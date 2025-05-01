@@ -5,9 +5,28 @@
 #include "NavigationController.h"
 #include <cmath>
 
-std::string NavigationController::navigate()
+double NavigationController::calculateDegreesToTurn()
 {
-  return "null";
+  const CourseObject* objectToPathTowards = nullptr;
+  if (ballVector_.empty() || ballsInRobot_ == robotBallCapacity_)
+  {
+    if (goal_ == nullptr)
+    {
+      // TODO Do some form of way to return that we should probably chill for a minute, until the next frame
+    }
+  }
+  else
+  {
+    objectToPathTowards = findClosestBall();
+  }
+  if (objectToPathTowards == nullptr)
+  {
+    // TODO WE NEED TO HANDLE THIS AS WELL, if for example no balls are found
+    return 0;
+  }
+  auto objectVector = calculateVectorToObject(objectToPathTowards);
+  const std::pair robotVector = {robotFront_->x2() - robotBack_->x1(), robotFront_->y1() - robotBack_->y1()};
+  return calculateAngleDifferenceBetweenVectors(robotVector,objectVector);
 }
 
 void NavigationController::addCourseObject(std::unique_ptr<CourseObject>&& courseObject)
@@ -47,6 +66,28 @@ void NavigationController::clearObjects()
   goal_ = nullptr;
   robotFront_ = nullptr;
   robotBack_ = nullptr;
+}
+
+const CourseObject* NavigationController::findClosestBall() const
+{
+  if (ballVector_.empty())
+  {
+    return nullptr;
+  }
+
+  double shortestDistance = 0;
+  CourseObject* closestBall = nullptr;
+  for (const auto& ball : ballVector_)
+  {
+    auto vectorToBall = calculateVectorToObject(ball.get());
+    double length = std::sqrt(vectorToBall.first * vectorToBall.first + vectorToBall.second * vectorToBall.second);
+    if (length  < shortestDistance)
+    {
+      shortestDistance = length;
+      closestBall = ball.get();
+    }
+  }
+  return closestBall;
 }
 
 std::pair<int, int> NavigationController::calculateVectorToObject(const CourseObject* courseObject) const

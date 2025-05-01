@@ -16,9 +16,9 @@ extern "C"
     MainController::getNavController()->addCourseObject(std::move(std::make_unique<CourseObject>(x1,y1,x2,y2,label)));
   }
 
-  void start()
+  void navigateAndSendCommand()
   {
-    MainController::getNavController()->navigate();
+    MainController::getNavController()->calculateDegreesToTurn();
   }
 
 }
