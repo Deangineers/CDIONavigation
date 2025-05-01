@@ -10,11 +10,12 @@
 class Client {
 public:
   Client();
-  void sendCommand(std::string& command) const;
+  void sendCommand(const std::string& command) const;
 
 private:
   int serverSocket{};
   void connectToServer();
+  static std::string getServerIp();
 };
 
 
