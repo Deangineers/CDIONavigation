@@ -4,6 +4,7 @@
 
 #ifndef MAINCONTROLLER_H
 #define MAINCONTROLLER_H
+#include "Client.h"
 #include "NavigationController.h"
 
 
@@ -15,6 +16,7 @@ public:
   static void navigateAndSendCommand();
 private:
   static inline std::unique_ptr<NavigationController> navigationController_ = nullptr;
+  static inline std::unique_ptr<Client> client_ = nullptr;
 };
 
 

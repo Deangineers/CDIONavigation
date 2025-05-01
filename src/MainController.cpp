@@ -7,6 +7,7 @@
 void MainController::init()
 {
   navigationController_ = std::make_unique<NavigationController>();
+  client_ = std::make_unique<Client>();
 }
 
 NavigationController* MainController::getNavController()
