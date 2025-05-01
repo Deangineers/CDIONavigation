@@ -6,8 +6,6 @@ set(CMAKE_CXX_STANDARD 20)
 add_library(CDIONavigation SHARED PythonBinding.cpp
         NavigationController.cpp
         NavigationController.h
-        ../CourseObject.cpp
-        ../CourseObject.h
-        NavigationUtil.cpp
-        NavigationUtil.h
+        CourseObject.cpp
+        CourseObject.h
 )
