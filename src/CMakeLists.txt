@@ -9,4 +9,10 @@ add_library(CDIONavigation SHARED PythonBinding.cpp
         Client.cpp
         Client.h
         Command.cpp
-        Command.h)
+        Command.h
+        NavigationController.h
+        CourseObject.cpp
+        CourseObject.h
+        MainController.cpp
+        MainController.h
+)

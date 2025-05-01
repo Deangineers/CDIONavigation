@@ -1,14 +1,24 @@
 #include <iostream>
+
+#include "MainController.h"
+#include "NavigationController.h"
+
 extern "C"
 {
-  void createObject(int x1, int y1, int x2, int y2, const char* label)
+
+  void init()
   {
-    std::cout << "Drawing line from (" << x1 << ", " << y1 << ") to (" << x2 << ", " << y2 << ") with label: " << label << std::endl;
+    MainController::init();
   }
 
-  void start()
+  void createObject(int x1, int y1, int x2, int y2, const char* label)
   {
-    std::cout << "Starting line drawing system..." << std::endl;
+    MainController::getNavController()->addCourseObject(std::move(std::make_unique<CourseObject>(x1,y1,x2,y2,label)));
+  }
+
+  void navigateAndSendCommand()
+  {
+    MainController::navigateAndSendCommand();
   }
 
 }
