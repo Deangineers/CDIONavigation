@@ -5,4 +5,8 @@ set(CMAKE_CXX_STANDARD 20)
 
 add_library(CDIONavigation SHARED PythonBinding.cpp
         NavigationController.cpp
-        NavigationController.h)
+        NavigationController.h
+        Client.cpp
+        Client.h
+        Command.cpp
+        Command.h)
