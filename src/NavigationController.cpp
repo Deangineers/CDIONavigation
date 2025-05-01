@@ -12,34 +12,31 @@ std::string NavigationController::navigate()
 
 void NavigationController::addCourseObject(std::unique_ptr<CourseObject>&& courseObject)
 {
-  switch (courseObject->name())
+  std::string name = courseObject->name();
+
+  if (name == "ball")
   {
-    case "ball":
-      {
-        ballVector_.push_back(std::move(courseObject));
-      }
-    case "egg":
-      {
-        eggVector_.push_back(std::move(courseObject));
-        break;
-      }
-    case "goal":
-      {
-        goal_ = std::move(courseObject);
-        break;
-      }
-    case "robotFront":
-      {
-        robotFront_ = std::move(courseObject);
-        break;
-      }
-      case "robotBack":
-      {
-        robotBack_ = std::move(courseObject);
-        break;
-      }
-      default:
-        break;
+    ballVector_.push_back(std::move(courseObject));
+  }
+  else if (name == "egg")
+  {
+    eggVector_.push_back(std::move(courseObject));
+  }
+  else if (name == "goal")
+  {
+    goal_ = std::move(courseObject);
+  }
+  else if (name == "robotFront")
+  {
+    robotFront_ = std::move(courseObject);
+  }
+  else if (name == "robotBack")
+  {
+    robotBack_ = std::move(courseObject);
+  }
+  else
+  {
+    throw std::runtime_error("Invalid courseObject name" + name);
   }
 }
 
@@ -52,7 +49,7 @@ void NavigationController::clearObjects()
   robotBack_ = nullptr;
 }
 
-std::pair<int, int> NavigationController::calculateVectorToObject(const CourseObject* courseObject)
+std::pair<int, int> NavigationController::calculateVectorToObject(const CourseObject* courseObject) const
 {
   const int objectWidth = courseObject->x2() - courseObject->x1();
   const int objectLength = courseObject->y2() - courseObject->y1();

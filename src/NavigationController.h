@@ -14,21 +14,22 @@
 class NavigationController
 {
 public:
-  static std::string navigate();
-  static void addCourseObject(std::unique_ptr<CourseObject>&& courseObject);
-  static void clearObjects();
+  NavigationController() = default;
+  std::string navigate();
+  void addCourseObject(std::unique_ptr<CourseObject>&& courseObject);
+  void clearObjects();
 private:
-  static std::pair<int,int> calculateVectorToObject(const CourseObject* courseObject);
-  static double calculateAngleDifferenceBetweenVectors(const std::pair<int,int>& firstVector, const std::pair<int,int>& secondVector);
+  std::pair<int,int> calculateVectorToObject(const CourseObject* courseObject) const;
+  double calculateAngleDifferenceBetweenVectors(const std::pair<int,int>& firstVector, const std::pair<int,int>& secondVector);
 
-  static inline std::vector<std::unique_ptr<CourseObject>> ballVector_;
-  static inline std::vector<std::unique_ptr<CourseObject>> eggVector_;
-  static inline std::unique_ptr<CourseObject> goal_;
-  static inline std::unique_ptr<CourseObject> robotFront_;
-  static inline std::unique_ptr<CourseObject> robotBack_;
+  std::vector<std::unique_ptr<CourseObject>> ballVector_;
+  std::vector<std::unique_ptr<CourseObject>> eggVector_;
+  std::unique_ptr<CourseObject> goal_;
+  std::unique_ptr<CourseObject> robotFront_;
+  std::unique_ptr<CourseObject> robotBack_;
 
-  static inline int ballsInRobot_ = 0;
-  static constexpr int robotBallCapacity_ = 5;
+  int ballsInRobot_ = 0;
+  int robotBallCapacity_ = 5;
 
 };
 
