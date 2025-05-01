@@ -4,12 +4,27 @@
 
 #ifndef NAVIGATIONCONTROLLER_H
 #define NAVIGATIONCONTROLLER_H
+#include <string>
+#include <vector>
 
+#include "../CourseObject.h"
 
 
 class NavigationController
 {
 public:
+  static std::string navigate();
+  static void addCourseObject(std::unique_ptr<CourseObject>&& courseObject);
+  static void clearObjects();
+private:
+  static inline std::vector<std::unique_ptr<CourseObject>> ballVector_;
+  static inline std::vector<std::unique_ptr<CourseObject>> eggVector_;
+  static inline std::unique_ptr<CourseObject> goal_;
+  static inline std::unique_ptr<CourseObject> robotFront_;
+  static inline std::unique_ptr<CourseObject> robotBack_;
+
+  static inline int ballsInRobot_ = 0;
+  static constexpr int robotBallCapacity_ = 5;
 
 };
 
