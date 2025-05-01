@@ -18,7 +18,7 @@ extern "C"
 
   void navigateAndSendCommand()
   {
-    MainController::getNavController()->calculateDegreesToTurn();
+    MainController::navigateAndSendCommand();
   }
 
 }

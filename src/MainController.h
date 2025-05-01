@@ -12,6 +12,7 @@ class MainController
 public:
   static void init();
   static NavigationController* getNavController();
+  static void navigateAndSendCommand();
 private:
   static inline std::unique_ptr<NavigationController> navigationController_ = nullptr;
 };

@@ -13,3 +13,9 @@ NavigationController* MainController::getNavController()
 {
   return navigationController_.get();
 }
+
+void MainController::navigateAndSendCommand()
+{
+  double degreesToTurn = navigationController_->calculateDegreesToTurn();
+  //TODO calculate to command and send it
+}
