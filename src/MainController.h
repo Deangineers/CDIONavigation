@@ -17,6 +17,7 @@ public:
 private:
   static inline std::unique_ptr<NavigationController> navigationController_ = nullptr;
   static inline std::unique_ptr<Client> client_ = nullptr;
+  static inline void updateBallCollectionAction(const std::string& action);
 };
 
 
