@@ -17,6 +17,8 @@ NavigationController* MainController::getNavController()
 
 void MainController::navigateAndSendCommand()
 {
-  double degreesToTurn = navigationController_->calculateDegreesToTurn();
+  std::pair<double, double> degreesAndDistanceToObject = navigationController_->calculateDegreesToTurn();
+  double degreesToTurn = degreesAndDistanceToObject.first;
+  double distanceToObject = degreesAndDistanceToObject.second;
   //TODO calculate to command and send it
 }

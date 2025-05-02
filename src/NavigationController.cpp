@@ -5,7 +5,7 @@
 #include "NavigationController.h"
 #include <cmath>
 
-double NavigationController::calculateDegreesToTurn()
+std::pair<double, double> NavigationController::calculateDegreesToTurn()
 {
   const CourseObject* objectToPathTowards = nullptr;
   if (ballVector_.empty() || ballsInRobot_ == robotBallCapacity_)
@@ -22,11 +22,13 @@ double NavigationController::calculateDegreesToTurn()
   if (objectToPathTowards == nullptr)
   {
     // TODO WE NEED TO HANDLE THIS AS WELL, if for example no balls are found
-    return 0;
+    return std::make_pair(0.0, 0.0);
   }
   auto objectVector = calculateVectorToObject(objectToPathTowards);
   const std::pair robotVector = {robotFront_->x2() - robotBack_->x1(), robotFront_->y1() - robotBack_->y1()};
-  return calculateAngleDifferenceBetweenVectors(robotVector,objectVector);
+  const double angle = calculateAngleDifferenceBetweenVectors(robotVector,objectVector);
+  const double distanceToObject = std::sqrt(objectVector.first * objectVector.first + objectVector.second * objectVector.second);
+  return std::make_pair(angle, distanceToObject);
 }
 
 void NavigationController::addCourseObject(std::unique_ptr<CourseObject>&& courseObject)
