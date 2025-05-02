@@ -23,9 +23,17 @@ void MainController::navigateAndSendCommand()
   std::pair<double, double> degreesAndDistanceToObject = navigationController_->calculateDegreesAndDistanceToObject();
   double degreesToTurn = degreesAndDistanceToObject.first;
   double distanceToObject = degreesAndDistanceToObject.second;
-  if (degreesToTurn != 0.0)
+  if (degreesToTurn > 1 || degreesToTurn < -1)
   {
-    command->setAction("r");
+    if (degreesToTurn > 0)
+    {
+      command->setAction("r");
+    }
+    else
+    {
+      command->setAction("l");
+    }
+
     if (degreesToTurn > - 20.0 && degreesToTurn < 20.0)
     {
       command->setSpeed(100);
