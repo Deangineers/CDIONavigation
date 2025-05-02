@@ -5,7 +5,7 @@
 #include "NavigationController.h"
 #include <cmath>
 
-std::pair<double, double> NavigationController::calculateDegreesToTurn()
+std::pair<double, double> NavigationController::calculateDegreesAndDistanceToObject()
 {
   const CourseObject* objectToPathTowards = nullptr;
   if (ballVector_.empty() || ballsInRobot_ == robotBallCapacity_)

@@ -15,7 +15,7 @@ class NavigationController
 {
 public:
   NavigationController() = default;
-  std::pair<double, double> calculateDegreesToTurn();
+  std::pair<double, double> calculateDegreesAndDistanceToObject();
   void addCourseObject(std::unique_ptr<CourseObject>&& courseObject);
   void clearObjects();
 private:
