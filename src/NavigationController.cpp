@@ -10,10 +10,11 @@ std::pair<double, double> NavigationController::calculateDegreesAndDistanceToObj
   const CourseObject* objectToPathTowards = nullptr;
   if (ballVector_.empty() || ballsInRobot_ == robotBallCapacity_)
   {
-    if (goal_ == nullptr)
+    if (goal_ != nullptr)
     {
-      // TODO Do some form of way to return that we should probably chill for a minute, until the next frame
+      objectToPathTowards = goal_.get();
     }
+
   }
   else
   {
@@ -21,7 +22,6 @@ std::pair<double, double> NavigationController::calculateDegreesAndDistanceToObj
   }
   if (objectToPathTowards == nullptr)
   {
-    // TODO WE NEED TO HANDLE THIS AS WELL, if for example no balls are found
     return std::make_pair(0.0, 0.0);
   }
   auto objectVector = calculateVectorToObject(objectToPathTowards);
