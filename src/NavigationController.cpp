@@ -14,7 +14,6 @@ std::pair<double, double> NavigationController::calculateDegreesAndDistanceToObj
     {
       objectToPathTowards = goal_.get();
     }
-
   }
   else
   {
@@ -24,7 +23,7 @@ std::pair<double, double> NavigationController::calculateDegreesAndDistanceToObj
   {
     return std::make_pair(0.0, 0.0);
   }
-  auto objectVector = calculateVectorToObject(objectToPathTowards);
+  const auto objectVector = calculateVectorToObject(objectToPathTowards);
   const std::pair robotVector = {robotFront_->x2() - robotBack_->x1(), robotFront_->y1() - robotBack_->y1()};
   const double angle = calculateAngleDifferenceBetweenVectors(robotVector,objectVector);
   const double distanceToObject = std::sqrt(objectVector.first * objectVector.first + objectVector.second * objectVector.second);
@@ -33,8 +32,7 @@ std::pair<double, double> NavigationController::calculateDegreesAndDistanceToObj
 
 void NavigationController::addCourseObject(std::unique_ptr<CourseObject>&& courseObject)
 {
-  std::string name = courseObject->name();
-
+  const std::string name = courseObject->name();
   if (name == "ball")
   {
     ballVector_.push_back(std::move(courseObject));
