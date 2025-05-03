@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "MainController.h"
-#include "NavigationController.h"
+#include "Controllers/MainController.h"
+#include "Controllers/NavigationController.h"
 
 extern "C"
 {

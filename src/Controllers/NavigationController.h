@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#include "CourseObject.h"
+#include "../Models/CourseObject.h"
 
 
 class NavigationController

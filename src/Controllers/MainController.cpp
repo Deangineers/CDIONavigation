@@ -4,7 +4,7 @@
 
 #include "MainController.h"
 
-#include "Command.h"
+#include "../Models/Command.h"
 
 void MainController::init()
 {
