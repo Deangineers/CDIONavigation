@@ -10,8 +10,8 @@
 #include <fstream>
 #include <string>
 
-#define FILE_NAME "keystore.txt"
-#define SERVER_PORT 1234
+constexpr std::string FILE_NAME = "keystore.txt";
+constexpr int SERVER_PORT = 1234;
 
 Client::Client() {
   connectToServer();
