@@ -8,17 +8,20 @@
 
 std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceToObject()
 {
+  bool toCollectBalls = false;
   const CourseObject* objectToPathTowards = nullptr;
   if (ballVector_.empty() || ballsInRobot_ == robotBallCapacity_)
   {
     if (goal_ != nullptr)
     {
       objectToPathTowards = goal_.get();
+      toCollectBalls = false;
     }
   }
   else
   {
     objectToPathTowards = findClosestBall();
+    toCollectBalls = true;
   }
   if (objectToPathTowards == nullptr)
   {
@@ -28,7 +31,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   const std::pair robotVector = {robotFront_->x2() - robotBack_->x1(), robotFront_->y1() - robotBack_->y1()};
   const double angle = calculateAngleDifferenceBetweenVectors(robotVector,objectVector);
   const double distanceToObject = std::sqrt(objectVector.first * objectVector.first + objectVector.second * objectVector.second);
-  return std::make_unique<JourneyModel>(distanceToObject, angle, off);
+  return std::make_unique<JourneyModel>(distanceToObject, angle, toCollectBalls);
 }
 
 void NavigationController::addCourseObject(std::unique_ptr<CourseObject>&& courseObject)

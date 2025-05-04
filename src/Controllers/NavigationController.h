@@ -9,9 +9,7 @@
 #include <vector>
 
 #include "../Models/CourseObject.h"
-
-
-struct JourneyModel;
+#include "../Models/JourneyModel.h"
 
 class NavigationController
 {

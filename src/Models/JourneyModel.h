@@ -5,14 +5,10 @@
 #ifndef TRAVELMODEL_H
 #define TRAVELMODEL_H
 
-enum BallCollectionMotorMode {
-  cout, cin, off
-};
-
 struct JourneyModel {
   double distance;
   double angle;
-  BallCollectionMotorMode ballCollectionMotorMode;
+  bool collectBalls;
 };
 
 #endif //TRAVELMODEL_H

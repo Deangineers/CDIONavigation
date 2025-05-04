@@ -21,7 +21,24 @@ NavigationController* MainController::getNavController()
 void MainController::navigateAndSendCommand()
 {
   Command command;
-  auto journey = navigationController_->calculateDegreesAndDistanceToObject();
+  const auto journey = navigationController_->calculateDegreesAndDistanceToObject();
+
+  if (journey->distance < 30)
+  {
+    if (journey->collectBalls)
+    {
+      updateBallCollectionAction("in");
+    }
+    else
+    {
+      updateBallCollectionAction("out");
+    }
+  }
+  else
+  {
+    updateBallCollectionAction("s");
+  }
+
   if ( journey->angle > 1 || journey->angle < -1)
   {
     if (journey->angle > 0)
@@ -51,7 +68,6 @@ void MainController::navigateAndSendCommand()
 
     if (journey->distance < 30.0)
     {
-      updateBallCollectionAction("in");
       command.setSpeed(100);
     }
     else
@@ -61,8 +77,7 @@ void MainController::navigateAndSendCommand()
     client_->sendCommand(command.formatToSend());
     return;
   }
-
-  updateBallCollectionAction("s");
+;
   command.setAction("s");
   client_->sendCommand(command.formatToSend());
   //TODO refine navigation, as we are just driving to the object and stopping at the moment
