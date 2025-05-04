@@ -5,6 +5,7 @@
 #include "MainController.h"
 
 #include "../Models/Command.h"
+#include "../Models/JourneyModel.h"
 
 void MainController::init()
 {
@@ -20,12 +21,10 @@ NavigationController* MainController::getNavController()
 void MainController::navigateAndSendCommand()
 {
   Command command;
-  std::pair<double, double> degreesAndDistanceToObject = navigationController_->calculateDegreesAndDistanceToObject();
-  double degreesToTurn = degreesAndDistanceToObject.first;
-  double distanceToObject = degreesAndDistanceToObject.second;
-  if (degreesToTurn > 1 || degreesToTurn < -1)
+  auto journey = navigationController_->calculateDegreesAndDistanceToObject();
+  if ( journey->angle > 1 || journey->angle < -1)
   {
-    if (degreesToTurn > 0)
+    if (journey->angle > 0)
     {
       command.setAction("r");
     }
@@ -34,7 +33,7 @@ void MainController::navigateAndSendCommand()
       command.setAction("l");
     }
 
-    if (degreesToTurn > - 20.0 && degreesToTurn < 20.0)
+    if (journey->angle > - 20.0 && journey->angle < 20.0)
     {
       command.setSpeed(100);
     }
@@ -46,11 +45,11 @@ void MainController::navigateAndSendCommand()
     return;
   }
 
-  if (distanceToObject > 0.0)
+  if (journey->distance > 0.0)
   {
     command.setAction("f");
 
-    if (distanceToObject < 30.0)
+    if (journey->distance < 30.0)
     {
       updateBallCollectionAction("in");
       command.setSpeed(100);

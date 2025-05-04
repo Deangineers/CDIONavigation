@@ -3,9 +3,10 @@
 //
 
 #include "NavigationController.h"
+#include "../Models/JourneyModel.h"
 #include <cmath>
 
-std::pair<double, double> NavigationController::calculateDegreesAndDistanceToObject()
+std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceToObject()
 {
   const CourseObject* objectToPathTowards = nullptr;
   if (ballVector_.empty() || ballsInRobot_ == robotBallCapacity_)
@@ -21,13 +22,13 @@ std::pair<double, double> NavigationController::calculateDegreesAndDistanceToObj
   }
   if (objectToPathTowards == nullptr)
   {
-    return std::make_pair(0.0, 0.0);
+    return nullptr;
   }
   const auto objectVector = calculateVectorToObject(objectToPathTowards);
   const std::pair robotVector = {robotFront_->x2() - robotBack_->x1(), robotFront_->y1() - robotBack_->y1()};
   const double angle = calculateAngleDifferenceBetweenVectors(robotVector,objectVector);
   const double distanceToObject = std::sqrt(objectVector.first * objectVector.first + objectVector.second * objectVector.second);
-  return std::make_pair(angle, distanceToObject);
+  return std::make_unique<JourneyModel>(distanceToObject, angle, off);
 }
 
 void NavigationController::addCourseObject(std::unique_ptr<CourseObject>&& courseObject)

@@ -11,11 +11,13 @@
 #include "../Models/CourseObject.h"
 
 
+struct JourneyModel;
+
 class NavigationController
 {
 public:
   NavigationController() = default;
-  std::pair<double, double> calculateDegreesAndDistanceToObject();
+  std::unique_ptr<JourneyModel> calculateDegreesAndDistanceToObject();
   void addCourseObject(std::unique_ptr<CourseObject>&& courseObject);
   void clearObjects();
 private:
