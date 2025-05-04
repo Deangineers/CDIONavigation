@@ -20,25 +20,40 @@ NavigationController* MainController::getNavController()
 
 void MainController::navigateAndSendCommand()
 {
+  auto journey = navigationController_->calculateDegreesAndDistanceToObject();
+  auto ballCollectionCommand = handleBallCollectionMotor(journey.get());
+  auto navigationCommand = journeyToCommand(journey.get());
+
+  client_->sendCommand(ballCollectionCommand.formatToSend());
+  client_->sendCommand(navigationCommand.formatToSend());
+}
+
+Command MainController::handleBallCollectionMotor(const JourneyModel* journey)
+{
   Command command;
-  const auto journey = navigationController_->calculateDegreesAndDistanceToObject();
+  command.setMotor("c");
 
   if (journey->distance < 30)
   {
     if (journey->collectBalls)
     {
-      updateBallCollectionAction("in");
+      command.setAction("in");
     }
     else
     {
-      updateBallCollectionAction("out");
+      command.setAction("out");
     }
   }
   else
   {
-    updateBallCollectionAction("s");
+    command.setAction("c");
   }
+  return command;
+}
 
+Command MainController::journeyToCommand(const JourneyModel* journey)
+{
+  Command command;
   if ( journey->angle > 1 || journey->angle < -1)
   {
     if (journey->angle > 0)
@@ -58,8 +73,7 @@ void MainController::navigateAndSendCommand()
     {
       command.setSpeed(500);
     }
-    client_->sendCommand(command.formatToSend());
-    return;
+    return command;
   }
 
   if (journey->distance > 0.0)
@@ -74,19 +88,8 @@ void MainController::navigateAndSendCommand()
     {
       command.setSpeed(500);
     }
-    client_->sendCommand(command.formatToSend());
-    return;
+    return command;
   }
-;
   command.setAction("s");
-  client_->sendCommand(command.formatToSend());
-  //TODO refine navigation, as we are just driving to the object and stopping at the moment
-}
-
-void MainController::updateBallCollectionAction(const std::string& action)
-{
-  Command command;
-  command.setAction(action);
-  command.setMotor("c");
-  client_->sendCommand(command.formatToSend());
+  return command;
 }
