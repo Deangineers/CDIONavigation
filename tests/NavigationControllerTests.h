@@ -27,6 +27,12 @@ TEST(NavControllertests, NavControllerTest1)
   auto command = MainController::journeyToCommand(journey.get());
   EXPECT_EQ(command.getAction(), "r");
 
+  // B = ball
+  // b = robotBack
+  // f = robotFront
+  // . . . . .
+  // . . f B .
+  // . . b . .
 }
 
 
