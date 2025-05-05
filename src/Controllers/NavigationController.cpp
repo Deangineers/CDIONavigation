@@ -79,7 +79,7 @@ const CourseObject* NavigationController::findClosestBall() const
     return nullptr;
   }
 
-  double shortestDistance = 0;
+  double shortestDistance = INT32_MAX;
   CourseObject* closestBall = nullptr;
   for (const auto& ball : ballVector_)
   {

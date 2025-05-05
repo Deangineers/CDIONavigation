@@ -16,10 +16,14 @@ public:
   void setMotor(const std::string& motor);
   [[nodiscard]] std::string formatToSend() const;
 
+  std::string& getAction();
+  [[nodiscard]] int getSpeed() const;
+  std::string& getMotor();
+
 private:
-  std::string action;
-  int speed;
-  std::string motor;
+  std::string action_;
+  int speed_;
+  std::string motor_;
 };
 
 
