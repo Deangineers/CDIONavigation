@@ -121,6 +121,13 @@ double NavigationController::calculateAngleDifferenceBetweenVectors(const std::p
   if (cosTheta > 1.0) cosTheta = 1.0;
 
   double angleRadians = std::acos(cosTheta);
+  double crossProduct = firstVector.first * secondVector.second - firstVector.second * secondVector.first;
+
+  if (crossProduct < 0.0)
+  {
+    angleRadians = -angleRadians;
+  }
+
   double angleDegrees = angleRadians * (180.0 / M_PI);
 
   return angleDegrees;

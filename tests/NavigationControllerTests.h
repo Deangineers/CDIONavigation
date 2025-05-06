@@ -40,5 +40,16 @@ TEST(NavControllertests, NavControllerTest1)
   // . . b . .
 }
 
+TEST(NavControllertests, NavControllerTest2)
+{
+  auto navController = std::make_unique<NavigationController>();
+  navController->addCourseObject(std::make_unique<CourseObject>(2,0,2,0,"ball"));
+  navController->addCourseObject(std::make_unique<CourseObject>(0,0,0,0,"robotBack"));
+  navController->addCourseObject(std::make_unique<CourseObject>(0,-1,0,-1,"robotFront"));
+  auto journey = navController->calculateDegreesAndDistanceToObject();
+  EXPECT_EQ(journey->angle, -90);
+
+}
+
 
 #endif //NAVIGATIONCONTROLLERTESTS_H
