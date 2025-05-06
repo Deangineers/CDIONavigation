@@ -24,6 +24,9 @@ TEST(NavControllertests, NavControllerTest1)
   navController->addCourseObject(std::make_unique<CourseObject>(0,0,0,0,"robotFront"));
   navController->addCourseObject(std::make_unique<CourseObject>(0,-1,0,-1,"robotBack"));
   auto journey = navController->calculateDegreesAndDistanceToObject();
+  EXPECT_EQ(journey->angle, 90.0);
+  EXPECT_EQ(journey->distance, 1.0);
+  EXPECT_EQ(journey->collectBalls, true);
   auto command = MainController::journeyToCommand(journey.get());
   EXPECT_EQ(command.getAction(), "r");
 
