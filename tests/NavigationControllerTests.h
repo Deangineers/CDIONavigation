@@ -48,7 +48,12 @@ TEST(NavControllertests, NavControllerTest2)
   navController->addCourseObject(std::make_unique<CourseObject>(0,-1,0,-1,"robotFront"));
   auto journey = navController->calculateDegreesAndDistanceToObject();
   EXPECT_EQ(journey->angle, -90);
-
+  EXPECT_EQ(journey->distance, 2.0);
+  EXPECT_EQ(journey->collectBalls, true);
+  auto command = MainController::journeyToCommand(journey.get());
+  EXPECT_EQ(command.getAction(), "l");
+  EXPECT_EQ(command.getMotor(), "");
+  EXPECT_EQ(command.getSpeed(), 500);
 }
 
 
