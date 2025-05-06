@@ -29,6 +29,8 @@ TEST(NavControllertests, NavControllerTest1)
   EXPECT_EQ(journey->collectBalls, true);
   auto command = MainController::journeyToCommand(journey.get());
   EXPECT_EQ(command.getAction(), "r");
+  EXPECT_EQ(command.getMotor(), "");
+  EXPECT_EQ(command.getSpeed(), 500);
 
   // B = ball
   // b = robotBack
