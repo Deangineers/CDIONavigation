@@ -109,5 +109,20 @@ TEST(NavControllertests, NavControllerTest4)
   // . b . . .
 }
 
+TEST(NavControllerstests, NavControllerTest5)
+{
+  auto navController = std::make_unique<NavigationController>();
+  navController->addCourseObject(std::make_unique<CourseObject>(0,0,0,0,"robotBack"));
+  navController->addCourseObject(std::make_unique<CourseObject>(0, 1, 0, 1, "robotFront"));
+  navController->addCourseObject(std::make_unique<CourseObject>(40, 25, 40, 25, "ball"));
+  auto journey = navController->calculateDegreesAndDistanceToObject();
+  EXPECT_EQ(static_cast<int>(journey->angle), 59);
+  EXPECT_EQ(static_cast<int>(journey->distance), 46);
+  EXPECT_EQ(journey->collectBalls, true);
+  auto command = MainController::journeyToCommand(journey.get());
+  EXPECT_EQ(command.getAction(), "r");
+  EXPECT_EQ(command.getMotor(), "");
+  EXPECT_EQ(command.getSpeed(), 500);
+}
 
 #endif //NAVIGATIONCONTROLLERTESTS_H
