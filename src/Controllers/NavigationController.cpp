@@ -28,7 +28,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     return nullptr;
   }
   const auto objectVector = calculateVectorToObject(objectToPathTowards);
-  const std::pair robotVector = {robotFront_->x2() - robotBack_->x1(), robotFront_->y1() - robotBack_->y1()};
+  const std::pair robotVector = {robotFront_->x1() - robotBack_->x1(), robotFront_->y1() - robotBack_->y1()};
   const double angle = calculateAngleDifferenceBetweenVectors(robotVector,objectVector);
   const double distanceToObject = std::sqrt(objectVector.first * objectVector.first + objectVector.second * objectVector.second);
   return std::make_unique<JourneyModel>(distanceToObject, angle, toCollectBalls);
@@ -102,7 +102,7 @@ std::pair<int, int> NavigationController::calculateVectorToObject(const CourseOb
   const int middleX = std::max(courseObject->x1() - objectWidth, courseObject->x2() - objectWidth);
   const int middleY = std::max(courseObject->y1() - objectLength, courseObject->y2() - objectLength);
 
-  return std::make_pair(robotFront_->x1() - middleX, robotFront_->x1() - middleY);
+  return std::make_pair(robotFront_->x1() - middleX, robotFront_->y1() - middleY);
 }
 
 double NavigationController::calculateAngleDifferenceBetweenVectors(const std::pair<int, int>& firstVector,
