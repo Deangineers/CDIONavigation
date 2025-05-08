@@ -59,7 +59,7 @@ void NavigationController::addCourseObject(std::unique_ptr<CourseObject>&& cours
   }
   else if (name == "blockedObject")
   {
-    blockingObject_.push_back(courseObject);
+    blockingObject_.push_back(std::move(courseObject));
   }
   else
   {

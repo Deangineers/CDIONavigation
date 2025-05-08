@@ -10,6 +10,7 @@
 class Client {
 public:
   Client();
+  ~Client();
   void sendCommand(const std::string& command) const;
 
 private:

@@ -31,7 +31,7 @@ private:
   std::unique_ptr<CourseObject> robotFront_;
   std::unique_ptr<CourseObject> robotBack_;
   std::vector<std::unique_ptr<CourseObject>> blockingObject_;
-  constexpr int robotWidth_ = 250;
+  int robotWidth_ = 250;
 
   int ballsInRobot_ = 0;
   int robotBallCapacity_ = 5;
