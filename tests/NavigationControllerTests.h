@@ -54,6 +54,13 @@ TEST(NavControllertests, NavControllerTest2)
   EXPECT_EQ(command.getAction(), "l");
   EXPECT_EQ(command.getMotor(), "");
   EXPECT_EQ(command.getSpeed(), 500);
+
+  // B = ball
+  // b = robotBack
+  // f = robotFront
+  // . . . . .
+  // . . b . B
+  // . . f . .
 }
 
 
