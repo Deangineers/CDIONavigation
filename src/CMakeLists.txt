@@ -16,3 +16,7 @@ add_library(CDIONavigation SHARED PythonBinding.cpp
         Controllers/MainController.cpp
         Controllers/MainController.h
 )
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    target_link_libraries(CDIONavigation PRIVATE ws2_32)
+endif()

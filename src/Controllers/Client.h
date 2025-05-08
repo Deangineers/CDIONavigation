@@ -12,6 +12,7 @@ public:
   Client();
   ~Client();
   void sendCommand(const std::string& command) const;
+  void initializeWinsock();
 
 private:
   int serverSocket{};
