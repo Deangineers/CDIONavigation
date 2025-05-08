@@ -1,3 +1,4 @@
+#include <future>
 #include <iostream>
 
 #include "Controllers/MainController.h"
@@ -18,6 +19,10 @@ extern "C"
 
   void navigateAndSendCommand()
   {
+    // Optimal but risky:
+    //auto thread = std::thread(MainController::navigateAndSendCommand);
+    //thread.detach();
+
     MainController::navigateAndSendCommand();
   }
 

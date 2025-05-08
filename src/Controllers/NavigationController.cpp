@@ -57,6 +57,10 @@ void NavigationController::addCourseObject(std::unique_ptr<CourseObject>&& cours
   {
     robotBack_ = std::move(courseObject);
   }
+  else if (name == "blockedObject")
+  {
+    blockingObject_.push_back(courseObject);
+  }
   else
   {
     throw std::runtime_error("Invalid courseObject name" + name);

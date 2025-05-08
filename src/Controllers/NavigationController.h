@@ -23,11 +23,15 @@ private:
   std::pair<int,int> calculateVectorToObject(const CourseObject* courseObject) const;
   double calculateAngleDifferenceBetweenVectors(const std::pair<int,int>& firstVector, const std::pair<int,int>& secondVector);
 
+
+
   std::vector<std::unique_ptr<CourseObject>> ballVector_;
   std::vector<std::unique_ptr<CourseObject>> eggVector_;
   std::unique_ptr<CourseObject> goal_;
   std::unique_ptr<CourseObject> robotFront_;
   std::unique_ptr<CourseObject> robotBack_;
+  std::vector<std::unique_ptr<CourseObject>> blockingObject_;
+  constexpr int robotWidth_ = 250;
 
   int ballsInRobot_ = 0;
   int robotBallCapacity_ = 5;
