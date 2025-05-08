@@ -109,7 +109,7 @@ TEST(NavControllertests, NavControllerTest4)
   // . b . . .
 }
 
-TEST(NavControllerstests, NavControllerTest5)
+TEST(NavControllertests, NavControllerTest5)
 {
   auto navController = std::make_unique<NavigationController>();
   navController->addCourseObject(std::make_unique<CourseObject>(0,0,0,0,"robotBack"));
@@ -125,7 +125,7 @@ TEST(NavControllerstests, NavControllerTest5)
   EXPECT_EQ(command.getSpeed(), 500);
 }
 
-TEST(NavControllerstests, NavControllerTest6)
+TEST(NavControllertests, NavControllerTest6)
 {
   auto navController = std::make_unique<NavigationController>();
   navController->addCourseObject(std::make_unique<CourseObject>(0, 0, 0, 0, "ball"));
@@ -140,7 +140,7 @@ TEST(NavControllerstests, NavControllerTest6)
   EXPECT_EQ(command.getSpeed(), 500);
 }
 
-TEST(NavControllerstests, NavControllerTest7)
+TEST(NavControllertests, NavControllerTest7)
 {
   auto navController = std::make_unique<NavigationController>();
   navController->addCourseObject(std::make_unique<CourseObject>(2, 3, 2, 3, "ball"));
