@@ -22,7 +22,7 @@ extern "C"
     // Optimal but risky:
     //auto thread = std::thread(MainController::navigateAndSendCommand);
     //thread.detach();
-
+    auto thing = std::async(MainController::navigateAndSendCommand);
     MainController::navigateAndSendCommand();
   }
 
