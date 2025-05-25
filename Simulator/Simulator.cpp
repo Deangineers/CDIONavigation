@@ -4,8 +4,10 @@
 
 #include "Simulator.h"
 
+#include "../src/Controllers/MainController.h"
+
 Simulator::Simulator() : engineBase_(std::make_unique<EngineBase>()), navController_(std::make_unique<NavigationController>())
-, robot_(std::make_unique<SimulatedRobot>(engineBase_.get())), ball_(std::make_unique<Ball>(engineBase_.get()))
+                         , robot_(std::make_unique<SimulatedRobot>(engineBase_.get())), ball_(std::make_unique<Ball>(engineBase_.get()))
 {
   engineBase_->registerUpdateFunction([this](double deltaTime)->void
     {update(deltaTime);}
@@ -21,6 +23,10 @@ void Simulator::update(double deltaTime)
   ball_->addToNavController(navController_.get());
 
   auto journey = navController_->calculateDegreesAndDistanceToObject();
+  if (journey != nullptr)
+  {
+    robot_->handleCommand(MainController::journeyToCommand(journey.get()),deltaTime);
+  }
 
 }
 
