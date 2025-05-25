@@ -48,7 +48,7 @@ void NavigationController::addCourseObject(std::unique_ptr<CourseObject>&& cours
   }
   else if (name == "egg")
   {
-    eggVector_ = std::move(courseObject);
+    blockingObject_.push_back(std::move(courseObject));
   }
   else if (name == "goal")
   {
@@ -75,7 +75,7 @@ void NavigationController::addCourseObject(std::unique_ptr<CourseObject>&& cours
 void NavigationController::clearObjects()
 {
   ballVector_.clear();
-  eggVector_ = nullptr;
+  blockingObject_.clear();
   goal_ = nullptr;
   robotFront_ = nullptr;
   robotBack_ = nullptr;
