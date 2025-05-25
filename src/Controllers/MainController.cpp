@@ -26,6 +26,7 @@ void MainController::navigateAndSendCommand()
 
   client_->sendCommand(ballCollectionCommand.formatToSend());
   client_->sendCommand(navigationCommand.formatToSend());
+  navigationController_->clearObjects();
 }
 
 Command MainController::handleBallCollectionMotor(const JourneyModel* journey)
