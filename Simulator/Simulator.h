@@ -10,6 +10,7 @@
 #include "../src/Controllers/NavigationController.h"
 #include "EngineBase/EngineBase.h"
 #include "Objects/Ball.h"
+#include "Objects/Cross.h"
 
 
 class Simulator
@@ -24,6 +25,7 @@ private:
   std::unique_ptr<NavigationController> navController_;
   std::unique_ptr<SimulatedRobot> robot_;
   std::unique_ptr<Ball> ball_;
+  std::unique_ptr<Cross> cross_;
   bool lButtonDown = false;
 };
 

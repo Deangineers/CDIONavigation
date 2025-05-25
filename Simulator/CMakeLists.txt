@@ -22,6 +22,8 @@ add_executable(CDIONavigation_Simulator
         TextureLocations.h
         Objects/Ball.cpp
         Objects/Ball.h
+        Objects/Cross.cpp
+        Objects/Cross.h
 )
 
 
