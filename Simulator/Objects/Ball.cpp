@@ -18,8 +18,8 @@ void Ball::addToNavController(NavigationController* navController) const
 {
   int x1 = ball_->getX();
   int y1 = ball_->getY();
-  int x2 = ball_->getX();
-  int y2 = ball_->getY();
+  int x2 = ball_->getX() + 20;
+  int y2 = ball_->getY() + 20;
 
   if (x1 > 0 && x2 > 0)
   {

@@ -22,7 +22,7 @@ private:
   [[nodiscard]] const CourseObject* findClosestBall() const;
   std::pair<int,int> calculateVectorToObject(const CourseObject* courseObject) const;
   double calculateAngleDifferenceBetweenVectors(const std::pair<int,int>& firstVector, const std::pair<int,int>& secondVector);
-
+  bool checkCollisionOnRoute(const CourseObject* target, const std::pair<int,int>& targetVector) const;
 
 
   std::vector<std::unique_ptr<CourseObject>> ballVector_;
