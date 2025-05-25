@@ -28,6 +28,11 @@ void Ball::addToNavController(NavigationController* navController) const
 
 }
 
+void Ball::handleMouseClick(std::pair<int, int> mousePos)
+{
+  ball_->setPosition(mousePos.first, mousePos.second);
+}
+
 int Ball::getX() const
 {
   return ball_->getX();

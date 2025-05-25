@@ -16,6 +16,7 @@ class Ball
 public:
   explicit Ball(EngineBase* engineBase);
   void addToNavController(NavigationController* navController) const;
+  void handleMouseClick(std::pair<int,int> mousePos);
   [[nodiscard]] int getX() const;
   [[nodiscard]] int getY() const;
 private:

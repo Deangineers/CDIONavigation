@@ -19,10 +19,12 @@ public:
   ~Simulator() = default;
   void update(double deltaTime);
 private:
+  void handleClicks();
   std::unique_ptr<EngineBase> engineBase_;
   std::unique_ptr<NavigationController> navController_;
   std::unique_ptr<SimulatedRobot> robot_;
   std::unique_ptr<Ball> ball_;
+  bool lButtonDown = false;
 };
 
 
