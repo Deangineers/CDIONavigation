@@ -21,8 +21,8 @@ SimulatedRobot::SimulatedRobot(EngineBase* engineBase) : robotFront_(std::make_s
   robotFront_->setPosition(250,250);
   robotRear_->setPosition(250,250-lengthOfRobot);
 
-  robotFront_->setTextureLocation(&greenBox);
-  robotRear_->setTextureLocation(&greenBox);
+  robotFront_->setTextureLocation(&robotFront);
+  robotRear_->setTextureLocation(&robotRear);
 }
 
 void SimulatedRobot::addRobotToNavController(NavigationController* navController) const
