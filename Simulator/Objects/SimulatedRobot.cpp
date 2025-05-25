@@ -25,7 +25,7 @@ SimulatedRobot::SimulatedRobot(EngineBase* engineBase) : robotFront_(std::make_s
   robotRear_->setTextureLocation(&greenBox);
 }
 
-void SimulatedRobot::addRobotToNavController(NavigationController* navController)
+void SimulatedRobot::addRobotToNavController(NavigationController* navController) const
 {
   int x1 = robotFront_->getX();
   int y1 = robotFront_->getY();

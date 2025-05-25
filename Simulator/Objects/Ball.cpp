@@ -14,7 +14,7 @@ Ball::Ball(EngineBase* engineBase) : ball_(std::make_shared<DrawAble>())
   ball_->setPosition(-100,-100);
 }
 
-void Ball::addToNavController(NavigationController* navController)
+void Ball::addToNavController(NavigationController* navController) const
 {
   int x1 = ball_->getX();
   int y1 = ball_->getY();

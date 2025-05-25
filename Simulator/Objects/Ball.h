@@ -15,7 +15,7 @@ class Ball
 {
 public:
   explicit Ball(EngineBase* engineBase);
-  void addToNavController(NavigationController* navController);
+  void addToNavController(NavigationController* navController) const;
   [[nodiscard]] int getX() const;
   [[nodiscard]] int getY() const;
 private:

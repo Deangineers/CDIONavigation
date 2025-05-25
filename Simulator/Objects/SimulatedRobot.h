@@ -11,7 +11,7 @@ class SimulatedRobot
 {
 public:
   explicit SimulatedRobot(EngineBase* engineBase);
-  void addRobotToNavController(NavigationController* navController);
+  void addRobotToNavController(NavigationController* navController) const;
 private:
   double movementSpeedFactor = 1;
   std::shared_ptr<DrawAble> robotFront_;
