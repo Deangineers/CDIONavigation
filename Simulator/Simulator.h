@@ -11,6 +11,7 @@
 #include "EngineBase/EngineBase.h"
 #include "Objects/Ball.h"
 #include "Objects/Cross.h"
+#include "Objects/Egg.h"
 
 
 class Simulator
@@ -26,7 +27,9 @@ private:
   std::unique_ptr<SimulatedRobot> robot_;
   std::unique_ptr<Ball> ball_;
   std::unique_ptr<Cross> cross_;
+  std::unique_ptr<Egg> egg_;
   bool lButtonDown = false;
+  bool rButtonDown = false;
 };
 
 

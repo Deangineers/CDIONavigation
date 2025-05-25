@@ -10,5 +10,6 @@ const std::string robotFront = "../../Simulator/Images/greenBox.png";
 const std::string robotRear = "../../Simulator/Images/redBox.png";
 const std::string ball = "../../Simulator/Images/ball.png";
 const std::string cross = "../../Simulator/Images/ball.png";
+const std::string egg = "../../Simulator/Images/ball.png";
 
 #endif //TEXTURELOCATIONS_H

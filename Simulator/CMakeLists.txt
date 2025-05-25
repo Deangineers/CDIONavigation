@@ -24,6 +24,8 @@ add_executable(CDIONavigation_Simulator
         Objects/Ball.h
         Objects/Cross.cpp
         Objects/Cross.h
+        Objects/Egg.cpp
+        Objects/Egg.h
 )
 
 

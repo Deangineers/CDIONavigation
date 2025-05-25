@@ -10,7 +10,7 @@
 
 Simulator::Simulator() : engineBase_(std::make_unique<EngineBase>()), navController_(std::make_unique<NavigationController>())
                          , robot_(std::make_unique<SimulatedRobot>(engineBase_.get())), ball_(std::make_unique<Ball>(engineBase_.get()))
-                         , cross_(std::make_unique<Cross>(engineBase_.get()))
+                         , cross_(std::make_unique<Cross>(engineBase_.get())), egg_(std::make_unique<Egg>(engineBase_.get()))
 {
   engineBase_->registerUpdateFunction([this](double deltaTime)->void
     {update(deltaTime);}
@@ -26,6 +26,7 @@ void Simulator::update(double deltaTime)
   robot_->addRobotToNavController(navController_.get());
   ball_->addToNavController(navController_.get());
   cross_->addToNavController(navController_.get());
+  egg_->addToNavController(navController_.get());
 
   auto journey = navController_->calculateDegreesAndDistanceToObject();
   if (journey != nullptr)
@@ -47,5 +48,16 @@ void Simulator::handleClicks()
   else if (lButtonDown && not engineBase_->getGraphicsLibrary()->isMouseButtonDown(ENGINEBASE_BUTTON_LEFT))
   {
     lButtonDown = false;
+  }
+  else if (not rButtonDown && engineBase_->getGraphicsLibrary()->isMouseButtonDown(ENGINEBASE_BUTTON_RIGHT))
+  {
+    rButtonDown = true;
+
+    const auto mousePos = engineBase_->getGraphicsLibrary()->getMousePos();
+    egg_->handleMouseClick(mousePos);
+  }
+  else if (rButtonDown && not engineBase_->getGraphicsLibrary()->isMouseButtonDown(ENGINEBASE_BUTTON_RIGHT))
+  {
+    rButtonDown = false;
   }
 }
