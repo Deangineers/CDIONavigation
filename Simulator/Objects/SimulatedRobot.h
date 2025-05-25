@@ -17,7 +17,7 @@ public:
 private:
   void rotate(double degrees);
   double movementSpeedFactor = 1;
-  double rotateSpeedFactor = 1;
+  double rotateSpeedFactor = 0.2;
   std::shared_ptr<DrawAble> robotFront_;
   std::shared_ptr<DrawAble> robotRear_;
 };
