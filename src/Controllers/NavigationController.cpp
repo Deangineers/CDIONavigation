@@ -48,7 +48,7 @@ void NavigationController::addCourseObject(std::unique_ptr<CourseObject>&& cours
   }
   else if (name == "egg")
   {
-    eggVector_.push_back(std::move(courseObject));
+    eggVector_ = std::move(courseObject);
   }
   else if (name == "goal")
   {
@@ -75,7 +75,7 @@ void NavigationController::addCourseObject(std::unique_ptr<CourseObject>&& cours
 void NavigationController::clearObjects()
 {
   ballVector_.clear();
-  eggVector_.clear();
+  eggVector_ = nullptr;
   goal_ = nullptr;
   robotFront_ = nullptr;
   robotBack_ = nullptr;
@@ -201,6 +201,11 @@ bool NavigationController::checkCollisionOnRoute(const CourseObject* target, con
     {endX - offsetX,   endY - offsetY},
     {endX + offsetX,   endY + offsetY}
   };
+
+  if (eggVector_ != nullptr && polygonHits(pathCorners, eggVector_->x1(), eggVector_->x2(), eggVector_->y1(), eggVector_->y2()))
+  {
+    return true;
+  }
 
   for (const auto& blocker : blockingObject_)
   {

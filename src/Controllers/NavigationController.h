@@ -26,7 +26,7 @@ private:
 
 
   std::vector<std::unique_ptr<CourseObject>> ballVector_;
-  std::vector<std::unique_ptr<CourseObject>> eggVector_;
+  std::unique_ptr<CourseObject> eggVector_;
   std::unique_ptr<CourseObject> goal_;
   std::unique_ptr<CourseObject> robotFront_;
   std::unique_ptr<CourseObject> robotBack_;
