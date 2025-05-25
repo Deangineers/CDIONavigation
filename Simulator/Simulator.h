@@ -6,8 +6,10 @@
 #define SIMULATOR_H
 #include <memory>
 
-#include "SimulatedRobot.h"
+#include "Objects/SimulatedRobot.h"
+#include "../src/Controllers/NavigationController.h"
 #include "EngineBase/EngineBase.h"
+#include "Objects/Ball.h"
 
 
 class Simulator
@@ -17,8 +19,10 @@ public:
   ~Simulator() = default;
   void update(double deltaTime);
 private:
-  std::shared_ptr<EngineBase> engineBase_;
-  std::shared_ptr<SimulatedRobot> robot_;
+  std::unique_ptr<EngineBase> engineBase_;
+  std::unique_ptr<NavigationController> navController_;
+  std::unique_ptr<SimulatedRobot> robot_;
+  std::unique_ptr<Ball> ball_;
 };
 
 

@@ -17,9 +17,11 @@ add_executable(CDIONavigation_Simulator
         main.cpp
         Simulator.cpp
         Simulator.h
-        SimulatedRobot.cpp
-        SimulatedRobot.h
+        Objects/SimulatedRobot.cpp
+        Objects/SimulatedRobot.h
         TextureLocations.h
+        Objects/Ball.cpp
+        Objects/Ball.h
 )
 
 

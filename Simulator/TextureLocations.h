@@ -7,5 +7,6 @@
 #include <string>
 
 constexpr std::string greenBox = "../Images/greenBox.png";
+constexpr std::string ball = "../Images/ball.png";
 
 #endif //TEXTURELOCATIONS_H
