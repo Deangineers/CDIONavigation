@@ -4,6 +4,8 @@
 
 #include "Simulator.h"
 
+#include <thread>
+
 #include "../src/Controllers/MainController.h"
 
 Simulator::Simulator() : engineBase_(std::make_unique<EngineBase>()), navController_(std::make_unique<NavigationController>())
@@ -12,6 +14,7 @@ Simulator::Simulator() : engineBase_(std::make_unique<EngineBase>()), navControl
   engineBase_->registerUpdateFunction([this](double deltaTime)->void
     {update(deltaTime);}
     );
+  engineBase_->getGraphicsLibrary()->setTargetFPS(120);
   engineBase_->launch();
 }
 
@@ -27,7 +30,7 @@ void Simulator::update(double deltaTime)
   {
     robot_->handleCommand(MainController::journeyToCommand(journey.get()),deltaTime);
   }
-
+  std::this_thread::sleep_for(std::chrono::milliseconds(5));
 }
 
 void Simulator::handleClicks()
