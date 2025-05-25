@@ -55,7 +55,7 @@ Command MainController::handleBallCollectionMotor(const JourneyModel* journey)
 Command MainController::journeyToCommand(const JourneyModel* journey)
 {
   Command command;
-  if ( journey->angle > 1 || journey->angle < -1)
+  if ( journey->angle > 5 || journey->angle < -5)
   {
     if (journey->angle > 0)
     {
