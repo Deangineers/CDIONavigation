@@ -51,13 +51,35 @@ void SimulatedRobot::handleCommand(Command command, double deltaTime)
   {
     rotate(speed * rotateSpeedFactor * deltaTime * -1);
   }
-  else if (command.getAction() == "b")
+  else if (command.getAction() == "f" || command.getAction() == "b")
   {
+    // 1. Get current positions
+    double x1 = robotFront_->getX();
+    double y1 = robotFront_->getY();
+    double x2 = robotRear_->getX();
+    double y2 = robotRear_->getY();
 
-  }
-  else if (command.getAction() == "f")
-  {
+    // 2. Calculate direction vector from rear to front
+    double dx = x1 - x2;
+    double dy = y1 - y2;
 
+    // 3. Normalize direction
+    double length = std::sqrt(dx * dx + dy * dy);
+    if (length == 0) return; // prevent division by zero
+
+    dx /= length;
+    dy /= length;
+
+    // 4. Calculate movement distance
+    double distance = speed * deltaTime;
+    if (command.getAction() == "b") distance *= -1;
+
+    // 5. Move both points in the direction
+    double moveX = dx * distance;
+    double moveY = dy * distance;
+
+    robotFront_->setPosition(x1 + moveX, y1 + moveY);
+    robotRear_->setPosition(x2 + moveX, y2 + moveY);
   }
 }
 

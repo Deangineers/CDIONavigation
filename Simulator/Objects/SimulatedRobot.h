@@ -16,7 +16,7 @@ public:
   void handleCommand(Command command, double deltaTime);
 private:
   void rotate(double degrees);
-  double movementSpeedFactor = 1;
+  double movementSpeedFactor = 0.05;
   double rotateSpeedFactor = 0.2;
   std::shared_ptr<DrawAble> robotFront_;
   std::shared_ptr<DrawAble> robotRear_;
