@@ -14,8 +14,13 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(EngineBase)
 
 add_executable(CDIONavigation_Simulator
-    main.cpp
-    )
+        main.cpp
+        Simulator.cpp
+        Simulator.h
+        SimulatedRobot.cpp
+        SimulatedRobot.h
+        TextureLocations.h
+)
 
 
 target_link_libraries(CDIONavigation_Simulator PUBLIC CDIONavigation)
