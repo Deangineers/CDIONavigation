@@ -8,7 +8,7 @@ include(FetchContent)
 FetchContent_Declare(
         EngineBase
         GIT_REPOSITORY https://github.com/ThePhoneBeLinging/EngineBase
-        GIT_TAG v4.2.1
+        GIT_TAG v4.2.2
 )
 
 FetchContent_MakeAvailable(EngineBase)
@@ -17,9 +17,11 @@ add_executable(CDIONavigation_Simulator
         main.cpp
         Simulator.cpp
         Simulator.h
-        SimulatedRobot.cpp
-        SimulatedRobot.h
+        Objects/SimulatedRobot.cpp
+        Objects/SimulatedRobot.h
         TextureLocations.h
+        Objects/Ball.cpp
+        Objects/Ball.h
 )
 
 

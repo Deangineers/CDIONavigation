@@ -5,13 +5,19 @@
 #ifndef SIMULATEDROBOT_H
 #define SIMULATEDROBOT_H
 #include "EngineBase/EngineBase.h"
-
+#include "../../src/Controllers/NavigationController.h"
+#include "../../src/Models/Command.h"
 
 class SimulatedRobot
 {
 public:
   explicit SimulatedRobot(EngineBase* engineBase);
+  void addRobotToNavController(NavigationController* navController) const;
+  void handleCommand(Command command, double deltaTime);
 private:
+  void rotate(double degrees);
+  double movementSpeedFactor = 0.05;
+  double rotateSpeedFactor = 0.2;
   std::shared_ptr<DrawAble> robotFront_;
   std::shared_ptr<DrawAble> robotRear_;
 };
