@@ -15,9 +15,9 @@ Egg::Egg(EngineBase* engineBase) : egg_(std::make_shared<DrawAble>())
 void Egg::addToNavController(NavigationController* navController) const
 {
   int x1 = egg_->getX();
-  int x2 = egg_->getX();
+  int x2 = egg_->getX() + 50;
   int y1 = egg_->getY();
-  int y2 = egg_->getY();
+  int y2 = egg_->getY() + 50;
 
   if (x1 > 0 && x2 > 0)
   {
