@@ -42,6 +42,8 @@ private:
   int currentX_ = 50;
   int currentY_ = 750;
 
+  std::unique_ptr<CourseObject> courseObject_;
+
 };
 
 

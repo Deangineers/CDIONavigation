@@ -10,72 +10,82 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
 {
   bool toCollectBalls = false;
   const CourseObject* objectToPathTowards = nullptr;
-  if (ballVector_.empty() || ballsInRobot_ == robotBallCapacity_)
+  auto objectVector = std::make_pair(0,0);
+  if (courseObject_ == nullptr)
   {
-    if (goal_ != nullptr)
+    if (ballVector_.empty() || ballsInRobot_ == robotBallCapacity_)
     {
-      objectToPathTowards = goal_.get();
-      toCollectBalls = false;
+      if (goal_ != nullptr)
+      {
+        objectToPathTowards = goal_.get();
+        toCollectBalls = false;
+      }
+    }
+    else
+    {
+      objectToPathTowards = findClosestBall();
+      toCollectBalls = true;
+    }
+    if (objectToPathTowards == nullptr)
+    {
+      return nullptr;
+    }
+
+    auto courseObject = std::make_unique<CourseObject>(currentX_,currentY_,currentX_,currentY_,"");
+    objectVector = calculateVectorToObject(objectToPathTowards);
+    while (checkCollisionOnRoute(objectToPathTowards, objectVector))
+    {
+      courseObject = std::make_unique<CourseObject>(currentX_,currentY_,currentX_,currentY_,"");
+      objectToPathTowards = courseObject.get();
+      objectVector = calculateVectorToObject(courseObject.get());
+      if (currentX_ == safeXLeft_ && currentY_ == safeYTop_)
+      {
+        currentX_++;
+      }
+      if (currentX_ == safeXLeft_)
+      {
+        currentY_--;
+      }
+
+      else if (currentY_ == safeYTop_ && currentX_ == safeXRight_)
+      {
+        currentY_++;
+      }
+      else if (currentY_ == safeYTop_)
+      {
+        currentX_++;
+      }
+
+      else if (currentX_ == safeXRight_ && currentY_ == safeYBot_)
+      {
+        currentX_--;
+      }
+      else if (currentX_ == safeXRight_)
+      {
+        currentY_++;
+      }
+      else if (currentY_ == safeYBot_)
+      {
+        currentX_--;
+      }
+      courseObject_ = std::move(courseObject);
+    }
+    if (courseObject_ == nullptr)
+    {
+      courseObject_ = std::make_unique<CourseObject>(objectToPathTowards->x1(),objectToPathTowards->y1(),objectToPathTowards->x2(),objectToPathTowards->y2(),objectToPathTowards->name());
     }
   }
   else
   {
-    objectToPathTowards = findClosestBall();
-    toCollectBalls = true;
+    objectVector = calculateVectorToObject(courseObject_.get());
   }
-  if (objectToPathTowards == nullptr)
-  {
-    return nullptr;
-  }
-  auto objectVector = calculateVectorToObject(objectToPathTowards);
-  auto courseObject = std::make_unique<CourseObject>(currentX_,currentY_,currentX_,currentY_,"");
-  while (checkCollisionOnRoute(objectToPathTowards, objectVector))
-  {
-    courseObject = std::make_unique<CourseObject>(currentX_,currentY_,currentX_,currentY_,"");
-    objectToPathTowards = courseObject.get();
-    objectVector = calculateVectorToObject(courseObject.get());
-    if (not checkCollisionOnRoute(courseObject.get(),calculateVectorToObject(courseObject.get())) && not(std::abs(objectVector.first) < 10 && std::abs(objectVector.second < 10)))
-    {
-      objectVector = calculateVectorToObject(courseObject.get());
-      break;
-    }
-    if (currentX_ == safeXLeft_ && currentY_ == safeYTop_)
-    {
-      currentX_++;
-    }
-    if (currentX_ == safeXLeft_)
-    {
-      currentY_--;
-    }
-
-    else if (currentY_ == safeYTop_ && currentX_ == safeXRight_)
-    {
-      currentY_++;
-    }
-    else if (currentY_ == safeYTop_)
-    {
-      currentX_++;
-    }
-
-    else if (currentX_ == safeXRight_ && currentY_ == safeYBot_)
-    {
-      currentX_--;
-    }
-    else if (currentX_ == safeXRight_)
-    {
-      currentY_++;
-    }
-    else if (currentY_ == safeYBot_)
-    {
-      currentX_--;
-    }
-
-
-  }
-
   const std::pair robotVector = {robotFront_->x1() - robotBack_->x1(), robotFront_->y1() - robotBack_->y1()};
   const double angle = calculateAngleDifferenceBetweenVectors(robotVector,objectVector);
   const double distanceToObject = std::sqrt(objectVector.first * objectVector.first + objectVector.second * objectVector.second);
+  if (distanceToObject < 10)
+  {
+    courseObject_ = nullptr;
+  }
   return std::make_unique<JourneyModel>(distanceToObject, angle, toCollectBalls);
 }
 
