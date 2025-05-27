@@ -3,7 +3,7 @@
 //
 
 #include "SimulatedRobot.h"
-
+#include <cmath>
 #include "../TextureLocations.h"
 
 SimulatedRobot::SimulatedRobot(EngineBase* engineBase) : robotFront_(std::make_shared<DrawAble>())
