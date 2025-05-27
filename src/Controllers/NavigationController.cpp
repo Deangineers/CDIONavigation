@@ -27,10 +27,50 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   {
     return nullptr;
   }
-  const auto objectVector = calculateVectorToObject(objectToPathTowards);
-  if (checkCollisionOnRoute(objectToPathTowards, objectVector))
+  auto objectVector = calculateVectorToObject(objectToPathTowards);
+  auto courseObject = std::make_unique<CourseObject>(currentX_,currentY_,currentX_,currentY_,"");
+  while (checkCollisionOnRoute(objectToPathTowards, objectVector))
   {
-    return nullptr;
+    courseObject = std::make_unique<CourseObject>(currentX_,currentY_,currentX_,currentY_,"");
+    objectToPathTowards = courseObject.get();
+    objectVector = calculateVectorToObject(courseObject.get());
+    if (not checkCollisionOnRoute(courseObject.get(),calculateVectorToObject(courseObject.get())) && not(std::abs(objectVector.first) < 10 && std::abs(objectVector.second < 10)))
+    {
+      objectVector = calculateVectorToObject(courseObject.get());
+      break;
+    }
+    if (currentX_ == safeXLeft_ && currentY_ == safeYTop_)
+    {
+      currentX_++;
+    }
+    if (currentX_ == safeXLeft_)
+    {
+      currentY_--;
+    }
+
+    else if (currentY_ == safeYTop_ && currentX_ == safeXRight_)
+    {
+      currentY_++;
+    }
+    else if (currentY_ == safeYTop_)
+    {
+      currentX_++;
+    }
+
+    else if (currentX_ == safeXRight_ && currentY_ == safeYBot_)
+    {
+      currentX_--;
+    }
+    else if (currentX_ == safeXRight_)
+    {
+      currentY_++;
+    }
+    else if (currentY_ == safeYBot_)
+    {
+      currentX_--;
+    }
+
+
   }
 
   const std::pair robotVector = {robotFront_->x1() - robotBack_->x1(), robotFront_->y1() - robotBack_->y1()};
@@ -145,7 +185,6 @@ double NavigationController::calculateAngleDifferenceBetweenVectors(const std::p
 bool NavigationController::checkCollisionOnRoute(const CourseObject* target, const std::pair<int,int>& targetVector) const
 {
   if (!robotFront_ || !target) return false;
-  int robotWidth = 50;
 
   int startX = robotFront_->x1();
   int startY = robotFront_->y1();
@@ -155,8 +194,8 @@ bool NavigationController::checkCollisionOnRoute(const CourseObject* target, con
   double length = std::sqrt(targetVector.first * targetVector.first + targetVector.second * targetVector.second);
   if (length == 0.0) return false;
 
-  double offsetX = -(targetVector.second / length) * (robotWidth / 2.0);
-  double offsetY =  (targetVector.first / length) * (robotWidth / 2.0);
+  double offsetX = -(targetVector.second / length) * (robotWidth_ / 2.0);
+  double offsetY =  (targetVector.first / length) * (robotWidth_ / 2.0);
 
   double topX = std::max(startX + offsetX,endX + offsetX);
   double topY = std::max(startY + offsetY,endY + offsetY);

@@ -30,10 +30,17 @@ private:
   std::unique_ptr<CourseObject> robotFront_;
   std::unique_ptr<CourseObject> robotBack_;
   std::vector<std::unique_ptr<CourseObject>> blockingObject_;
-  int robotWidth_ = 250;
+  int robotWidth_ = 50;
 
   int ballsInRobot_ = 0;
   int robotBallCapacity_ = 5;
+  int safeXLeft_ = 50;
+  int safeXRight_ = 1150;
+  int safeYTop_ = 50;
+  int safeYBot_ = 750;
+
+  int currentX_ = 50;
+  int currentY_ = 750;
 
 };
 
