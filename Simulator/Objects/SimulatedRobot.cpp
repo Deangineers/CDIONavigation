@@ -68,7 +68,7 @@ void SimulatedRobot::handleCommand(Command command, double deltaTime)
     dx /= length;
     dy /= length;
 
-    double distance = speed * deltaTime;
+    double distance = speed * deltaTime * movementSpeedFactor;
     if (command.getAction() == "b") distance *= -1;
 
     double moveX = dx * distance;
