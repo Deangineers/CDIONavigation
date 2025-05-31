@@ -28,6 +28,16 @@ void Simulator::update(double deltaTime)
   cross_->addToNavController(navController_.get());
   egg_->addToNavController(navController_.get());
 
+  auto topWall = std::make_unique<CourseObject>(0,0,1200,0,"blockedObject");
+  auto leftWall = std::make_unique<CourseObject>(0,0,0,800,"blockedObject");
+  auto rightWall = std::make_unique<CourseObject>(1200,0,1200,800,"blockedObject");
+  auto bottomWall = std::make_unique<CourseObject>(0,800,1200,800,"blockedObject");
+
+  navController_->addCourseObject(std::move(topWall));
+  navController_->addCourseObject(std::move(leftWall));
+  navController_->addCourseObject(std::move(rightWall));
+  navController_->addCourseObject(std::move(bottomWall));
+
   auto journey = navController_->calculateDegreesAndDistanceToObject();
   if (journey != nullptr)
   {
