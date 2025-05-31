@@ -21,6 +21,8 @@ NavigationController* MainController::getNavController()
 void MainController::navigateAndSendCommand()
 {
   auto journey = navigationController_->calculateDegreesAndDistanceToObject();
+  if (journey == nullptr) return;
+
   auto ballCollectionCommand = handleBallCollectionMotor(journey.get());
   auto navigationCommand = journeyToCommand(journey.get());
 
