@@ -8,6 +8,10 @@
 
 std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceToObject()
 {
+  if (robotFront_ == nullptr || robotBack_ == nullptr)
+  {
+    return nullptr;
+  }
   bool toCollectBalls = false;
   const CourseObject* objectToPathTowards = nullptr;
   auto objectVector = std::make_pair(0,0);
