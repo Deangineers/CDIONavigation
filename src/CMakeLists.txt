@@ -15,8 +15,9 @@ add_library(CDIONavigation SHARED PythonBinding.cpp
         Models/CourseObject.h
         Controllers/MainController.cpp
         Controllers/MainController.h
+        Controllers/Clients/IClient.h
+        Controllers/Clients/LinuxClient.cpp
+        Controllers/Clients/LinuxClient.h
+        Controllers/Clients/MockClient.cpp
+        Controllers/Clients/MockClient.h
 )
-
-if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    target_link_libraries(CDIONavigation PRIVATE ws2_32)
-endif()

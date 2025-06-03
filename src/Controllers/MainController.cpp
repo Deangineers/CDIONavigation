@@ -6,11 +6,19 @@
 
 #include "../Models/Command.h"
 #include "../Models/JourneyModel.h"
+#include "Clients/LinuxClient.h"
+#include "Clients/MockClient.h"
 
 void MainController::init()
 {
   navigationController_ = std::make_unique<NavigationController>();
-  client_ = std::make_unique<Client>();
+  client_ = std::make_unique<LinuxClient>();
+}
+
+void MainController::mockInit()
+{
+  navigationController_ = std::make_unique<NavigationController>();
+  client_ = std::make_unique<MockClient>();
 }
 
 NavigationController* MainController::getNavController()
