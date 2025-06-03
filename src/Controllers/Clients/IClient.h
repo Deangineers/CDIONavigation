@@ -12,7 +12,7 @@
 class IClient
 {
 public:
-  virtual ~IClient() = 0;
+  virtual ~IClient() = default;
   virtual void sendCommand(const std::string& command) const = 0;
   virtual void connectToServer() = 0;
   static std::string getServerIp()

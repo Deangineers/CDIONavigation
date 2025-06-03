@@ -4,6 +4,11 @@
 
 #include "MockClient.h"
 
+MockClient::MockClient()
+{
+  MockClient::connectToServer();
+}
+
 void MockClient::sendCommand(const std::string& command) const
 {
   std::cout << "Sent Command: " << command << std::endl;
