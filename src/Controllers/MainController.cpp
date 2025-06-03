@@ -29,14 +29,17 @@ NavigationController* MainController::getNavController()
 void MainController::navigateAndSendCommand()
 {
   auto journey = navigationController_->calculateDegreesAndDistanceToObject();
-  if (journey == nullptr) return;
+  navigationController_->clearObjects();
+  if (journey == nullptr)
+  {
+    return;
+  }
 
   auto ballCollectionCommand = handleBallCollectionMotor(journey.get());
   auto navigationCommand = journeyToCommand(journey.get());
 
   client_->sendCommand(ballCollectionCommand.formatToSend());
   client_->sendCommand(navigationCommand.formatToSend());
-  navigationController_->clearObjects();
 }
 
 Command MainController::handleBallCollectionMotor(const JourneyModel* journey)
@@ -57,7 +60,7 @@ Command MainController::handleBallCollectionMotor(const JourneyModel* journey)
   }
   else
   {
-    command.setAction("c");
+    command.setAction("s");
   }
   return command;
 }
