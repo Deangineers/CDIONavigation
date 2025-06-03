@@ -3,7 +3,7 @@ project(CDIONavigation)
 
 set(CMAKE_CXX_STANDARD 20)
 
-set(testing ON)
+set(testing OFF)
 
 if(testing)
     include(FetchContent)
