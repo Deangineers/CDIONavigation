@@ -18,7 +18,6 @@ add_library(CDIONavigation SHARED PythonBinding.cpp
         Controllers/Clients/LinuxClient.h
         Controllers/Clients/MockClient.cpp
         Controllers/Clients/MockClient.h
-        EnvVariables.h
 )
 
 target_link_libraries(CDIONavigation PUBLIC Utility)

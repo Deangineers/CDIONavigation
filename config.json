@@ -1,0 +1,10 @@
+{
+  "safeXLeft": 50,
+  "safeXRight":50,
+  "safeYTop":50,
+  "safeYBot":50,
+  "middleXOnAxis":500,
+  "distanceToGoal":50,
+  "RobotIP": "192.168.0.1",
+  "RobotPort": 1234
+}
