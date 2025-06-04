@@ -20,7 +20,6 @@ public:
   static Command journeyToCommand(const JourneyModel* journey);
 private:
   static inline std::unique_ptr<NavigationController> navigationController_ = nullptr;
-  static inline void updateBallCollectionAction(const std::string& action);
 };
 
 
