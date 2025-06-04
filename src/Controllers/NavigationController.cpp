@@ -117,10 +117,6 @@ void NavigationController::addCourseObject(std::unique_ptr<CourseObject>&& cours
   {
     blockingObject_.push_back(std::move(courseObject));
   }
-  else if (name == "smallgoal")
-  {
-    goal_ = std::move(courseObject);
-  }
   else if (name == "robotFront")
   {
     int x1 = courseObject->x1() + ConfigController::getConfigInt("RobotFrontOffsetX");
@@ -141,9 +137,21 @@ void NavigationController::addCourseObject(std::unique_ptr<CourseObject>&& cours
   {
     blockingObject_.push_back(std::move(courseObject));
   }
-  else if (name == "biggoal")
+  else if (name == "biggoal" || name == "smallgoal")
   {
-    // Ignore this case ;)
+    if (goal_ == nullptr)
+    {
+      goal_ = std::move(courseObject);
+    }
+    else
+    {
+      double sizeOfCurrentGoal = std::sqrt((goal_->x2() - goal_->x1())*(goal_->x2() - goal_->x1()) + (goal_->y2() - goal_->y1())*(goal_->y2() - goal_->y1()));
+      double sizeOfProposedGoal = std::sqrt((courseObject->x2() - courseObject->x1())*(courseObject->x2() - courseObject->x1()) + (courseObject->y2() - courseObject->y1())*(courseObject->y2() - courseObject->y1()));
+      if (sizeOfProposedGoal > sizeOfCurrentGoal)
+      {
+        goal_ = std::move(courseObject);
+      }
+    }
   }
   else
   {
