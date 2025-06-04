@@ -18,5 +18,6 @@
   "RobotFrontOffsetX": 0,
   "RobotFrontOffsetY": 0,
   "RobotBackOffsetX": 0,
-  "RobotBackOffsetY": 0
+  "RobotBackOffsetY": 0,
+  "DistanceBeforeTargetReached": 10
 }

@@ -99,7 +99,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   const std::pair robotVector = {robotFront_->x1() - robotBack_->x1(), robotFront_->y1() - robotBack_->y1()};
   const double angle = calculateAngleDifferenceBetweenVectors(robotVector,objectVector);
   const double distanceToObject = std::sqrt(objectVector.first * objectVector.first + objectVector.second * objectVector.second);
-  if (distanceToObject < 10)
+  if (distanceToObject < ConfigController::getConfigInt("DistanceBeforeTargetReached"))
   {
     courseObject_ = nullptr;
   }
