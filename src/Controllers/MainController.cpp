@@ -47,7 +47,7 @@ Command MainController::handleBallCollectionMotor(const JourneyModel* journey)
   Command command;
   command.setMotor("c");
 
-  if (journey->distance < 30)
+  if (journey->distance < ConfigController::getConfigInt("DistanceBeforeBallCollection"))
   {
     if (journey->collectBalls)
     {
@@ -68,7 +68,8 @@ Command MainController::handleBallCollectionMotor(const JourneyModel* journey)
 Command MainController::journeyToCommand(const JourneyModel* journey)
 {
   Command command;
-  if ( journey->angle > 5 || journey->angle < -5)
+  int allowedAngleDiff = ConfigController::getConfigInt("AllowedAngleDifference");
+  if ( journey->angle > allowedAngleDiff || journey->angle < -allowedAngleDiff)
   {
     if (journey->angle > 0)
     {
@@ -78,14 +79,14 @@ Command MainController::journeyToCommand(const JourneyModel* journey)
     {
       command.setAction("l");
     }
-
-    if (journey->angle > - 20.0 && journey->angle < 20.0)
+    int maxAngleBeforeSlowingDown = ConfigController::getConfigInt("MaxAngleBeforeSlowingDown");
+    if (journey->angle > - maxAngleBeforeSlowingDown && journey->angle < maxAngleBeforeSlowingDown)
     {
-      command.setSpeed(100);
+      command.setSpeed(ConfigController::getConfigInt("RotationSlowSpeed"));
     }
     else
     {
-      command.setSpeed(500);
+      command.setSpeed(ConfigController::getConfigInt("RotationFastSpeed"));
     }
     return command;
   }
@@ -96,11 +97,11 @@ Command MainController::journeyToCommand(const JourneyModel* journey)
 
     if (journey->distance < 30.0)
     {
-      command.setSpeed(100);
+      command.setSpeed(ConfigController::getConfigInt("ForwardFastSpeed"));
     }
     else
     {
-      command.setSpeed(500);
+      command.setSpeed(ConfigController::getConfigInt("ForwardSlowSpeed"));
     }
     return command;
   }
