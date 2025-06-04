@@ -5,6 +5,7 @@
 #include "NavigationController.h"
 #include "../Models/JourneyModel.h"
 #include "Utility/ConfigController.h"
+#include "cmath"
 
 std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceToObject()
 {

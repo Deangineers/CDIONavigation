@@ -13,6 +13,8 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(Utility)
 
+set_target_properties(Utility PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
 if(testing)
     FetchContent_Declare(
             googletest
