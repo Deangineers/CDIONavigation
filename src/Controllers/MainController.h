@@ -15,12 +15,11 @@ public:
   static void init();
   static void mockInit();
   static NavigationController* getNavController();
-  static void navigateAndSendCommand();
+  static const char* navigateAndSendCommand();
   static Command handleBallCollectionMotor(const JourneyModel* journey);
   static Command journeyToCommand(const JourneyModel* journey);
 private:
   static inline std::unique_ptr<NavigationController> navigationController_ = nullptr;
-  static inline std::unique_ptr<IClient> client_ = nullptr;
   static inline void updateBallCollectionAction(const std::string& action);
 };
 

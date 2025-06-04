@@ -14,14 +14,12 @@ void MainController::init()
 {
   ConfigController::loadConfig("config.json");
   navigationController_ = std::make_unique<NavigationController>();
-  client_ = std::make_unique<LinuxClient>();
 }
 
 void MainController::mockInit()
 {
   ConfigController::loadConfig("config.json");
   navigationController_ = std::make_unique<NavigationController>();
-  client_ = std::make_unique<MockClient>();
 }
 
 NavigationController* MainController::getNavController()
@@ -29,20 +27,19 @@ NavigationController* MainController::getNavController()
   return navigationController_.get();
 }
 
-void MainController::navigateAndSendCommand()
+const char* MainController::navigateAndSendCommand()
 {
   auto journey = navigationController_->calculateDegreesAndDistanceToObject();
   navigationController_->clearObjects();
   if (journey == nullptr)
   {
-    return;
+    return "";
   }
 
   auto ballCollectionCommand = handleBallCollectionMotor(journey.get());
   auto navigationCommand = journeyToCommand(journey.get());
 
-  client_->sendCommand(ballCollectionCommand.formatToSend());
-  client_->sendCommand(navigationCommand.formatToSend());
+  return (ballCollectionCommand.formatToSend() + "/" + navigationCommand.formatToSend()).c_str();
 }
 
 Command MainController::handleBallCollectionMotor(const JourneyModel* journey)
