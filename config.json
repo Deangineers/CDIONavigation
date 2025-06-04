@@ -20,5 +20,6 @@
   "RobotBackOffsetX": 0,
   "RobotBackOffsetY": 0,
   "DistanceBeforeTargetReached": 10,
-  "RobotWidth": 50
+  "RobotWidth": 50,
+  "TotalBalls": 5
 }

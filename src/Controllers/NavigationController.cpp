@@ -18,7 +18,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   auto objectVector = std::make_pair(0,0);
   if (courseObject_ == nullptr)
   {
-    if (ballVector_.empty() || ballsInRobot_ == robotBallCapacity_)
+    if (ballVector_.empty() || totalBalls_ - ballVector_.size() == robotBallCapacity_ )
     {
       if (goal_ != nullptr)
       {

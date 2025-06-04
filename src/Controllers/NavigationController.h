@@ -32,7 +32,7 @@ private:
   std::vector<std::unique_ptr<CourseObject>> blockingObject_;
   int robotWidth_ = ConfigController::getConfigInt("RobotWidth");
 
-  int ballsInRobot_ = 0;
+  int totalBalls_ = ConfigController::getConfigInt("TotalBalls");
   int robotBallCapacity_ = 5;
 
   int currentX_ = ConfigController::getConfigInt("safeXLeft");
