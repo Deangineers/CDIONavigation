@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+#include "../EnvVariables.h"
 #include "../Models/CourseObject.h"
 #include "../Models/JourneyModel.h"
 
@@ -34,13 +35,9 @@ private:
 
   int ballsInRobot_ = 0;
   int robotBallCapacity_ = 5;
-  int safeXLeft_ = 50;
-  int safeXRight_ = 1150;
-  int safeYTop_ = 50;
-  int safeYBot_ = 750;
 
-  int currentX_ = 50;
-  int currentY_ = 750;
+  int currentX_ = safeXLeft;
+  int currentY_ = safeYBot;
 
   std::unique_ptr<CourseObject> courseObject_;
 

@@ -6,6 +6,8 @@
 #include "../Models/JourneyModel.h"
 #include <cmath>
 
+#include "../EnvVariables.h"
+
 std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceToObject()
 {
   if (robotFront_ == nullptr || robotBack_ == nullptr)
@@ -21,6 +23,18 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     {
       if (goal_ != nullptr)
       {
+        int targetX;
+        int targetY = goal_->y1();
+        if (goal_->x1() > middleOnXAxis)
+        {
+          targetX = goal_->x1() - distanceToGoal;
+          targetY = goal_->y1();
+        }
+        else
+        {
+          targetX = goal_->x1() + distanceToGoal;
+        }
+        goal_ = std::make_unique<CourseObject>(targetX,goal_->y1(),targetX,goal_->y2(),"smallgoal");
         objectToPathTowards = goal_.get();
         toCollectBalls = false;
       }
@@ -42,33 +56,33 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
       courseObject = std::make_unique<CourseObject>(currentX_,currentY_,currentX_,currentY_,"");
       objectToPathTowards = courseObject.get();
       objectVector = calculateVectorToObject(courseObject.get());
-      if (currentX_ == safeXLeft_ && currentY_ == safeYTop_)
+      if (currentX_ == safeXLeft && currentY_ == safeYTop)
       {
         currentX_++;
       }
-      if (currentX_ == safeXLeft_)
+      if (currentX_ == safeXLeft)
       {
         currentY_--;
       }
 
-      else if (currentY_ == safeYTop_ && currentX_ == safeXRight_)
+      else if (currentY_ == safeYTop && currentX_ == safeXRight)
       {
         currentY_++;
       }
-      else if (currentY_ == safeYTop_)
+      else if (currentY_ == safeYTop)
       {
         currentX_++;
       }
 
-      else if (currentX_ == safeXRight_ && currentY_ == safeYBot_)
+      else if (currentX_ == safeXRight && currentY_ == safeYBot)
       {
         currentX_--;
       }
-      else if (currentX_ == safeXRight_)
+      else if (currentX_ == safeXRight)
       {
         currentY_++;
       }
-      else if (currentY_ == safeYBot_)
+      else if (currentY_ == safeYBot)
       {
         currentX_--;
       }
