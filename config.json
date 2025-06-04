@@ -1,8 +1,8 @@
 {
   "safeXLeft": 50,
-  "safeXRight":50,
+  "safeXRight":650,
   "safeYTop":50,
-  "safeYBot":50,
+  "safeYBot":650,
   "middleXOnAxis":500,
   "distanceToGoal":50,
   "RobotIP": "192.168.0.1",
@@ -14,5 +14,9 @@
   "RotationFastSpeed": 500,
   "MaxDistanceBeforeFastSpeed": 30,
   "ForwardFastSpeed": 500,
-  "ForwardSlowSpeed": 100
+  "ForwardSlowSpeed": 100,
+  "RobotFrontOffsetX": 0,
+  "RobotFrontOffsetY": 0,
+  "RobotBackOffsetX": 0,
+  "RobotBackOffsetY": 0
 }

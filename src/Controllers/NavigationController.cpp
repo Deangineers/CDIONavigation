@@ -123,11 +123,19 @@ void NavigationController::addCourseObject(std::unique_ptr<CourseObject>&& cours
   }
   else if (name == "robotFront")
   {
-    robotFront_ = std::move(courseObject);
+    int x1 = courseObject->x1() + ConfigController::getConfigInt("RobotFrontOffsetX");
+    int y1 = courseObject->y1() + ConfigController::getConfigInt("RobotFrontOffsetY");
+    int x2 = courseObject->x2() + ConfigController::getConfigInt("RobotFrontOffsetX");
+    int y2 = courseObject->y2() + ConfigController::getConfigInt("RobotFrontOffsetY");
+    robotFront_ = std::make_unique<CourseObject>(x1,y1,x2,y2,"robotFront");
   }
   else if (name == "robotBack")
   {
-    robotBack_ = std::move(courseObject);
+    int x1 = courseObject->x1() + ConfigController::getConfigInt("RobotBackOffsetX");
+    int y1 = courseObject->y1() + ConfigController::getConfigInt("RobotBackOffsetY");
+    int x2 = courseObject->x2() + ConfigController::getConfigInt("RobotBackOffsetX");
+    int y2 = courseObject->y2() + ConfigController::getConfigInt("RobotBackOffsetY");
+    robotBack_ = std::make_unique<CourseObject>(x1,y1,x2,y2,"robotBack");
   }
   else if (name == "blockedObject")
   {
