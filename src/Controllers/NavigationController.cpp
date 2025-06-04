@@ -168,6 +168,15 @@ void NavigationController::clearObjects()
   robotBack_ = nullptr;
 }
 
+void NavigationController::removeBallsOutsideCourse()
+{
+  auto topLeftCornerLambda = [] (CourseObject* a, CourseObject* b) -> bool
+  {
+    return a->x1() > b->x1() && a->y1() > b->y1();
+  };
+  auto topLeftCorner = std::max_element(blockingObject_.begin(),blockingObject_.end(),topLeftCornerLambda);
+}
+
 const CourseObject* NavigationController::findClosestBall() const
 {
   if (ballVector_.empty())
