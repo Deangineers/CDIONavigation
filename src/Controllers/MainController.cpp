@@ -8,16 +8,19 @@
 #include "../Models/JourneyModel.h"
 #include "Clients/LinuxClient.h"
 #include "Clients/MockClient.h"
+#include "Utility/ConfigController.h"
 
 void MainController::init()
 {
   navigationController_ = std::make_unique<NavigationController>();
+  ConfigController::loadConfig("config.json");
   client_ = std::make_unique<LinuxClient>();
 }
 
 void MainController::mockInit()
 {
   navigationController_ = std::make_unique<NavigationController>();
+  ConfigController::loadConfig("config.json");
   client_ = std::make_unique<MockClient>();
 }
 

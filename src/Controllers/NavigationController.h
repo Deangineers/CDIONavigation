@@ -7,10 +7,9 @@
 #include <memory>
 #include <string>
 #include <vector>
-
-#include "../EnvVariables.h"
 #include "../Models/CourseObject.h"
 #include "../Models/JourneyModel.h"
+#include "Utility/ConfigController.h"
 
 class NavigationController
 {
@@ -36,8 +35,8 @@ private:
   int ballsInRobot_ = 0;
   int robotBallCapacity_ = 5;
 
-  int currentX_ = safeXLeft;
-  int currentY_ = safeYBot;
+  int currentX_ = ConfigController::getConfigInt("safeXLeft");
+  int currentY_ = ConfigController::getConfigInt("safeYBot");
 
   std::unique_ptr<CourseObject> courseObject_;
 

@@ -10,6 +10,8 @@
 #include <fstream>
 #include <string>
 
+#include "Utility/ConfigController.h"
+
 LinuxClient::LinuxClient()
 {
   LinuxClient::connectToServer();
@@ -25,8 +27,8 @@ void LinuxClient::connectToServer()
 
   sockaddr_in serverAddr{};
   serverAddr.sin_family = AF_INET;
-  serverAddr.sin_port = htons(1234);
-  const std::string ip = getServerIp();
+  serverAddr.sin_port = htons(ConfigController::getConfigInt("RobotPort"));
+  const std::string ip = ConfigController::getConfigString("RobotIP");
 
   if (inet_pton(AF_INET, ip.c_str(), &serverAddr.sin_addr) <= 0) {
     std::cerr << "Invalid address / Address not supported\n";

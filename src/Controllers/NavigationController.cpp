@@ -4,9 +4,7 @@
 
 #include "NavigationController.h"
 #include "../Models/JourneyModel.h"
-#include <cmath>
-
-#include "../EnvVariables.h"
+#include "Utility/ConfigController.h"
 
 std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceToObject()
 {
@@ -25,14 +23,14 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
       {
         int targetX;
         int targetY = goal_->y1();
-        if (goal_->x1() > middleOnXAxis)
+        if (goal_->x1() > ConfigController::getConfigInt("middleXOnAxis"))
         {
-          targetX = goal_->x1() - distanceToGoal;
+          targetX = goal_->x1() - ConfigController::getConfigInt("distanceToGoal");
           targetY = goal_->y1();
         }
         else
         {
-          targetX = goal_->x1() + distanceToGoal;
+          targetX = goal_->x1() + ConfigController::getConfigInt("distanceToGoal");
         }
         goal_ = std::make_unique<CourseObject>(targetX,goal_->y1(),targetX,goal_->y2(),"smallgoal");
         objectToPathTowards = goal_.get();
@@ -56,33 +54,33 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
       courseObject = std::make_unique<CourseObject>(currentX_,currentY_,currentX_,currentY_,"");
       objectToPathTowards = courseObject.get();
       objectVector = calculateVectorToObject(courseObject.get());
-      if (currentX_ == safeXLeft && currentY_ == safeYTop)
+      if (currentX_ == ConfigController::getConfigInt("safeXLeft") && currentY_ == ConfigController::getConfigInt("safeYTop"))
       {
         currentX_++;
       }
-      if (currentX_ == safeXLeft)
+      if (currentX_ == ConfigController::getConfigInt("safeXLeft"))
       {
         currentY_--;
       }
 
-      else if (currentY_ == safeYTop && currentX_ == safeXRight)
+      else if (currentY_ == ConfigController::getConfigInt("safeYTop") && currentX_ == ConfigController::getConfigInt("safeXRight"))
       {
         currentY_++;
       }
-      else if (currentY_ == safeYTop)
+      else if (currentY_ == ConfigController::getConfigInt("safeYTop"))
       {
         currentX_++;
       }
 
-      else if (currentX_ == safeXRight && currentY_ == safeYBot)
+      else if (currentX_ == ConfigController::getConfigInt("safeXRight") && currentY_ == ConfigController::getConfigInt("safeYBot"))
       {
         currentX_--;
       }
-      else if (currentX_ == safeXRight)
+      else if (currentX_ == ConfigController::getConfigInt("safeXRight"))
       {
         currentY_++;
       }
-      else if (currentY_ == safeYBot)
+      else if (currentY_ == ConfigController::getConfigInt("safeYBot"))
       {
         currentX_--;
       }
