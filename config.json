@@ -19,5 +19,6 @@
   "RobotFrontOffsetY": 0,
   "RobotBackOffsetX": 0,
   "RobotBackOffsetY": 0,
-  "DistanceBeforeTargetReached": 10
+  "DistanceBeforeTargetReached": 10,
+  "RobotWidth": 50
 }

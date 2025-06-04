@@ -30,7 +30,7 @@ private:
   std::unique_ptr<CourseObject> robotFront_;
   std::unique_ptr<CourseObject> robotBack_;
   std::vector<std::unique_ptr<CourseObject>> blockingObject_;
-  int robotWidth_ = 50;
+  int robotWidth_ = ConfigController::getConfigInt("RobotWidth");
 
   int ballsInRobot_ = 0;
   int robotBallCapacity_ = 5;
