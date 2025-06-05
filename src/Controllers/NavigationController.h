@@ -20,6 +20,7 @@ public:
   void clearObjects();
 private:
   void removeBallsOutsideCourse();
+  void removeBallsInsideRobot();
   [[nodiscard]] const CourseObject* findClosestBall() const;
   std::pair<int,int> calculateVectorToObject(const CourseObject* courseObject) const;
   double calculateAngleDifferenceBetweenVectors(const std::pair<int,int>& firstVector, const std::pair<int,int>& secondVector);

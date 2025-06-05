@@ -3,6 +3,9 @@
 //
 
 #include "NavigationController.h"
+
+#include <iostream>
+
 #include "../Models/JourneyModel.h"
 #include "Utility/ConfigController.h"
 #include "cmath"
@@ -40,6 +43,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     }
     else
     {
+      removeBallsInsideRobot();
       objectToPathTowards = findClosestBall();
       toCollectBalls = true;
     }
@@ -175,6 +179,23 @@ void NavigationController::removeBallsOutsideCourse()
     return a->x1() > b->x1() && a->y1() > b->y1();
   };
   auto topLeftCorner = std::max_element(blockingObject_.begin(),blockingObject_.end(),topLeftCornerLambda);
+}
+
+void NavigationController::removeBallsInsideRobot()
+{
+  double topX = std::min(robotFront_->x1(),robotBack_->x1());
+  double topY = std::min(robotFront_->y1(),robotBack_->y1());
+  double bottomX = std::max(robotFront_->x2(), robotBack_->x2());
+  double bottomY = std::max(robotFront_->y2(), robotBack_->y2());
+
+  std::erase_if(ballVector_,[topX, topY, bottomX, bottomY](CourseObject* ball){
+    double ballTopX = std::min(ball->x1(), ball->x2());
+    double ballTopY = std::min(ball->y1(), ball->y2());
+    double ballBottomX = std::max(ball->x1(), ball->x2());
+    double ballBottomY = std::max(ball->y1(), ball->y2());
+
+    return ballTopX >= topX && ballTopY >= topY && ballBottomX <= bottomX && ballBottomY <= bottomY;
+  });
 }
 
 const CourseObject* NavigationController::findClosestBall() const
