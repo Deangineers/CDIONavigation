@@ -174,7 +174,7 @@ void NavigationController::clearObjects()
 
 void NavigationController::removeBallsOutsideCourse()
 {
-  auto topLeftCornerLambda = [] (CourseObject* a, CourseObject* b) -> bool
+  auto topLeftCornerLambda = [] (const std::unique_ptr<CourseObject>& a, const std::unique_ptr<CourseObject>& b) -> bool
   {
     return a->x1() > b->x1() && a->y1() > b->y1();
   };
@@ -188,7 +188,7 @@ void NavigationController::removeBallsInsideRobot()
   double bottomX = std::max(robotFront_->x2(), robotBack_->x2());
   double bottomY = std::max(robotFront_->y2(), robotBack_->y2());
 
-  std::erase_if(ballVector_,[topX, topY, bottomX, bottomY](CourseObject* ball){
+  std::erase_if(ballVector_,[topX, topY, bottomX, bottomY](const std::unique_ptr<CourseObject>& ball){
     double ballTopX = std::min(ball->x1(), ball->x2());
     double ballTopY = std::min(ball->y1(), ball->y2());
     double ballBottomX = std::max(ball->x1(), ball->x2());
