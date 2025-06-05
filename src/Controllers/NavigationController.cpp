@@ -194,7 +194,7 @@ void NavigationController::removeBallsInsideRobot()
     double ballBottomX = std::max(ball->x1(), ball->x2());
     double ballBottomY = std::max(ball->y1(), ball->y2());
 
-    return ballTopX >= topX && ballTopY >= topY && ballBottomX <= bottomX && ballBottomY <= bottomY;
+    return ballBottomX > topX && ballTopX < bottomX && ballBottomY > topY && ballTopY < bottomY;
   });
 }
 
