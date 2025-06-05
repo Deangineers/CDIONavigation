@@ -44,6 +44,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     else
     {
       removeBallsInsideRobot();
+      removeBallsOutsideCourse();
       objectToPathTowards = findClosestBall();
       toCollectBalls = true;
     }
@@ -174,11 +175,28 @@ void NavigationController::clearObjects()
 
 void NavigationController::removeBallsOutsideCourse()
 {
+  if (blockingObject_.empty())
+  {
+    return;
+  }
   auto topLeftCornerLambda = [] (const std::unique_ptr<CourseObject>& a, const std::unique_ptr<CourseObject>& b) -> bool
+  {
+    return a->x1() < b->x1() && a->y1() < b->y1();
+  };
+  auto topLeftCorner = std::max_element(blockingObject_.begin(),blockingObject_.end(),topLeftCornerLambda)->get();
+  auto bottomRightCornerLambda = [] (const std::unique_ptr<CourseObject>& a, const std::unique_ptr<CourseObject>& b) -> bool
   {
     return a->x1() > b->x1() && a->y1() > b->y1();
   };
-  auto topLeftCorner = std::max_element(blockingObject_.begin(),blockingObject_.end(),topLeftCornerLambda);
+
+  auto bottomRightCorner = std::max_element(blockingObject_.begin(),blockingObject_.end(),bottomRightCornerLambda)->get();
+
+  auto deletionLambda = [topLeftCorner,bottomRightCorner] (const std::unique_ptr<CourseObject>& a) -> bool
+  {
+    return a->x1() > topLeftCorner->x1() && bottomRightCorner->x1() > a->x1() && a->y1() > topLeftCorner->y1() && bottomRightCorner->y1() > a->y1();
+  };
+
+  std::erase_if(ballVector_,deletionLambda);
 }
 
 void NavigationController::removeBallsInsideRobot()
