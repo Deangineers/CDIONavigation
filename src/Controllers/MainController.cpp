@@ -47,16 +47,19 @@ void MainController::navigateAndSendCommand()
 
   if (journey == nullptr)
   {
-    client_->sendCommand("s\n");
-    client_->sendCommand("s c\n");
+    client_->sendMovementCommand("s");
+    client_->sendBallCollectionCommand("s c");
     return;
   }
 
-  auto ballCollectionCommand = handleBallCollectionMotor(journey.get());
   auto navigationCommand = journeyToCommand(journey.get());
+  auto ballCollectionCommand = handleBallCollectionMotor(journey.get());
+
   localStartTime = std::chrono::high_resolution_clock::now();
-  client_->sendCommand(ballCollectionCommand.formatToSend().append("\n"));
-  client_->sendCommand(navigationCommand.formatToSend().append("\n"));
+
+  client_->sendMovementCommand(navigationCommand.formatToSend());
+  client_->sendBallCollectionCommand(ballCollectionCommand.formatToSend());
+
   navMSPassed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - localStartTime).count();
   std::cout << "Time spent sending command using client: "<< std::to_string(navMSPassed) << " ms\n" << std::endl;
 }
