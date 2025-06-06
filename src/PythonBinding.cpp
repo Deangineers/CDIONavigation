@@ -19,12 +19,12 @@ extern "C"
     MainController::addCourseObject(std::move(std::make_unique<CourseObject>(x1,y1,x2,y2,label)));
   }
 
-  const char* navigateAndSendCommand()
+  void navigateAndSendCommand()
   {
     // Optimal but risky:
     //auto thread = std::thread(MainController::navigateAndSendCommand);
     //thread.detach();
-    return MainController::navigateAndSendCommand();
+    MainController::navigateAndSendCommand();
   }
 
   void createBlockedObjects(int* x, int* y, int size)

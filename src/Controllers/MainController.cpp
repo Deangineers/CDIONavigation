@@ -32,7 +32,7 @@ void MainController::addCourseObject(std::unique_ptr<CourseObject>&& courseObjec
   navigationController_->addCourseObject(std::move(courseObject));
 }
 
-const char* MainController::navigateAndSendCommand()
+void MainController::navigateAndSendCommand()
 {
   auto localStartTime = std::chrono::high_resolution_clock::now();
   auto journey = navigationController_->calculateDegreesAndDistanceToObject();
@@ -45,13 +45,16 @@ const char* MainController::navigateAndSendCommand()
 
   if (journey == nullptr)
   {
-    return "";
+    return;
   }
 
   auto ballCollectionCommand = handleBallCollectionMotor(journey.get());
   auto navigationCommand = journeyToCommand(journey.get());
-
-  return (ballCollectionCommand.formatToSend() + "/" + navigationCommand.formatToSend()).c_str();
+  localStartTime = std::chrono::high_resolution_clock::now();
+  client_->sendCommand(ballCollectionCommand.formatToSend());
+  client_->sendCommand(navigationCommand.formatToSend());
+  navMSPassed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - localStartTime).count();
+  std::cout << "Time sending using client: "<< std::to_string(navMSPassed) << " ms\n" << std::endl;
 }
 
 Command MainController::handleBallCollectionMotor(const JourneyModel* journey)
