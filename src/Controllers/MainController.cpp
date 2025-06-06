@@ -34,12 +34,14 @@ void MainController::addCourseObject(std::unique_ptr<CourseObject>&& courseObjec
 
 const char* MainController::navigateAndSendCommand()
 {
+  auto localStartTime = std::chrono::high_resolution_clock::now();
   auto journey = navigationController_->calculateDegreesAndDistanceToObject();
   navigationController_->clearObjects();
   isFirst_ = true;
   auto msPassed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - startTime_).count();
-  std::cout << "//\nTime Passed since start of creating objects: "<< std::to_string(msPassed) << " ms\n" << std::endl;
-
+  auto navMSPassed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - startTime_).count();
+  std::cout << "Time Passed since start of creating objects: "<< std::to_string(msPassed) << " ms\n" << std::endl;
+  std::cout << "Time in navigation: "<< std::to_string(navMSPassed) << " ms\n" << std::endl;
 
   if (journey == nullptr)
   {
