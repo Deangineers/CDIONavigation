@@ -11,7 +11,7 @@ MockClient::MockClient()
 
 void MockClient::sendCommand(const std::string& command) const
 {
-  std::cout << "Sent Command: " << command << std::endl;
+  std::cout << "Sent Command: " << command;
 }
 
 void MockClient::connectToServer()

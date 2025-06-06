@@ -46,11 +46,10 @@ void LinuxClient::connectToServer()
 
 void LinuxClient::sendCommand(const std::string& command) const
 {
-  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   ssize_t bytesSent = send(serverSocket, command.c_str(), command.size(), 0);
   if (bytesSent < 0) {
     std::cerr << "Failed to send command\n";
   } else {
-    std::cout << "Sent: " << command << std::endl;
+    std::cout << "Sent: " << command;
   }
 }
