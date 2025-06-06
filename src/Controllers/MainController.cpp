@@ -49,6 +49,7 @@ void MainController::navigateAndSendCommand()
   {
     client_->sendCommand("s\n");
     client_->sendCommand("s c\n");
+    return;
   }
 
   auto ballCollectionCommand = handleBallCollectionMotor(journey.get());
