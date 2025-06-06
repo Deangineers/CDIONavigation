@@ -12,8 +12,6 @@
 
 std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceToObject()
 {
-  removeBlackOutsideCourse();
-  setRobotFrontFromBlack();
   if (robotFront_ == nullptr || robotBack_ == nullptr)
   {
     return nullptr;
@@ -120,10 +118,6 @@ void NavigationController::addCourseObject(std::unique_ptr<CourseObject>&& cours
   {
     ballVector_.push_back(std::move(courseObject));
   }
-  else if (name == "black")
-  {
-    blackObjects_.push_back(std::move(courseObject));
-  }
   else if (name == "robotFront")
   {
     int x1 = courseObject->x1() + ConfigController::getConfigInt("RobotFrontOffsetX");
@@ -170,62 +164,9 @@ void NavigationController::clearObjects()
 {
   ballVector_.clear();
   blockingObjects_.clear();
-  blackObjects_.clear();
   goal_ = nullptr;
   robotFront_ = nullptr;
   robotBack_ = nullptr;
-}
-
-void NavigationController::removeBlackOutsideCourse()
-{
-  if (blockingObjects_.empty())
-  {
-    return;
-  }
-  auto topLeftCornerLambda = [] (const std::unique_ptr<CourseObject>& a, const std::unique_ptr<CourseObject>& b) -> bool
-  {
-    return a->x1() < b->x1() && a->y1() < b->y1();
-  };
-  auto topLeftCorner = std::max_element(blockingObjects_.begin(),blockingObjects_.end(),topLeftCornerLambda)->get();
-  auto bottomRightCornerLambda = [] (const std::unique_ptr<CourseObject>& a, const std::unique_ptr<CourseObject>& b) -> bool
-  {
-    return a->x1() > b->x1() && a->y1() > b->y1();
-  };
-
-  auto bottomRightCorner = std::max_element(blockingObjects_.begin(),blockingObjects_.end(),bottomRightCornerLambda)->get();
-
-  auto deletionLambda = [topLeftCorner,bottomRightCorner] (const std::unique_ptr<CourseObject>& a) -> bool
-  {
-    return a->x1() > topLeftCorner->x1() && bottomRightCorner->x1() > a->x1() && a->y1() > topLeftCorner->y1() && bottomRightCorner->y1() > a->y1();
-  };
-
-  std::erase_if(blackObjects_,deletionLambda);
-}
-
-void NavigationController::setRobotFrontFromBlack()
-{
-  if (blackObjects_.size() <= 1)
-  {
-    return;
-  }
-  auto xCompare = [](const std::unique_ptr<CourseObject>& a,const std::unique_ptr<CourseObject>& b)->bool
-  {
-    return a->x1() > b->x1();
-  };
-  auto yCompare = [](const std::unique_ptr<CourseObject>& a,const std::unique_ptr<CourseObject>& b)->bool
-  {
-    return a->y1() > b->y1();
-  };
-  auto minX = std::min_element(blackObjects_.begin(),blackObjects_.end(),xCompare)->get();
-  auto maxX = std::max_element(blackObjects_.begin(),blackObjects_.end(),xCompare)->get();
-
-  auto minY = std::min_element(blackObjects_.begin(),blackObjects_.end(),yCompare)->get();
-  auto maxY = std::max_element(blackObjects_.begin(),blackObjects_.end(),yCompare)->get();
-
-  const int x = maxX - minX;
-  const int y = maxY - minY;
-
-  robotFront_ = std::make_unique<CourseObject>(x,y,x,y,"robotFront");
 }
 
 void NavigationController::removeBallsOutsideCourse()
