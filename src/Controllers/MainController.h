@@ -14,8 +14,7 @@ class MainController
 public:
   static void init();
   static void mockInit();
-  static NavigationController* getNavController();
-  static void addCourseObject(std::unique_ptr<CourseObject>& courseObject);
+  static void addCourseObject(std::unique_ptr<CourseObject>&& courseObject);
   static const char* navigateAndSendCommand();
   static Command handleBallCollectionMotor(const JourneyModel* journey);
   static Command journeyToCommand(const JourneyModel* journey);
