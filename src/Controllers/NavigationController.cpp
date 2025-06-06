@@ -204,6 +204,10 @@ void NavigationController::removeBlackOutsideCourse()
 
 void NavigationController::setRobotFrontFromBlack()
 {
+  if (blackObjects_.size() <= 1)
+  {
+    return;
+  }
   auto xCompare = [](const std::unique_ptr<CourseObject>& a,const std::unique_ptr<CourseObject>& b)->bool
   {
     return a->x1() > b->x1();
