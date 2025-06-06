@@ -47,8 +47,8 @@ void MainController::navigateAndSendCommand()
 
   if (journey == nullptr)
   {
-    client_->sendCommand("s");
-    client_->sendCommand("s c");
+    client_->sendCommand("s\n");
+    client_->sendCommand("s c\n");
   }
 
   auto ballCollectionCommand = handleBallCollectionMotor(journey.get());
