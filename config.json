@@ -21,5 +21,7 @@
   "RobotBackOffsetY": 0,
   "DistanceBeforeTargetReached": 10,
   "RobotWidth": 50,
-  "TotalBalls": 5
+  "TotalBalls": 5,
+  "WallWidth": 10,
+  "OuterWallOffsetWhenSearchingForCross": 10
 }

@@ -18,6 +18,8 @@ public:
   static const char* navigateAndSendCommand();
   static Command handleBallCollectionMotor(const JourneyModel* journey);
   static Command journeyToCommand(const JourneyModel* journey);
+  static int findMaxValue(const int* cords, int size, int maxValueAllowed);
+  static int findMinValue(const int* cords, int size, int minValueAllowed);
 private:
   static inline std::unique_ptr<NavigationController> navigationController_ = nullptr;
   static inline bool isFirst_ = true;

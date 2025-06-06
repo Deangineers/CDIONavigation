@@ -120,3 +120,37 @@ Command MainController::journeyToCommand(const JourneyModel* journey)
   command.setAction("s");
   return command;
 }
+
+int MainController::findMaxValue(const int* cords, const int size, int maxValueAllowed)
+{
+  if (size == 0)
+  {
+    return -1;
+  }
+  int max = cords[0];
+  for (int i = 0; i < size; i++)
+  {
+    if (cords[i] > max && cords[i] < maxValueAllowed)
+    {
+      max = cords[i];
+    }
+  }
+  return max;
+}
+
+int MainController::findMinValue(const int* cords, int size, int minValueAllowed)
+{
+  if (size == 0)
+  {
+    return -1;
+  }
+  int min = cords[0];
+  for (int i = 0; i < size; i++)
+  {
+    if (cords[i] > min && cords[i] > minValueAllowed)
+    {
+      min = cords[i];
+    }
+  }
+  return min;
+}
