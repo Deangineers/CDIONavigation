@@ -43,7 +43,7 @@ void MainController::navigateAndSendCommand()
   auto msPassed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - startTime_).count();
   auto navMSPassed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - localStartTime).count();
   std::cout << "Time Passed since start of creating objects: "<< std::to_string(msPassed) << " ms\n" << std::endl;
-  std::cout << "Time in navigation: "<< std::to_string(navMSPassed) << " ms\n" << std::endl;
+  std::cout << "Time in navigation: "<< std::to_string(navMSPassed) << " ms\n";
 
   if (journey == nullptr)
   {
@@ -61,7 +61,7 @@ void MainController::navigateAndSendCommand()
   client_->sendBallCollectionCommand(ballCollectionCommand.formatToSend());
 
   navMSPassed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - localStartTime).count();
-  std::cout << "Time spent sending command using client: "<< std::to_string(navMSPassed) << " ms\n" << std::endl;
+  std::cout << "Time spent sending command using client: "<< std::to_string(navMSPassed) << " ms\n";
 }
 
 Command MainController::handleBallCollectionMotor(const JourneyModel* journey)
