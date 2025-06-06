@@ -9,7 +9,7 @@ extern "C"
     MainController::init();
   }
 
-  void mockInit()
+  void mockinit()
   {
     MainController::mockInit();
   }
