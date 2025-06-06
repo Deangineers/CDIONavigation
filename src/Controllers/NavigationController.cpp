@@ -125,8 +125,8 @@ void NavigationController::addCourseObject(std::unique_ptr<CourseObject>&& cours
     int x2 = courseObject->x2() + ConfigController::getConfigInt("RobotFrontOffsetX");
     int y2 = courseObject->y2() + ConfigController::getConfigInt("RobotFrontOffsetY");
 
-    x1 = x2-x1;
-    y1 = y2-y1;
+    x1 += x2-x1;
+    y1 += y2-y1;
 
     robotFront_ = std::make_unique<CourseObject>(x1,y1,x1,y1,"robotFront");
   }
@@ -137,8 +137,8 @@ void NavigationController::addCourseObject(std::unique_ptr<CourseObject>&& cours
     int x2 = courseObject->x2() + ConfigController::getConfigInt("RobotBackOffsetX");
     int y2 = courseObject->y2() + ConfigController::getConfigInt("RobotBackOffsetY");
 
-    x1 = x2-x1;
-    y1 = y2-y1;
+    x1 += x2-x1;
+    y1 += y2-y1;
 
     robotBack_ = std::make_unique<CourseObject>(x1,y1,x1,y1,"robotBack");
   }
