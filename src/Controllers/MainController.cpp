@@ -27,10 +27,26 @@ NavigationController* MainController::getNavController()
   return navigationController_.get();
 }
 
+void MainController::addCourseObject(std::unique_ptr<CourseObject>& courseObject)
+{
+  if (isFirst_)
+  {
+    startTime_ = std::chrono::high_resolution_clock::now();
+  }
+  isFirst_ = false;
+  navigationController_->addCourseObject(std::move(courseObject));
+}
+
 const char* MainController::navigateAndSendCommand()
 {
   auto journey = navigationController_->calculateDegreesAndDistanceToObject();
   navigationController_->clearObjects();
+  isFirst_ = true;
+  auto timePassed = std::chrono::high_resolution_clock::now() - startTime_;
+  auto msPassed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - startTime_).count();
+  std::cout << "//\nTime Passed since start of creating objects: "<< std::to_string(msPassed) << " ms\n" << std::endl;
+
+
   if (journey == nullptr)
   {
     return "";

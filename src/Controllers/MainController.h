@@ -15,11 +15,14 @@ public:
   static void init();
   static void mockInit();
   static NavigationController* getNavController();
+  static void addCourseObject(std::unique_ptr<CourseObject>& courseObject);
   static const char* navigateAndSendCommand();
   static Command handleBallCollectionMotor(const JourneyModel* journey);
   static Command journeyToCommand(const JourneyModel* journey);
 private:
   static inline std::unique_ptr<NavigationController> navigationController_ = nullptr;
+  static inline bool isFirst_ = true;
+  static inline std::chrono::time_point<std::chrono::high_resolution_clock> startTime_;
 };
 
 
