@@ -56,7 +56,7 @@ void MainController::navigateAndSendCommand()
   client_->sendCommand(ballCollectionCommand.formatToSend());
   client_->sendCommand(navigationCommand.formatToSend());
   navMSPassed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - localStartTime).count();
-  std::cout << "Time sending using client: "<< std::to_string(navMSPassed) << " ms\n" << std::endl;
+  std::cout << "Time spent sending command using client: "<< std::to_string(navMSPassed) << " ms\n" << std::endl;
 }
 
 Command MainController::handleBallCollectionMotor(const JourneyModel* journey)

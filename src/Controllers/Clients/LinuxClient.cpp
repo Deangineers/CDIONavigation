@@ -9,6 +9,7 @@
 #include <sys/socket.h>
 #include <fstream>
 #include <string>
+#include <thread>
 
 #include "Utility/ConfigController.h"
 
@@ -45,6 +46,7 @@ void LinuxClient::connectToServer()
 
 void LinuxClient::sendCommand(const std::string& command) const
 {
+  std::this_thread::sleep_for(std::chrono::milliseconds(10));
   ssize_t bytesSent = send(serverSocket, command.c_str(), command.size(), 0);
   if (bytesSent < 0) {
     std::cerr << "Failed to send command\n";
