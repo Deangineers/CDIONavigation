@@ -13,12 +13,14 @@
 void MainController::init()
 {
   ConfigController::loadConfig("config.json");
+  client_ = std::make_unique<LinuxClient>();
   navigationController_ = std::make_unique<NavigationController>();
 }
 
 void MainController::mockInit()
 {
   ConfigController::loadConfig("config.json");
+  client_ = std::make_unique<MockClient>();
   navigationController_ = std::make_unique<NavigationController>();
 }
 
