@@ -53,6 +53,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
       return nullptr;
     }
 
+    std::cout << objectToPathTowards->x1() << "," << objectToPathTowards->y1() << std::endl;
     auto courseObject = std::make_unique<CourseObject>(currentX_,currentY_,currentX_,currentY_,"");
     objectVector = calculateVectorToObject(objectToPathTowards);
     while (checkCollisionOnRoute(objectToPathTowards, objectVector))
