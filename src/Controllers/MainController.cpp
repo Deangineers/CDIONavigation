@@ -53,8 +53,6 @@ void MainController::navigateAndSendCommand()
 
   client_->sendCommandAndAddNewLine(ballCollectionCommand.formatToSend());
   client_->sendCommandAndAddNewLine(journeyToCommand(journey.get()));
-
-  std::this_thread::sleep_for(std::chrono::seconds(5));
 }
 
 Command MainController::handleBallCollectionMotor(const JourneyModel* journey)
