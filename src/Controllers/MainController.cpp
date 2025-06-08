@@ -86,11 +86,11 @@ std::string MainController::journeyToCommand(const JourneyModel* journey)
   {
     if (journey->angle > 0)
     {
-      command << "r";
+      command << "l";
     }
     else
     {
-      command << "l";
+      command << "r";
     }
     command << " ";
     int maxAngleBeforeSlowingDown = ConfigController::getConfigInt("MaxAngleBeforeSlowingDown");
@@ -103,7 +103,7 @@ std::string MainController::journeyToCommand(const JourneyModel* journey)
       command << std::to_string(ConfigController::getConfigInt("RotationFastSpeed"));
     }
     command << " ";
-    command << std::to_string(journey->angle);
+    command << std::to_string(std::abs(journey->angle));
     return command.str();
   }
 
