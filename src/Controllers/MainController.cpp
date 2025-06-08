@@ -4,6 +4,8 @@
 
 #include "MainController.h"
 
+#include <sstream>
+
 #include "../Models/Command.h"
 #include "../Models/JourneyModel.h"
 #include "Clients/LinuxClient.h"
@@ -36,38 +38,26 @@ void MainController::addCourseObject(std::unique_ptr<CourseObject>&& courseObjec
 
 void MainController::navigateAndSendCommand()
 {
-  auto localStartTime = std::chrono::high_resolution_clock::now();
   auto journey = navigationController_->calculateDegreesAndDistanceToObject();
   navigationController_->clearObjects();
   isFirst_ = true;
-  auto msPassed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - startTime_).count();
-  auto navMSPassed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - localStartTime).count();
-  std::cout << "Time Passed since start of creating objects: "<< std::to_string(msPassed) << " ms\n" << std::endl;
-  std::cout << "Time in navigation: "<< std::to_string(navMSPassed) << " ms\n";
 
   if (journey == nullptr)
   {
-    client_->sendMovementCommand("s");
-    client_->sendBallCollectionCommand("s c");
     return;
   }
 
   auto navigationCommand = journeyToCommand(journey.get());
   auto ballCollectionCommand = handleBallCollectionMotor(journey.get());
 
-  localStartTime = std::chrono::high_resolution_clock::now();
-
-  client_->sendMovementCommand(navigationCommand.formatToSend());
-  client_->sendBallCollectionCommand(ballCollectionCommand.formatToSend());
-
-  navMSPassed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - localStartTime).count();
-  std::cout << "Time spent sending command using client: "<< std::to_string(navMSPassed) << " ms\n";
+  client_->sendCommandAndAddNewLine(journeyToCommand(journey.get()));
+  client_->sendCommandAndAddNewLine(ballCollectionCommand.formatToSend());
 }
 
 Command MainController::handleBallCollectionMotor(const JourneyModel* journey)
 {
   Command command;
-  command.setMotor("c");
+  command.setMotor("");
 
   if (journey->distance < ConfigController::getConfigInt("DistanceBeforeBallCollection"))
   {
@@ -82,53 +72,59 @@ Command MainController::handleBallCollectionMotor(const JourneyModel* journey)
   }
   else
   {
+    command.setMotor("c");
     command.setAction("s");
   }
   return command;
 }
 
-Command MainController::journeyToCommand(const JourneyModel* journey)
+std::string MainController::journeyToCommand(const JourneyModel* journey)
 {
-  Command command;
+  std::stringstream command;
   int allowedAngleDiff = ConfigController::getConfigInt("AllowedAngleDifference");
   if ( journey->angle > allowedAngleDiff || journey->angle < -allowedAngleDiff)
   {
     if (journey->angle > 0)
     {
-      command.setAction("r");
+      command << "r";
     }
     else
     {
-      command.setAction("l");
+      command << "l";
     }
+    command << " ";
     int maxAngleBeforeSlowingDown = ConfigController::getConfigInt("MaxAngleBeforeSlowingDown");
     if (journey->angle > - maxAngleBeforeSlowingDown && journey->angle < maxAngleBeforeSlowingDown)
     {
-      command.setSpeed(ConfigController::getConfigInt("RotationSlowSpeed"));
+      command << std::to_string(ConfigController::getConfigInt("RotationSlowSpeed"));
     }
     else
     {
-      command.setSpeed(ConfigController::getConfigInt("RotationFastSpeed"));
+      command << std::to_string(ConfigController::getConfigInt("RotationFastSpeed"));
     }
-    return command;
+    command << " ";
+    command << std::to_string(journey->angle);
+    return command.str();
   }
 
   if (journey->distance > 0.0)
   {
-    command.setAction("f");
+    command << "f ";
 
     if (journey->distance < 30.0)
     {
-      command.setSpeed(ConfigController::getConfigInt("ForwardFastSpeed"));
+      command << std::to_string(ConfigController::getConfigInt("ForwardFastSpeed"));
     }
     else
     {
-      command.setSpeed(ConfigController::getConfigInt("ForwardSlowSpeed"));
+      command << std::to_string(ConfigController::getConfigInt("ForwardSlowSpeed"));
     }
-    return command;
+    command << " ";
+    command << std::to_string(journey->distance);
+    return command.str();
   }
-  command.setAction("s");
-  return command;
+  command << "s";
+  return command.str();
 }
 
 int MainController::findMaxValue(const int* cords, const int size, int maxValueAllowed)

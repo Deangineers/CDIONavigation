@@ -18,22 +18,9 @@ LinuxClient::LinuxClient()
   LinuxClient::connectToServer();
 }
 
-void LinuxClient::sendBallCollectionCommand(const std::string& command)
+void LinuxClient::sendCommandAndAddNewLine(const std::string& command)
 {
-  if (command != lastSentBallCommand_)
-  {
-    sendCommand(command + "\n");
-    lastSentBallCommand_ = command;
-  }
-}
-
-void LinuxClient::sendMovementCommand(const std::string& command)
-{
-  if (command != lastSentMovementCommand_)
-  {
-    sendCommand(command + "\n");
-    lastSentMovementCommand_ = command;
-  }
+  sendCommand(command + "\n");
 }
 
 void LinuxClient::connectToServer()

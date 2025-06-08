@@ -23,5 +23,6 @@
   "RobotWidth": 50,
   "TotalBalls": 5,
   "WallWidth": 10,
-  "OuterWallOffsetWhenSearchingForCross": 10
+  "OuterWallOffsetWhenSearchingForCross": 10,
+  "RobotLengthInMM": 20
 }

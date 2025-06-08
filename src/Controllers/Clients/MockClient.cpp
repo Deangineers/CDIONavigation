@@ -9,12 +9,7 @@ MockClient::MockClient()
   MockClient::connectToServer();
 }
 
-void MockClient::sendBallCollectionCommand(const std::string& command)
-{
-  std::cout << command << "\n";
-}
-
-void MockClient::sendMovementCommand(const std::string& command)
+void MockClient::sendCommandAndAddNewLine(const std::string& command)
 {
   std::cout << command << "\n";
 }

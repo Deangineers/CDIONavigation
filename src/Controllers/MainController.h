@@ -17,7 +17,7 @@ public:
   static void addCourseObject(std::unique_ptr<CourseObject>&& courseObject);
   static void navigateAndSendCommand();
   static Command handleBallCollectionMotor(const JourneyModel* journey);
-  static Command journeyToCommand(const JourneyModel* journey);
+  static std::string journeyToCommand(const JourneyModel* journey);
   static int findMaxValue(const int* cords, int size, int maxValueAllowed);
   static int findMinValue(const int* cords, int size, int minValueAllowed);
 private:

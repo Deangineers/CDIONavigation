@@ -13,8 +13,7 @@ class IClient
 {
 public:
   virtual ~IClient() = default;
-  virtual void sendMovementCommand(const std::string& command) = 0;
-  virtual void sendBallCollectionCommand(const std::string& command) = 0;
+  virtual void sendCommandAndAddNewLine(const std::string& command) = 0;
   virtual void connectToServer() = 0;
 protected:
   int serverSocket = 0;
