@@ -50,30 +50,21 @@ void MainController::navigateAndSendCommand()
   auto navigationCommand = journeyToCommand(journey.get());
   auto ballCollectionCommand = handleBallCollectionMotor(journey.get());
 
-  client_->sendCommandAndAddNewLine(journeyToCommand(journey.get()));
   client_->sendCommandAndAddNewLine(ballCollectionCommand.formatToSend());
+  client_->sendCommandAndAddNewLine(journeyToCommand(journey.get()));
 }
 
 Command MainController::handleBallCollectionMotor(const JourneyModel* journey)
 {
   Command command;
   command.setMotor("");
-
-  if (journey->distance < ConfigController::getConfigInt("DistanceBeforeBallCollection"))
+  if (journey->collectBalls)
   {
-    if (journey->collectBalls)
-    {
-      command.setAction("in");
-    }
-    else
-    {
-      command.setAction("out");
-    }
+    command.setAction("in");
   }
   else
   {
-    command.setMotor("c");
-    command.setAction("s");
+    command.setAction("out");
   }
   return command;
 }
