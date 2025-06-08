@@ -5,6 +5,7 @@
 #include "MainController.h"
 
 #include <sstream>
+#include <thread>
 
 #include "../Models/Command.h"
 #include "../Models/JourneyModel.h"
@@ -52,6 +53,8 @@ void MainController::navigateAndSendCommand()
 
   client_->sendCommandAndAddNewLine(ballCollectionCommand.formatToSend());
   client_->sendCommandAndAddNewLine(journeyToCommand(journey.get()));
+
+  std::this_thread::sleep_for(std::chrono::seconds(5));
 }
 
 Command MainController::handleBallCollectionMotor(const JourneyModel* journey)
