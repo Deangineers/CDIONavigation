@@ -4,6 +4,7 @@
 
 #include "NavigationController.h"
 
+#include <algorithm>
 #include <iostream>
 
 #include "../Models/JourneyModel.h"
