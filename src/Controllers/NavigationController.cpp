@@ -87,7 +87,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
 {
   if (robotFront_ == nullptr || robotBack_ == nullptr)
   {
-    std::cout << "No Robot\n";
+    Utility::appendToFile("log.txt", "No Robot");
     return nullptr;
   }
   bool toCollectBalls = true;
@@ -125,7 +125,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     handleCollision(&objectToPathTowards);
     if (objectToPathTowards == nullptr)
     {
-      std::cout << "ObjectToPathTowards was nullptr\n";
+      Utility::appendToFile("log.txt", "objectToPathTowards was nullptr");
       return nullptr;
     }
 
@@ -156,6 +156,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     objectVector.first * objectVector.first + objectVector.second * objectVector.second);
   if (distanceToObject < ConfigController::getConfigInt("DistanceBeforeTargetReached"))
   {
+    Utility::appendToFile("log.txt", "Close to target, courseObject_ = nullptr");
     courseObject_ = nullptr;
   }
   auto vectorToRobotBack = MathUtil::calculateVectorToObject(robotFront_.get(), robotBack_.get());
