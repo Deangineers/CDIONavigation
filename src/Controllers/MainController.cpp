@@ -69,7 +69,7 @@ std::string MainController::journeyToCommand(const JourneyModel* journey)
 {
   std::stringstream command;
   int allowedAngleDiff = ConfigController::getConfigInt("AllowedAngleDifference");
-  if ( journey->angle > allowedAngleDiff || journey->angle < -allowedAngleDiff)
+  if (journey->angle > allowedAngleDiff || journey->angle < -allowedAngleDiff)
   {
     if (journey->angle > 0)
     {
@@ -81,7 +81,7 @@ std::string MainController::journeyToCommand(const JourneyModel* journey)
     }
     command << " ";
     int maxAngleBeforeSlowingDown = ConfigController::getConfigInt("MaxAngleBeforeSlowingDown");
-    if (journey->angle > - maxAngleBeforeSlowingDown && journey->angle < maxAngleBeforeSlowingDown)
+    if (journey->angle > -maxAngleBeforeSlowingDown && journey->angle < maxAngleBeforeSlowingDown)
     {
       command << std::to_string(ConfigController::getConfigInt("RotationSlowSpeed"));
     }
@@ -107,14 +107,7 @@ std::string MainController::journeyToCommand(const JourneyModel* journey)
       command << std::to_string(ConfigController::getConfigInt("ForwardSlowSpeed"));
     }
     command << " ";
-    if (journey->distance < 25.0)
-    {
-      command << "20";
-    }
-    else
-    {
-      command << std::to_string(journey->distance);
-    }
+    command << std::to_string(journey->distance);
     return command.str();
   }
   command << "s";
