@@ -80,6 +80,7 @@ void LinuxClient::sendCommand()
     ssize_t bytesReceived = recv(serverSocket, buffer, 1024, 0);
     if (bytesReceived > 0)
     {
+      commandToSend_ = "";
     }
   }
 }
