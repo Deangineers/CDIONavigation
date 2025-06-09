@@ -44,7 +44,8 @@ void LinuxClient::sendBallCollectionCommand(const std::string& command)
 void LinuxClient::connectToServer()
 {
   serverSocket = socket(AF_INET, SOCK_STREAM, 0);
-  if (serverSocket < 0) {
+  if (serverSocket < 0)
+  {
     std::cerr << "Failed to create socket\n";
     exit(EXIT_FAILURE);
   }
@@ -54,12 +55,14 @@ void LinuxClient::connectToServer()
   serverAddr.sin_port = htons(ConfigController::getConfigInt("RobotPort"));
   const std::string ip = ConfigController::getConfigString("RobotIP");
 
-  if (inet_pton(AF_INET, ip.c_str(), &serverAddr.sin_addr) <= 0) {
+  if (inet_pton(AF_INET, ip.c_str(), &serverAddr.sin_addr) <= 0)
+  {
     std::cerr << "Invalid address / Address not supported\n";
     exit(EXIT_FAILURE);
   }
 
-  if (connect(serverSocket, reinterpret_cast<sockaddr*>(&serverAddr), sizeof(serverAddr)) < 0) {
+  if (connect(serverSocket, reinterpret_cast<sockaddr*>(&serverAddr), sizeof(serverAddr)) < 0)
+  {
     std::cerr << "Connection failed\n";
     exit(EXIT_FAILURE);
   }
@@ -81,9 +84,12 @@ void LinuxClient::sendCommand()
 
 
     ssize_t bytesSent = send(serverSocket, commandToSend_.c_str(), commandToSend_.size(), 0);
-    if (bytesSent < 0) {
+    if (bytesSent < 0)
+    {
       std::cerr << "Failed to send command\n";
-    } else {
+    }
+    else
+    {
       std::cout << "Sent: " << commandToSend_;
     }
     commandToSend_ = "";
@@ -94,6 +100,8 @@ void LinuxClient::sendCommand()
     if (bytesReceived > 0)
     {
       commandToSend_ = "";
+      std::cout << "Received: " << bytesReceived;
     }
+    std::cout << "Done with Sending\n";
   }
 }
