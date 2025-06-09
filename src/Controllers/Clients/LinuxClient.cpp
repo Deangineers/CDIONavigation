@@ -60,12 +60,13 @@ void LinuxClient::sendCommand()
 {
   while (keepRunning_)
   {
+    std::unique_lock lock(mutex_);
     if (commandToSend_.empty())
     {
+      lock.unlock();
       std::this_thread::sleep_for(std::chrono::milliseconds(500));
       continue;
     }
-    std::unique_lock lock(mutex_);
     ssize_t bytesSent = send(serverSocket, commandToSend_.c_str(), commandToSend_.size(), 0);
     if (bytesSent < 0) {
       std::cerr << "Failed to send command\n";
