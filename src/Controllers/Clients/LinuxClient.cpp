@@ -92,7 +92,7 @@ void LinuxClient::sendCommand()
     }
     else
     {
-      Utility::appendToFile("log.txt", "Sent: " + commandToSend_ + "\n");
+      Utility::appendToFile("log.txt", "\n//\n// Sent: " + commandToSend_ + "\n//\n");
     }
     commandToSend_ = "";
 
