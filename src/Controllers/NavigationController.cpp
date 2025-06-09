@@ -159,7 +159,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     courseObject_ = nullptr;
   }
   auto vectorToRobotBack = MathUtil::calculateVectorToObject(robotFront_.get(), robotBack_.get());
-  double distanceInCm = distanceToObject * (ConfigController::getConfigInt("RobotLengthInMM") / std::sqrt(
+  double distanceInCm = distanceToObject * ((ConfigController::getConfigInt("RobotLengthInMM")/10) / std::sqrt(
     vectorToRobotBack.first * vectorToRobotBack.first + vectorToRobotBack.second * vectorToRobotBack.second));
   return std::make_unique<JourneyModel>(distanceInCm, angle, toCollectBalls);
 }
