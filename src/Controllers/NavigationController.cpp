@@ -129,17 +129,6 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
       return nullptr;
     }
 
-    Utility::appendToFile(
-      "log.txt",
-      "Target: " + objectToPathTowards->name() + " " + std::to_string(objectToPathTowards->x1()) + ", " +
-      std::to_string(objectToPathTowards->y1()) + "\n");
-    Utility::appendToFile(
-      "log.txt",
-      robotFront_->name() + ": " + std::to_string(robotFront_->x1()) + ", " + std::to_string(robotFront_->y1()) + "\n");
-    Utility::appendToFile(
-      "log.txt",
-      robotBack_->name() + ": " + std::to_string(robotBack_->x1()) + ", " + std::to_string(robotBack_->y1()) + "\n");
-
     auto courseObject = std::make_unique<CourseObject>(currentX_, currentY_, currentX_, currentY_, "");
     objectVector = MathUtil::calculateVectorToObject(robotFront_.get(), objectToPathTowards);
   }
@@ -147,6 +136,20 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   {
     objectVector = MathUtil::calculateVectorToObject(robotFront_.get(), courseObject_.get());
   }
+  if (objectToPathTowards == nullptr)
+  {
+    return nullptr;
+  }
+  Utility::appendToFile(
+    "log.txt",
+    "Target: " + objectToPathTowards->name() + " " + std::to_string(objectToPathTowards->x1()) + ", " +
+    std::to_string(objectToPathTowards->y1()) + "\n");
+  Utility::appendToFile(
+    "log.txt",
+    robotFront_->name() + ": " + std::to_string(robotFront_->x1()) + ", " + std::to_string(robotFront_->y1()) + "\n");
+  Utility::appendToFile(
+    "log.txt",
+    robotBack_->name() + ": " + std::to_string(robotBack_->x1()) + ", " + std::to_string(robotBack_->y1()) + "\n");
   const std::pair robotVector = {robotFront_->x1() - robotBack_->x1(), robotFront_->y1() - robotBack_->y1()};
   const double angle = MathUtil::calculateAngleDifferenceBetweenVectors(robotVector, objectVector);
   const double distanceToObject = std::sqrt(
