@@ -138,6 +138,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   }
   if (objectToPathTowards == nullptr)
   {
+    Utility::appendToFile("log.txt", "ObjectToPathTowardsIsNullptr");
     return nullptr;
   }
   Utility::appendToFile(
