@@ -47,7 +47,7 @@ void MainController::navigateAndSendCommand()
   auto navigationCommand = journeyToCommand(journey.get());
   auto ballCollectionCommand = handleBallCollectionMotor(journey.get());
 
-  client_->sendCommandAndAddNewLine(journeyToCommand(journey.get()) + ballCollectionCommand.formatToSend());
+  client_->sendCommandAndAddNewLine(journeyToCommand(journey.get()) + " " + ballCollectionCommand.formatToSend());
 }
 
 Command MainController::handleBallCollectionMotor(const JourneyModel* journey)
