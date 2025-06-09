@@ -44,7 +44,8 @@ void MainController::navigateAndSendCommand()
     return;
   }
   Utility::appendToFile(
-    "log.txt", "Journey: " + std::to_string(std::abs(journey->angle)) + ", " + std::to_string(journey->distance));
+    "log.txt",
+    "Journey: " + std::to_string(std::abs(journey->angle)) + ", " + std::to_string(journey->distance) + "\n");
 
   auto navigationCommand = journeyToCommand(journey.get());
   auto ballCollectionCommand = handleBallCollectionMotor(journey.get());
