@@ -232,14 +232,14 @@ CourseObject* NavigationController::findClosestBall() const
 
 void NavigationController::handleCollision(CourseObject** objectToPathTowards)
 {
-  auto courseObject = std::make_unique<CourseObject>(currentX_, currentY_, currentX_, currentY_, "");
-  auto objectVector = MathUtil::calculateVectorToObject(robotFront_.get(), courseObject.get());
+  courseObject_ = std::make_unique<CourseObject>(currentX_, currentY_, currentX_, currentY_, "");
+  auto objectVector = MathUtil::calculateVectorToObject(robotFront_.get(), courseObject_.get());
   while (checkCollisionOnRoute(*objectToPathTowards, objectVector))
   {
     std::cout << "Collision Detected, ignoring for now\n";
-    courseObject = std::make_unique<CourseObject>(currentX_, currentY_, currentX_, currentY_, "");
-    *objectToPathTowards = courseObject.get();
-    objectVector = MathUtil::calculateVectorToObject(robotFront_.get(), courseObject.get());
+    courseObject_ = std::make_unique<CourseObject>(currentX_, currentY_, currentX_, currentY_, "");
+    *objectToPathTowards = courseObject_.get();
+    objectVector = MathUtil::calculateVectorToObject(robotFront_.get(), courseObject_.get());
     if (currentX_ == ConfigController::getConfigInt("safeXLeft") && currentY_ ==
       ConfigController::getConfigInt("safeYTop"))
     {
@@ -273,11 +273,11 @@ void NavigationController::handleCollision(CourseObject** objectToPathTowards)
     {
       currentX_--;
     }
-    courseObject_ = std::move(courseObject);
   }
   courseObject_ = std::make_unique<CourseObject>((*objectToPathTowards)->x1(), (*objectToPathTowards)->y1(),
                                                  (*objectToPathTowards)->x2(), (*objectToPathTowards)->y2(),
                                                  (*objectToPathTowards)->name());
+  *objectToPathTowards = courseObject_.get();
 }
 
 bool NavigationController::checkCollisionOnRoute(const CourseObject* target,
