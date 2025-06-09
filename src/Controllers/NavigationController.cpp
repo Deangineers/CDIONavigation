@@ -238,7 +238,7 @@ void NavigationController::handleCollision(CourseObject** objectToPathTowards)
   while (checkCollisionOnRoute(*objectToPathTowards, objectVector))
   {
     std::cout << "Collision Detected, ignoring for now\n";
-    courseObject_ = std::make_unique<CourseObject>(currentX_, currentY_, currentX_, currentY_, courseObject_->name());
+    courseObject_ = std::make_unique<CourseObject>(currentX_, currentY_, currentX_, currentY_, "safeSpot");
     *objectToPathTowards = courseObject_.get();
     objectVector = MathUtil::calculateVectorToObject(robotFront_.get(), courseObject_.get());
     if (currentX_ == ConfigController::getConfigInt("safeXLeft") && currentY_ ==
