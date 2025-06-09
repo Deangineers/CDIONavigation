@@ -108,7 +108,14 @@ std::string MainController::journeyToCommand(const JourneyModel* journey)
       command << std::to_string(ConfigController::getConfigInt("ForwardSlowSpeed"));
     }
     command << " ";
-    command << std::to_string(journey->distance);
+    if (journey->distance < 25.0)
+    {
+      command << "20";
+    }
+    else
+    {
+      command << std::to_string(journey->distance);
+    }
     return command.str();
   }
   command << "s";
