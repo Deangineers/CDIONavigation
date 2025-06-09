@@ -78,15 +78,19 @@ void LinuxClient::sendCommand()
       std::this_thread::sleep_for(std::chrono::milliseconds(500));
       continue;
     }
-    ssize_t bytesSent = send(serverSocket, ballCollectionCommand_.c_str(), ballCollectionCommand_.size(), 0);
-    if (bytesSent < 0) {
-      std::cerr << "Failed to send command\n";
-    } else {
-      std::cout << "Sent: " << ballCollectionCommand_;
+    if (not ballCollectionCommand_.empty())
+    {
+      ssize_t bytesSent = send(serverSocket, ballCollectionCommand_.c_str(), ballCollectionCommand_.size(), 0);
+      if (bytesSent < 0) {
+        std::cerr << "Failed to send command\n";
+      } else {
+        std::cout << "Sent: " << ballCollectionCommand_;
+      }
+      ballCollectionCommand_ = "";
     }
-    ballCollectionCommand_ = "";
 
-    bytesSent = send(serverSocket, commandToSend_.c_str(), commandToSend_.size(), 0);
+
+    ssize_t bytesSent = send(serverSocket, commandToSend_.c_str(), commandToSend_.size(), 0);
     if (bytesSent < 0) {
       std::cerr << "Failed to send command\n";
     } else {
