@@ -57,11 +57,4 @@ void LinuxClient::sendCommand(const std::string& command) const
   } else {
     std::cout << "Sent: " << command;
   }
-
-  char buffer[1024] = {0};
-  ssize_t bytesReceived = recv(serverSocket, buffer, 1024, 0);
-  if (bytesReceived > 0)
-  {
-    std::cout << "Received: " << buffer;
-  }
 }
