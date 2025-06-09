@@ -16,7 +16,7 @@
 LinuxClient::LinuxClient() : commandToSend_(""), keepRunning_(true)
 {
   LinuxClient::connectToServer();
-  LinuxClient::sendBallCollectionCommand("in");
+  LinuxClient::sendBallCollectionCommand("in\n");
   sendThread_ = std::thread(&LinuxClient::sendCommand, this);
 }
 
