@@ -258,7 +258,10 @@ std::pair<int, int> NavigationController::calculateVectorToObject(const CourseOb
   const int middleX = std::max(courseObject->x1() - objectWidth, courseObject->x2() - objectWidth);
   const int middleY = std::max(courseObject->y1() - objectLength, courseObject->y2() - objectLength);
 
-  return std::make_pair(middleX - robotFront_->x1(), middleY - robotFront_->y1());
+  const int middleRobotX = robotFront_->x1() - (robotFront_->x1() - robotBack_->x1());
+  const int middleRobotY = robotFront_->y1() - (robotFront_->y1() - robotBack_->y1());
+
+  return std::make_pair(middleX - middleRobotX, middleY - middleRobotY);
 }
 
 double NavigationController::calculateAngleDifferenceBetweenVectors(const std::pair<int, int>& firstVector,
