@@ -86,7 +86,6 @@ void LinuxClient::sendCommand()
       } else {
         std::cout << "Sent: " << ballCollectionCommand_;
       }
-      ballCollectionCommand_ = "";
     }
 
 
