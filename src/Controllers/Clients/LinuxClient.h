@@ -15,10 +15,12 @@ public:
   LinuxClient();
   ~LinuxClient() override;
   void sendCommandAndAddNewLine(const std::string& command) override;
+  void sendBallCollectionCommand(const std::string& command) override;
 private:
   void connectToServer() override;
   void sendCommand();
   std::string commandToSend_;
+  std::string ballCollectionCommand_;
   std::mutex mutex_;
   std::thread sendThread_;
   bool keepRunning_;

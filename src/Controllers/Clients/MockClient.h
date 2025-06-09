@@ -12,6 +12,7 @@ class MockClient : public IClient
 public:
   MockClient();
   void sendCommandAndAddNewLine(const std::string& command) override;
+  void sendBallCollectionCommand(const std::string& command) override;
 private:
   void connectToServer() override;
 };

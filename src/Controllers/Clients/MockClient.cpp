@@ -14,6 +14,11 @@ void MockClient::sendCommandAndAddNewLine(const std::string& command)
   std::cout << command << "\n";
 }
 
+void MockClient::sendBallCollectionCommand(const std::string& command)
+{
+  std::cout << command << "\n";
+}
+
 void MockClient::connectToServer()
 {
   std::cout << "Connected Using Mock Client\n";

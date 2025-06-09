@@ -30,6 +30,16 @@ void LinuxClient::sendCommandAndAddNewLine(const std::string& command)
   commandToSend_ = command + "\n";
 }
 
+void LinuxClient::sendBallCollectionCommand(const std::string& command)
+{
+  ssize_t bytesSent = send(serverSocket, command.c_str(), command.size(), 0);
+  if (bytesSent < 0) {
+    std::cerr << "Failed to send command\n";
+  } else {
+    std::cout << "Sent BC: " << command;
+  }
+}
+
 void LinuxClient::connectToServer()
 {
   serverSocket = socket(AF_INET, SOCK_STREAM, 0);
