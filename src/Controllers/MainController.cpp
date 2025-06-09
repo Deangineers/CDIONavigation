@@ -29,11 +29,6 @@ void MainController::mockInit()
 
 void MainController::addCourseObject(std::unique_ptr<CourseObject>&& courseObject)
 {
-  if (isFirst_)
-  {
-    startTime_ = std::chrono::high_resolution_clock::now();
-  }
-  isFirst_ = false;
   navigationController_->addCourseObject(std::move(courseObject));
 }
 
@@ -41,7 +36,6 @@ void MainController::navigateAndSendCommand()
 {
   auto journey = navigationController_->calculateDegreesAndDistanceToObject();
   navigationController_->clearObjects();
-  isFirst_ = true;
 
   if (journey == nullptr)
   {

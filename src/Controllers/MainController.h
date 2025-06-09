@@ -23,8 +23,6 @@ public:
 private:
   static inline std::unique_ptr<NavigationController> navigationController_ = nullptr;
   static inline std::unique_ptr<IClient> client_ = nullptr;
-  static inline bool isFirst_ = true;
-  static inline std::chrono::time_point<std::chrono::high_resolution_clock> startTime_;
 };
 
 
