@@ -13,14 +13,21 @@
 
 #include "Utility/ConfigController.h"
 
-LinuxClient::LinuxClient()
+LinuxClient::LinuxClient() : commandToSend_(""), keepRunning_(true)
 {
   LinuxClient::connectToServer();
+  sendThread_ = std::thread(&LinuxClient::sendCommand, this);
+}
+
+LinuxClient::~LinuxClient()
+{
+  keepRunning_ = false;
 }
 
 void LinuxClient::sendCommandAndAddNewLine(const std::string& command)
 {
-  sendCommand(command + "\n");
+  std::lock_guard lock(mutex_);
+  commandToSend_ = command + "\n";
 }
 
 void LinuxClient::connectToServer()
@@ -49,12 +56,24 @@ void LinuxClient::connectToServer()
   std::cout << "Connected using LinuxClient.\n";
 }
 
-void LinuxClient::sendCommand(const std::string& command) const
+void LinuxClient::sendCommand()
 {
-  ssize_t bytesSent = send(serverSocket, command.c_str(), command.size(), 0);
-  if (bytesSent < 0) {
-    std::cerr << "Failed to send command\n";
-  } else {
-    std::cout << "Sent: " << command;
+  while (keepRunning_)
+  {
+    std::unique_lock lock(mutex_);
+    ssize_t bytesSent = send(serverSocket, commandToSend_.c_str(), commandToSend_.size(), 0);
+    if (bytesSent < 0) {
+      std::cerr << "Failed to send command\n";
+    } else {
+      std::cout << "Sent: " << commandToSend_;
+    }
+    commandToSend_ = "";
+
+    lock.unlock();
+    char buffer[1024] = {0};
+    ssize_t bytesReceived = recv(serverSocket, buffer, 1024, 0);
+    if (bytesReceived > 0)
+    {
+    }
   }
 }
