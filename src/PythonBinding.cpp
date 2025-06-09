@@ -1,3 +1,5 @@
+#include <thread>
+
 #include "Controllers/MainController.h"
 #include "Controllers/NavigationController.h"
 
