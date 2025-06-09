@@ -45,6 +45,7 @@ void MainController::navigateAndSendCommand()
 
   if (journey == nullptr)
   {
+    std::cout << "Journey was nullptr\n";
     return;
   }
 
