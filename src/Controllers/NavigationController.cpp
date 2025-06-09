@@ -130,7 +130,9 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     }
 
     Utility::appendToFile(
-      "log.txt", "Target: " + objectToPathTowards->name() + " " + std::to_string(objectToPathTowards->x1()) + "\n");
+      "log.txt",
+      "Target: " + objectToPathTowards->name() + " " + std::to_string(objectToPathTowards->x1()) + ", " +
+      std::to_string(objectToPathTowards->y1()) + "\n");
     Utility::appendToFile(
       "log.txt",
       robotFront_->name() + ": " + std::to_string(robotFront_->x1()) + ", " + std::to_string(robotFront_->y1()) + "\n");
