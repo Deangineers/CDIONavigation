@@ -24,6 +24,7 @@ extern "C"
     // Optimal but risky:
     //auto thread = std::thread(MainController::navigateAndSendCommand);
     //thread.detach();
+    std::cout << "Calling into MainController\n";
     MainController::navigateAndSendCommand();
   }
 
