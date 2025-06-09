@@ -137,7 +137,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     Utility::appendToFile(
       "log.txt",
       robotBack_->name() + ": " + std::to_string(robotBack_->x1()) + ", " + std::to_string(robotBack_->y1()) + "\n");
-    objectToPathTowards->y1() << std::endl;
+
     auto courseObject = std::make_unique<CourseObject>(currentX_, currentY_, currentX_, currentY_, "");
     objectVector = MathUtil::calculateVectorToObject(robotFront_.get(), objectToPathTowards);
   }
