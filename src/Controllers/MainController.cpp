@@ -17,6 +17,7 @@
 void MainController::init()
 {
   ConfigController::loadConfig("config.json");
+  Utility::writeToFile("log.txt", "");
   client_ = std::make_unique<LinuxClient>();
   navigationController_ = std::make_unique<NavigationController>();
 }
@@ -25,6 +26,7 @@ void MainController::mockInit()
 {
   ConfigController::loadConfig("config.json");
   client_ = std::make_unique<MockClient>();
+  Utility::writeToFile("log.txt", "");
   navigationController_ = std::make_unique<NavigationController>();
 }
 
