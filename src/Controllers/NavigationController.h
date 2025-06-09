@@ -15,16 +15,18 @@ class NavigationController
 {
 public:
   NavigationController() = default;
-  std::unique_ptr<JourneyModel> calculateDegreesAndDistanceToObject();
   void addCourseObject(std::unique_ptr<CourseObject>&& courseObject);
   void clearObjects();
+  std::unique_ptr<JourneyModel> calculateDegreesAndDistanceToObject();
+
 private:
   void removeBallsOutsideCourse();
   void removeBallsInsideRobot();
-  [[nodiscard]] const CourseObject* findClosestBall() const;
-  std::pair<int,int> calculateVectorToObject(const CourseObject* courseObject) const;
-  double calculateAngleDifferenceBetweenVectors(const std::pair<int,int>& firstVector, const std::pair<int,int>& secondVector);
-  bool checkCollisionOnRoute(const CourseObject* target, const std::pair<int,int>& targetVector) const;
+  [[nodiscard]] CourseObject* findClosestBall() const;
+
+  void handleCollision(CourseObject** objectToPathTowards);
+
+  bool checkCollisionOnRoute(const CourseObject* target, const std::pair<int, int>& targetVector) const;
 
 
   std::vector<std::unique_ptr<CourseObject>> ballVector_;
@@ -41,9 +43,7 @@ private:
   int currentY_ = ConfigController::getConfigInt("safeYBot");
 
   std::unique_ptr<CourseObject> courseObject_;
-
 };
-
 
 
 #endif //NAVIGATIONCONTROLLER_H

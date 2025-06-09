@@ -18,6 +18,8 @@ add_library(CDIONavigation SHARED PythonBinding.cpp
         Controllers/Clients/LinuxClient.h
         Controllers/Clients/MockClient.cpp
         Controllers/Clients/MockClient.h
+        Controllers/MathUtil.cpp
+        Controllers/MathUtil.h
 )
 
 target_link_libraries(CDIONavigation PUBLIC Utility)
