@@ -91,7 +91,7 @@ std::string MainController::journeyToCommand(const JourneyModel* journey)
       command << std::to_string(ConfigController::getConfigInt("RotationFastSpeed"));
     }
     command << " ";
-    command << std::to_string(2);
+    command << std::to_string(journey->angle);
     return command.str();
   }
 
@@ -108,7 +108,7 @@ std::string MainController::journeyToCommand(const JourneyModel* journey)
       command << std::to_string(ConfigController::getConfigInt("ForwardSlowSpeed"));
     }
     command << " ";
-    command << std::to_string(5);
+    command << std::to_string(journey->distance);
     return command.str();
   }
   command << "s";
