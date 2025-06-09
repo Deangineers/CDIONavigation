@@ -12,6 +12,7 @@
 #include "Clients/LinuxClient.h"
 #include "Clients/MockClient.h"
 #include "Utility/ConfigController.h"
+#include "Utility/Utility.h"
 
 void MainController::init()
 {
@@ -39,10 +40,11 @@ void MainController::navigateAndSendCommand()
 
   if (journey == nullptr)
   {
-    std::cout << "Journey was nullptr\n";
+    Utility::appendToFile("log.txt", "Journey was nullptr\n");
     return;
   }
-  std::cout << "Journey: " << std::abs(journey->angle) << ", " << journey->distance << std::endl;
+  Utility::appendToFile(
+    "log.txt", "Journey: " + std::to_string(std::abs(journey->angle)) + ", " + std::to_string(journey->distance));
 
   auto navigationCommand = journeyToCommand(journey.get());
   auto ballCollectionCommand = handleBallCollectionMotor(journey.get());

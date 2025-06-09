@@ -12,6 +12,8 @@
 #include <thread>
 
 #include "Utility/ConfigController.h"
+#include "Utility/DebugController.h"
+#include "Utility/Utility.h"
 
 LinuxClient::LinuxClient() : commandToSend_(""), keepRunning_(true)
 {
@@ -90,7 +92,7 @@ void LinuxClient::sendCommand()
     }
     else
     {
-      std::cout << "Sent: " << commandToSend_;
+      Utility::appendToFile("log.txt", "Sent: " + commandToSend_ + "\n");
     }
     commandToSend_ = "";
 
@@ -100,8 +102,8 @@ void LinuxClient::sendCommand()
     if (bytesReceived > 0)
     {
       commandToSend_ = "";
-      std::cout << "Received: " << bytesReceived;
+      Utility::appendToFile("log.txt", "Received Response\n");
     }
-    std::cout << "Done with Sending\n";
+    Utility::appendToFile("log.txt", "Done with sending\n");
   }
 }
