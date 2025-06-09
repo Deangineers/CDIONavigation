@@ -15,6 +15,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
 {
   if (robotFront_ == nullptr || robotBack_ == nullptr)
   {
+    std::cout << "No Robot\n";
     return nullptr;
   }
   bool toCollectBalls = false;
@@ -51,6 +52,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     }
     if (objectToPathTowards == nullptr)
     {
+      std::cout << "ObjectToPathTowards was nullptr\n";
       return nullptr;
     }
 
@@ -59,6 +61,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     objectVector = calculateVectorToObject(objectToPathTowards);
     while (checkCollisionOnRoute(objectToPathTowards, objectVector))
     {
+      std::cout << "Collision Detected, ignoring for now\n";
       return nullptr;
       courseObject = std::make_unique<CourseObject>(currentX_,currentY_,currentX_,currentY_,"");
       objectToPathTowards = courseObject.get();
