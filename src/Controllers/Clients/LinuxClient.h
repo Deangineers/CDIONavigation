@@ -21,6 +21,7 @@ private:
   void sendCommand();
   std::string commandToSend_;
   std::string ballCollectionCommand_;
+  std::string lastBallCollectionCommand_;
   std::mutex mutex_;
   std::thread sendThread_;
   bool keepRunning_;
