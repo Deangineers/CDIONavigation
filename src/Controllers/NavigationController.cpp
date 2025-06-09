@@ -18,7 +18,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     std::cout << "No Robot\n";
     return nullptr;
   }
-  bool toCollectBalls = false;
+  bool toCollectBalls = true;
   const CourseObject* objectToPathTowards = nullptr;
   auto objectVector = std::make_pair(0,0);
   if (courseObject_ == nullptr)
