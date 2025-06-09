@@ -42,7 +42,7 @@ void MainController::navigateAndSendCommand()
     std::cout << "Journey was nullptr\n";
     return;
   }
-  std::cout << "Journey: " << journey->angle << ", " << journey->distance << std::endl;
+  std::cout << "Journey: " << std::abs(journey->angle) << ", " << journey->distance << std::endl;
 
   auto navigationCommand = journeyToCommand(journey.get());
   auto ballCollectionCommand = handleBallCollectionMotor(journey.get());
