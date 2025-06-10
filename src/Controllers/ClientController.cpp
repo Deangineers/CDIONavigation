@@ -15,7 +15,7 @@ ClientController::ClientController(std::unique_ptr<IClient> client) : client_(st
 void ClientController::sendCommand(Command command)
 {
   commands_.emplace_back(command);
-  if (commands_.size() == ConfigController::getConfigInt("AmountOfCommandsToAverage"))
+  if (commands_.size() > ConfigController::getConfigInt("AmountOfCommandsToAverage"))
   {
     std::string action = command.getAction();
     int speed = command.getSpeed();
