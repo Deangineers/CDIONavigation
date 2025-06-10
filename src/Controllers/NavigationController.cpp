@@ -97,7 +97,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   {
     if (ballVector_.empty() || totalBalls_ - ballVector_.size() == robotBallCapacity_)
     {
-      navigateToGoal(objectToPathTowards, toCollectBalls);
+      navigateToGoal(&objectToPathTowards, toCollectBalls);
     }
     else
     {
