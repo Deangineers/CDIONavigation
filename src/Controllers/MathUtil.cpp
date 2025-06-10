@@ -37,11 +37,17 @@ double MathUtil::calculateAngleDifferenceBetweenVectors(const std::pair<int, int
 
 std::pair<int, int> MathUtil::calculateVectorToObject(const CourseObject* robotFront, const CourseObject* courseObject)
 {
-  const int objectWidth = courseObject->x2() - courseObject->x1();
-  const int objectLength = courseObject->y2() - courseObject->y1();
+  const int objectWidth = (courseObject->x2() - courseObject->x1())/2;
+  const int objectLength = (courseObject->y2() - courseObject->y1())/2;
 
   const int middleX = std::max(courseObject->x1() - objectWidth, courseObject->x2() - objectWidth);
   const int middleY = std::max(courseObject->y1() - objectLength, courseObject->y2() - objectLength);
 
-  return std::make_pair(middleX - robotFront->x1(), middleY - robotFront->y1());
+  const int robotWidth = (robotFront->x2() - robotFront->x1())/2;
+  const int robotLength = (robotFront->y2() - robotFront->y1())/2;
+
+  const int robotMiddleX = std::max(robotFront->x1() - robotWidth, robotFront->x2() - robotWidth);
+  const int robotMiddleY = std::max(robotFront->y1() - robotLength, robotFront->y2() - robotLength);
+
+  return std::make_pair(middleX -robotMiddleX, middleY - robotMiddleY);
 }
