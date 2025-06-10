@@ -14,7 +14,7 @@ class ClientController
 {
 public:
   explicit ClientController(std::unique_ptr<IClient> client);
-  void sendCommand(const Command& command);
+  void sendCommand(Command command);
 
 private:
   void clearCommands();

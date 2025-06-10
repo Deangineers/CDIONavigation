@@ -12,7 +12,7 @@ ClientController::ClientController(std::unique_ptr<IClient> client) : client_(st
   commands_.reserve(ConfigController::getConfigInt("AmountOfCommandsToAverage"));
 }
 
-void ClientController::sendCommand(Command& command)
+void ClientController::sendCommand(Command command)
 {
   commands_.emplace_back(command);
   if (commands_.size() == ConfigController::getConfigInt("AmountOfCommandsToAverage"))
@@ -35,7 +35,7 @@ void ClientController::sendCommand(Command& command)
       if (loopCommand.getAction() == "r" || loopCommand.getAction() == "l")
       {
         int angleDiffAllowed = ConfigController::getConfigInt("MaxDifferenceInAngle");
-        if (std::abs(distanceOrAngle - loopCommand.getDistanceOrAngle() > angleDiffAllowed))
+        if (std::abs(distanceOrAngle - loopCommand.getDistanceOrAngle()) > angleDiffAllowed)
         {
           clearCommands();
           return;

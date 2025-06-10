@@ -44,7 +44,7 @@ private:
   int currentX_ = ConfigController::getConfigInt("safeXLeft");
   int currentY_ = ConfigController::getConfigInt("safeYBot");
 
-  std::unique_ptr<CourseObject> courseObject_;
+  std::unique_ptr<CourseObject> safeSpotPointer_;
 };
 
 

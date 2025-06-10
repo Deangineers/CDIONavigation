@@ -93,43 +93,29 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   bool toCollectBalls = true;
   CourseObject* objectToPathTowards = nullptr;
   auto objectVector = std::make_pair(0, 0);
-  if (courseObject_ == nullptr)
+  if (ballVector_.empty() || totalBalls_ - ballVector_.size() == robotBallCapacity_)
   {
-    if (ballVector_.empty() || totalBalls_ - ballVector_.size() == robotBallCapacity_)
-    {
-      navigateToGoal(&objectToPathTowards, toCollectBalls);
-    }
-    else
-    {
-      removeBallsInsideRobot();
-      removeBallsOutsideCourse();
-      objectToPathTowards = findClosestBall();
-      toCollectBalls = true;
-    }
-
-    if (objectToPathTowards == nullptr)
-    {
-      Utility::appendToFile("log.txt", "objectToPathTowards = nullptr, firstCheck\n");
-      return nullptr;
-    }
-    handleCollision(&objectToPathTowards);
-
-    auto courseObject = std::make_unique<CourseObject>(currentX_, currentY_, currentX_, currentY_, "");
-    objectVector = MathUtil::calculateVectorToObject(robotFront_.get(), objectToPathTowards);
+    navigateToGoal(&objectToPathTowards, toCollectBalls);
   }
   else
   {
-    objectVector = MathUtil::calculateVectorToObject(robotFront_.get(), courseObject_.get());
+    removeBallsInsideRobot();
+    removeBallsOutsideCourse();
+    objectToPathTowards = findClosestBall();
+    toCollectBalls = true;
   }
+
+  if (objectToPathTowards == nullptr)
+  {
+    Utility::appendToFile("log.txt", "objectToPathTowards = nullptr, firstCheck\n");
+    return nullptr;
+  }
+  handleCollision(&objectToPathTowards);
+  objectVector = MathUtil::calculateVectorToObject(robotFront_.get(), objectToPathTowards);
+
   if (objectToPathTowards == nullptr)
   {
     Utility::appendToFile("log.txt", "objectToPathTowards = nullptr, secondCheck\n");
-    if (courseObject_ == nullptr)
-    {
-      Utility::appendToFile("log.txt", "CourseObject was also nullptr\n");
-      return nullptr;
-    }
-    objectToPathTowards = courseObject_.get();
   }
   Utility::appendToFile(
     "log.txt",
@@ -152,11 +138,7 @@ std::unique_ptr<JourneyModel> NavigationController::makeJourneyModel(const std::
   const double angle = MathUtil::calculateAngleDifferenceBetweenVectors(robotVector, objectVector);
   const double distanceToObject = std::sqrt(
     objectVector.first * objectVector.first + objectVector.second * objectVector.second);
-  if (distanceToObject < ConfigController::getConfigInt("DistanceBeforeTargetReached"))
-  {
-    Utility::appendToFile("log.txt", "Close to target, courseObject_ = nullptr\n");
-    courseObject_ = nullptr;
-  }
+
   auto vectorToRobotBack = MathUtil::calculateVectorToObject(robotFront_.get(), robotBack_.get());
   double distanceInCm = distanceToObject * ((static_cast<double>(ConfigController::getConfigInt("RobotLengthInMM")) /
     10) / std::sqrt(
@@ -256,15 +238,13 @@ CourseObject* NavigationController::findClosestBall() const
 
 void NavigationController::handleCollision(CourseObject** objectToPathTowards)
 {
-  courseObject_ = std::make_unique<CourseObject>(currentX_, currentY_, currentX_, currentY_,
-                                                 (*objectToPathTowards)->name());
-  auto objectVector = MathUtil::calculateVectorToObject(robotFront_.get(), courseObject_.get());
+  auto objectVector = MathUtil::calculateVectorToObject(robotFront_.get(), safeSpotPointer_.get());
   while (checkCollisionOnRoute(*objectToPathTowards, objectVector))
   {
     std::cout << "Collision Detected, ignoring for now\n";
-    courseObject_ = std::make_unique<CourseObject>(currentX_, currentY_, currentX_, currentY_, "safeSpot");
-    *objectToPathTowards = courseObject_.get();
-    objectVector = MathUtil::calculateVectorToObject(robotFront_.get(), courseObject_.get());
+    safeSpotPointer_ = std::make_unique<CourseObject>(currentX_, currentY_, currentX_, currentY_, "safeSpot");
+    *objectToPathTowards = safeSpotPointer_.get();
+    objectVector = MathUtil::calculateVectorToObject(robotFront_.get(), *objectToPathTowards);
     if (currentX_ == ConfigController::getConfigInt("safeXLeft") && currentY_ ==
       ConfigController::getConfigInt("safeYTop"))
     {
@@ -299,10 +279,6 @@ void NavigationController::handleCollision(CourseObject** objectToPathTowards)
       currentX_--;
     }
   }
-  courseObject_ = std::make_unique<CourseObject>((*objectToPathTowards)->x1(), (*objectToPathTowards)->y1(),
-                                                 (*objectToPathTowards)->x2(), (*objectToPathTowards)->y2(),
-                                                 (*objectToPathTowards)->name());
-  *objectToPathTowards = courseObject_.get();
 }
 
 bool NavigationController::checkCollisionOnRoute(const CourseObject* target,
