@@ -144,7 +144,8 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   return makeJourneyModel(objectVector, toCollectBalls);
 }
 
-std::unique_ptr<JourneyModel> NavigationController::makeJourneyModel(const std::pair<int,int>& objectVector, bool toCollectBalls)
+std::unique_ptr<JourneyModel> NavigationController::makeJourneyModel(const std::pair<int, int>& objectVector,
+                                                                     bool toCollectBalls)
 {
   const std::pair robotVector = {robotFront_->x1() - robotBack_->x1(), robotFront_->y1() - robotBack_->y1()};
   const double angle = MathUtil::calculateAngleDifferenceBetweenVectors(robotVector, objectVector);
@@ -208,7 +209,7 @@ void NavigationController::removeBallsInsideRobot()
   });
 }
 
-void NavigationController::navigateToGoal(CourseObject* objectToPathTowards, bool &toCollectBalls)
+void NavigationController::navigateToGoal(CourseObject** objectToPathTowards, bool& toCollectBalls)
 {
   if (goal_ != nullptr)
   {
@@ -224,7 +225,7 @@ void NavigationController::navigateToGoal(CourseObject* objectToPathTowards, boo
       targetX = goal_->x1() + ConfigController::getConfigInt("distanceToGoal");
     }
     goal_ = std::make_unique<CourseObject>(targetX, goal_->y1(), targetX, goal_->y2(), "smallgoal");
-    objectToPathTowards = goal_.get();
+    *objectToPathTowards = goal_.get();
     toCollectBalls = false;
   }
 }
