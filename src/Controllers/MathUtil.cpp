@@ -2,6 +2,7 @@
 // Created by Elias Aggergaard Larsen on 09/06/2025.
 //
 
+#include <cmath>
 #include "MathUtil.h"
 
 double MathUtil::calculateAngleDifferenceBetweenVectors(const std::pair<int, int>& firstVector,
