@@ -7,25 +7,28 @@
 #include <string>
 
 
-class Command {
+class Command
+{
 public:
   Command();
-  Command(const std::string& action, int speed, const std::string& motor);
+  Command(const std::string& action, int speed, double distanceOrAngle, bool ballCollection);
   void setAction(const std::string& action);
   void setSpeed(int speed);
-  void setMotor(const std::string& motor);
+  void setDistanceOrAngle(double distanceOrAngle);
+  void setBallCollection(bool ballCollectionGrabsBalls);
   [[nodiscard]] std::string formatToSend() const;
 
-  std::string& getAction();
+  [[nodiscard]] std::string getAction() const;
   [[nodiscard]] int getSpeed() const;
-  std::string& getMotor();
+  [[nodiscard]] double getDistanceOrAngle() const;
+  [[nodiscard]] bool getBallCollectionGrabsBalls() const;
 
 private:
   std::string action_;
   int speed_;
-  std::string motor_;
+  double distanceOrAngle_;
+  bool ballCollectionGrabsBalls_;
 };
-
 
 
 #endif //COMMAND_H

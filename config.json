@@ -26,5 +26,8 @@
   "OuterWallOffsetWhenSearchingForCross": 10,
   "RobotLengthInMM": 20,
   "DistanceBeforeSmallBit": 35,
-  "SmallBit": 25
+  "SmallBit": 25,
+  "AmountOfCommandsToAverage": 5,
+  "MaxDifferenceInAngle": 1,
+  "MaxDifferenceInDistance": 5
 }

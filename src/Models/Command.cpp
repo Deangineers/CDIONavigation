@@ -4,19 +4,15 @@
 
 #include "Command.h"
 
-Command::Command()
+Command::Command() : speed_(0), distanceOrAngle_(0), ballCollectionGrabsBalls_(true)
 {
-  this->action_ = "";
-  this->speed_ = 0;
-  this->motor_ = "";
-
 }
 
-Command::Command(const std::string& action, const int speed, const std::string& motor)
+Command::Command(const std::string& action, const int speed, const double distanceOrAngle, bool ballCollection)
+  : speed_(speed), distanceOrAngle_(distanceOrAngle), ballCollectionGrabsBalls_(ballCollection)
 {
   this->action_ = action;
   this->speed_ = speed;
-  this->motor_ = motor;
 }
 
 void Command::setAction(const std::string& action)
@@ -29,9 +25,14 @@ void Command::setSpeed(int speed)
   this->speed_ = speed;
 }
 
-void Command::setMotor(const std::string& motor)
+void Command::setDistanceOrAngle(const double distanceOrAngle)
 {
-  this->motor_ = motor;
+  this->distanceOrAngle_ = distanceOrAngle;
+}
+
+void Command::setBallCollection(const bool ballCollectionStatus)
+{
+  this->ballCollectionGrabsBalls_ = ballCollectionStatus;
 }
 
 std::string Command::formatToSend() const
@@ -42,15 +43,24 @@ std::string Command::formatToSend() const
     sendString += " " + std::to_string(speed_);
   }
 
-  if (!motor_.empty())
+  if (distanceOrAngle_ == 0)
   {
-    sendString += " " + motor_;
+    sendString += " " + std::to_string(distanceOrAngle_);
+  }
+
+  if (ballCollectionGrabsBalls_)
+  {
+    sendString += " out";
+  }
+  else
+  {
+    sendString += " in";
   }
 
   return sendString;
 }
 
-std::string& Command::getAction()
+std::string Command::getAction() const
 {
   return action_;
 }
@@ -60,7 +70,13 @@ int Command::getSpeed() const
   return speed_;
 }
 
-std::string& Command::getMotor()
+double Command::getDistanceOrAngle() const
 {
-  return motor_;
+  return distanceOrAngle_;
 }
+
+bool Command::getBallCollectionGrabsBalls() const
+{
+  return ballCollectionGrabsBalls_;
+}
+

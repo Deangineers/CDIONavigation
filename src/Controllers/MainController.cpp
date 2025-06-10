@@ -18,14 +18,14 @@ void MainController::init()
 {
   ConfigController::loadConfig("config.json");
   Utility::writeToFile("log.txt", "");
-  client_ = std::make_unique<LinuxClient>();
+  clientController_ = std::make_unique<ClientController>(std::make_unique<LinuxClient>());
   navigationController_ = std::make_unique<NavigationController>();
 }
 
 void MainController::mockInit()
 {
   ConfigController::loadConfig("config.json");
-  client_ = std::make_unique<MockClient>();
+  clientController_ = std::make_unique<ClientController>(std::make_unique<MockClient>());
   Utility::writeToFile("log.txt", "");
   navigationController_ = std::make_unique<NavigationController>();
 }
@@ -50,80 +50,62 @@ void MainController::navigateAndSendCommand()
     "Journey: " + std::to_string(std::abs(journey->angle)) + ", " + std::to_string(journey->distance) + "\n");
 
   auto navigationCommand = journeyToCommand(journey.get());
-  auto ballCollectionCommand = handleBallCollectionMotor(journey.get());
 
-  client_->sendCommandAndAddNewLine(journeyToCommand(journey.get()) + " " + ballCollectionCommand.formatToSend());
+  clientController_->sendCommand(journeyToCommand(journey.get()));
 }
 
-Command MainController::handleBallCollectionMotor(const JourneyModel* journey)
+Command MainController::journeyToCommand(const JourneyModel* journey)
 {
   Command command;
-  command.setMotor("");
-  if (journey->collectBalls)
-  {
-    command.setAction("in");
-  }
-  else
-  {
-    command.setAction("out");
-  }
-  return command;
-}
-
-std::string MainController::journeyToCommand(const JourneyModel* journey)
-{
-  std::stringstream command;
   int allowedAngleDiff = ConfigController::getConfigInt("AllowedAngleDifference");
+  command.setBallCollection(journey->collectBalls);
   if (journey->angle > allowedAngleDiff || journey->angle < -allowedAngleDiff)
   {
     if (journey->angle > 0)
     {
-      command << "l";
+      command.setAction("l");
     }
     else
     {
-      command << "r";
+      command.setAction("r");
     }
-    command << " ";
     int maxAngleBeforeSlowingDown = ConfigController::getConfigInt("MaxAngleBeforeSlowingDown");
     if (journey->angle > -maxAngleBeforeSlowingDown && journey->angle < maxAngleBeforeSlowingDown)
     {
-      command << std::to_string(ConfigController::getConfigInt("RotationSlowSpeed"));
+      command.setSpeed(ConfigController::getConfigInt("RotationSlowSpeed"));
     }
     else
     {
-      command << std::to_string(ConfigController::getConfigInt("RotationFastSpeed"));
+      command.setSpeed(ConfigController::getConfigInt("RotationFastSpeed"));
     }
-    command << " ";
-    command << std::to_string(std::abs(journey->angle));
-    return command.str();
+    command.setDistanceOrAngle(std::abs(journey->angle));
+    return command;
   }
 
   if (journey->distance > 0.0)
   {
-    command << "f ";
+    command.setAction("f");
 
     if (journey->distance > ConfigController::getConfigInt("FastSpeedMinimumDistance"))
     {
-      command << std::to_string(ConfigController::getConfigInt("ForwardFastSpeed"));
+      command.setDistanceOrAngle(ConfigController::getConfigInt("ForwardFastSpeed"));
     }
     else
     {
-      command << std::to_string(ConfigController::getConfigInt("ForwardSlowSpeed"));
+      command.setDistanceOrAngle(ConfigController::getConfigInt("ForwardSlowSpeed"));
     }
-    command << " ";
     if (journey->distance > ConfigController::getConfigInt("DistanceBeforeSmallBit"))
     {
-      command << ConfigController::getConfigInt("SmallBit");
+      command.setDistanceOrAngle(ConfigController::getConfigInt("SmallBit"));
     }
     else
     {
-      command << std::to_string(journey->distance);
+      command.setDistanceOrAngle(journey->distance);
     }
-    return command.str();
+    return command;
   }
-  command << "s";
-  return command.str();
+  command.setAction("s");
+  return command;
 }
 
 int MainController::findMaxValue(const int* cords, const int size, int maxValueAllowed)
