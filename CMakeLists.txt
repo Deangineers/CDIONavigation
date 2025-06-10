@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 3.25)
 project(CDIONavigation)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -15,7 +15,7 @@ FetchContent_MakeAvailable(Utility)
 
 set_target_properties(Utility PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
-if(testing)
+if (testing)
     FetchContent_Declare(
             googletest
             GIT_REPOSITORY https://github.com/google/googletest.git
