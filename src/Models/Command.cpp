@@ -43,10 +43,7 @@ std::string Command::formatToSend() const
     sendString += " " + std::to_string(speed_);
   }
 
-  if (distanceOrAngle_ == 0)
-  {
-    sendString += " " + std::to_string(distanceOrAngle_);
-  }
+  sendString += " " + std::to_string(distanceOrAngle_);
 
   if (ballCollectionGrabsBalls_)
   {
