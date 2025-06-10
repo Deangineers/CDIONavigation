@@ -12,7 +12,7 @@
   "MaxAngleBeforeSlowingDown": 20,
   "RotationSlowSpeed": 100,
   "RotationFastSpeed": 500,
-  "MaxDistanceBeforeFastSpeed": 30,
+  "FastSpeedMinimumDistance": 30,
   "ForwardFastSpeed": 500,
   "ForwardSlowSpeed": 100,
   "RobotFrontOffsetX": 0,

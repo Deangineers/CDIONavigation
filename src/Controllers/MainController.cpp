@@ -103,7 +103,7 @@ std::string MainController::journeyToCommand(const JourneyModel* journey)
   {
     command << "f ";
 
-    if (journey->distance < 30.0)
+    if (journey->distance > ConfigController::getConfigInt("FastSpeedMinimumDistance"))
     {
       command << std::to_string(ConfigController::getConfigInt("ForwardFastSpeed"));
     }
