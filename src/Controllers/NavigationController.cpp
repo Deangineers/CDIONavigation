@@ -107,6 +107,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
       toCollectBalls = true;
     }
     handleCollision(&objectToPathTowards);
+
     if (objectToPathTowards == nullptr)
     {
       Utility::appendToFile("log.txt", "objectToPathTowards = nullptr, firstCheck\n");
@@ -254,6 +255,7 @@ CourseObject* NavigationController::findClosestBall() const
 
 void NavigationController::handleCollision(CourseObject** objectToPathTowards)
 {
+  return;
   courseObject_ = std::make_unique<CourseObject>(currentX_, currentY_, currentX_, currentY_,
                                                  (*objectToPathTowards)->name());
   auto objectVector = MathUtil::calculateVectorToObject(robotFront_.get(), courseObject_.get());
