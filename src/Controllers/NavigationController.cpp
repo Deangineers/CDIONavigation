@@ -255,7 +255,6 @@ CourseObject* NavigationController::findClosestBall() const
 
 void NavigationController::handleCollision(CourseObject** objectToPathTowards)
 {
-  return;
   courseObject_ = std::make_unique<CourseObject>(currentX_, currentY_, currentX_, currentY_,
                                                  (*objectToPathTowards)->name());
   auto objectVector = MathUtil::calculateVectorToObject(robotFront_.get(), courseObject_.get());
