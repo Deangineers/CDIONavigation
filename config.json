@@ -1,10 +1,10 @@
 {
   "safeXLeft": 50,
-  "safeXRight":650,
-  "safeYTop":50,
-  "safeYBot":650,
-  "middleXOnAxis":500,
-  "distanceToGoal":50,
+  "safeXRight": 650,
+  "safeYTop": 50,
+  "safeYBot": 650,
+  "middleXOnAxis": 500,
+  "distanceToGoal": 50,
   "RobotIP": "192.168.0.1",
   "RobotPort": 1234,
   "DistanceBeforeBallCollection": 30,
@@ -24,5 +24,7 @@
   "TotalBalls": 5,
   "WallWidth": 10,
   "OuterWallOffsetWhenSearchingForCross": 10,
-  "RobotLengthInMM": 20
+  "RobotLengthInMM": 20,
+  "DistanceBeforeSmallBit": 35,
+  "SmallBit": 25
 }

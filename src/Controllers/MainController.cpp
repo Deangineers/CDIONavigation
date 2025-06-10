@@ -112,7 +112,14 @@ std::string MainController::journeyToCommand(const JourneyModel* journey)
       command << std::to_string(ConfigController::getConfigInt("ForwardSlowSpeed"));
     }
     command << " ";
-    command << std::to_string(journey->distance);
+    if (journey->distance > ConfigController::getConfigInt("DistanceBeforeSmallBit"))
+    {
+      command << ConfigController::getConfigInt("SmallBit");
+    }
+    else
+    {
+      command << std::to_string(journey->distance);
+    }
     return command.str();
   }
   command << "s";
