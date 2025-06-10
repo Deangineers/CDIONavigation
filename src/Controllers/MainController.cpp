@@ -88,11 +88,11 @@ Command MainController::journeyToCommand(const JourneyModel* journey)
 
     if (journey->distance > ConfigController::getConfigInt("FastSpeedMinimumDistance"))
     {
-      command.setDistanceOrAngle(ConfigController::getConfigInt("ForwardFastSpeed"));
+      command.setSpeed(ConfigController::getConfigInt("ForwardFastSpeed"));
     }
     else
     {
-      command.setDistanceOrAngle(ConfigController::getConfigInt("ForwardSlowSpeed"));
+      command.setSpeed(ConfigController::getConfigInt("ForwardSlowSpeed"));
     }
     if (journey->distance > ConfigController::getConfigInt("DistanceBeforeSmallBit"))
     {
