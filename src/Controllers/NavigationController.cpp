@@ -97,23 +97,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   {
     if (ballVector_.empty() || totalBalls_ - ballVector_.size() == robotBallCapacity_)
     {
-      if (goal_ != nullptr)
-      {
-        int targetX;
-        int targetY = goal_->y1();
-        if (goal_->x1() > ConfigController::getConfigInt("middleXOnAxis"))
-        {
-          targetX = goal_->x1() - ConfigController::getConfigInt("distanceToGoal");
-          targetY = goal_->y1();
-        }
-        else
-        {
-          targetX = goal_->x1() + ConfigController::getConfigInt("distanceToGoal");
-        }
-        goal_ = std::make_unique<CourseObject>(targetX, goal_->y1(), targetX, goal_->y2(), "smallgoal");
-        objectToPathTowards = goal_.get();
-        toCollectBalls = false;
-      }
+      navigateToGoal(objectToPathTowards, toCollectBalls);
     }
     else
     {
@@ -156,6 +140,12 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   Utility::appendToFile(
     "log.txt",
     robotBack_->name() + ": " + std::to_string(robotBack_->x1()) + ", " + std::to_string(robotBack_->y1()) + "\n");
+
+  return makeJourneyModel(objectVector, toCollectBalls);
+}
+
+std::unique_ptr<JourneyModel> NavigationController::makeJourneyModel(const std::pair<int,int>& objectVector, bool toCollectBalls)
+{
   const std::pair robotVector = {robotFront_->x1() - robotBack_->x1(), robotFront_->y1() - robotBack_->y1()};
   const double angle = MathUtil::calculateAngleDifferenceBetweenVectors(robotVector, objectVector);
   const double distanceToObject = std::sqrt(
@@ -216,6 +206,27 @@ void NavigationController::removeBallsInsideRobot()
 
     return ballBottomX > topX && ballTopX < bottomX && ballBottomY > topY && ballTopY < bottomY;
   });
+}
+
+void NavigationController::navigateToGoal(CourseObject* objectToPathTowards, bool &toCollectBalls)
+{
+  if (goal_ != nullptr)
+  {
+    int targetX;
+    int targetY = goal_->y1();
+    if (goal_->x1() > ConfigController::getConfigInt("middleXOnAxis"))
+    {
+      targetX = goal_->x1() - ConfigController::getConfigInt("distanceToGoal");
+      targetY = goal_->y1();
+    }
+    else
+    {
+      targetX = goal_->x1() + ConfigController::getConfigInt("distanceToGoal");
+    }
+    goal_ = std::make_unique<CourseObject>(targetX, goal_->y1(), targetX, goal_->y2(), "smallgoal");
+    objectToPathTowards = goal_.get();
+    toCollectBalls = false;
+  }
 }
 
 CourseObject* NavigationController::findClosestBall() const

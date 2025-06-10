@@ -22,6 +22,8 @@ public:
 private:
   void removeBallsOutsideCourse();
   void removeBallsInsideRobot();
+  std::unique_ptr<JourneyModel> makeJourneyModel(const std::pair<int,int>& objectVector, bool toCollectBalls);
+  void navigateToGoal(CourseObject* objectToPathTowards, bool &toCollectBalls);
   [[nodiscard]] CourseObject* findClosestBall() const;
 
   void handleCollision(CourseObject** objectToPathTowards);
