@@ -60,6 +60,8 @@ void ClientController::sendCommand(Command command)
       "AmountOfCommandsToAverage"));
     command.setDistanceOrAngle(averageDistanceOrAngle);
     client_->sendCommandAndAddNewLine(command.formatToSend());
+    commands_.clear();
+    commands_.reserve(ConfigController::getConfigInt("AmountOfCommandsToAverage"));
   }
 }
 
