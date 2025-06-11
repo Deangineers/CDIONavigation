@@ -92,7 +92,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   }
   bool toCollectBalls = true;
   CourseObject* objectToPathTowards = nullptr;
-  auto objectVector = std::make_pair(0, 0);
+  auto objectVector = Vector(0, 0);
   if (ballVector_.empty() || totalBalls_ - ballVector_.size() == robotBallCapacity_)
   {
     navigateToGoal(&objectToPathTowards, toCollectBalls);
@@ -132,18 +132,18 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   return makeJourneyModel(objectVector, toCollectBalls);
 }
 
-std::unique_ptr<JourneyModel> NavigationController::makeJourneyModel(const std::pair<int, int>& objectVector,
+std::unique_ptr<JourneyModel> NavigationController::makeJourneyModel(const Vector& objectVector,
                                                                      bool toCollectBalls)
 {
-  const std::pair robotVector = {robotFront_->x1() - robotBack_->x1(), robotFront_->y1() - robotBack_->y1()};
+  const Vector robotVector = {robotFront_->x1() - robotBack_->x1(), robotFront_->y1() - robotBack_->y1()};
   const double angle = MathUtil::calculateAngleDifferenceBetweenVectors(robotVector, objectVector);
   const double distanceToObject = std::sqrt(
-    objectVector.first * objectVector.first + objectVector.second * objectVector.second);
+    objectVector.x * objectVector.x + objectVector.y * objectVector.y);
 
   auto vectorToRobotBack = MathUtil::calculateVectorToObject(robotFront_.get(), robotBack_.get());
   double distanceInCm = distanceToObject * ((static_cast<double>(ConfigController::getConfigInt("RobotLengthInMM")) /
     10) / std::sqrt(
-    vectorToRobotBack.first * vectorToRobotBack.first + vectorToRobotBack.second * vectorToRobotBack.second));
+    vectorToRobotBack.x * vectorToRobotBack.x + vectorToRobotBack.y * vectorToRobotBack.y));
   return std::make_unique<JourneyModel>(distanceInCm, angle, toCollectBalls);
 }
 
@@ -227,7 +227,7 @@ CourseObject* NavigationController::findClosestBall() const
   for (const auto& ball : ballVector_)
   {
     auto vectorToBall = MathUtil::calculateVectorToObject(robotFront_.get(), ball.get());
-    double length = std::sqrt(vectorToBall.first * vectorToBall.first + vectorToBall.second * vectorToBall.second);
+    double length = std::sqrt(vectorToBall.x * vectorToBall.x + vectorToBall.y * vectorToBall.y);
     if (length < shortestDistance)
     {
       shortestDistance = length;
@@ -293,20 +293,20 @@ void NavigationController::handleCollision(CourseObject** objectToPathTowards)
 }
 
 bool NavigationController::checkCollisionOnRoute(const CourseObject* target,
-                                                 const std::pair<int, int>& targetVector) const
+                                                 const Vector& targetVector) const
 {
   if (!robotFront_ || !target) return false;
 
   int startX = robotFront_->x1();
   int startY = robotFront_->y1();
-  int endX = startX + targetVector.first;
-  int endY = startY + targetVector.second;
+  int endX = startX + targetVector.x;
+  int endY = startY + targetVector.y;
 
-  double length = std::sqrt(targetVector.first * targetVector.first + targetVector.second * targetVector.second);
+  double length = std::sqrt(targetVector.x * targetVector.x + targetVector.y * targetVector.y);
   if (length == 0.0) return false;
 
-  double offsetX = -(targetVector.second / length) * (robotWidth_ / 2.0);
-  double offsetY = (targetVector.first / length) * (robotWidth_ / 2.0);
+  double offsetX = -(targetVector.y / length) * (robotWidth_ / 2.0);
+  double offsetY = (targetVector.x / length) * (robotWidth_ / 2.0);
 
   double topX = std::max(startX + offsetX, endX + offsetX);
   double topY = std::max(startY + offsetY, endY + offsetY);

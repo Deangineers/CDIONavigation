@@ -9,6 +9,7 @@
 #include <vector>
 #include "../Models/CourseObject.h"
 #include "../Models/JourneyModel.h"
+#include "../Models/Vector.h"
 #include "Utility/ConfigController.h"
 
 class NavigationController
@@ -22,13 +23,13 @@ public:
 private:
   void removeBallsOutsideCourse();
   void removeBallsInsideRobot();
-  std::unique_ptr<JourneyModel> makeJourneyModel(const std::pair<int, int>& objectVector, bool toCollectBalls);
+  std::unique_ptr<JourneyModel> makeJourneyModel(const Vector& objectVector, bool toCollectBalls);
   void navigateToGoal(CourseObject** objectToPathTowards, bool& toCollectBalls);
   [[nodiscard]] CourseObject* findClosestBall() const;
 
   void handleCollision(CourseObject** objectToPathTowards);
 
-  bool checkCollisionOnRoute(const CourseObject* target, const std::pair<int, int>& targetVector) const;
+  bool checkCollisionOnRoute(const CourseObject* target, const Vector& targetVector) const;
 
 
   std::vector<std::unique_ptr<CourseObject>> ballVector_;

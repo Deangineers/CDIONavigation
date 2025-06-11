@@ -5,14 +5,14 @@
 #include <cmath>
 #include "MathUtil.h"
 
-double MathUtil::calculateAngleDifferenceBetweenVectors(const std::pair<int, int>& firstVector,
-                                                        const std::pair<int, int>& secondVector)
+double MathUtil::calculateAngleDifferenceBetweenVectors(const Vector& firstVector,
+                                                        const Vector& secondVector)
 {
-  int dotProduct = firstVector.first * secondVector.first + firstVector.second * secondVector.second;
+  int dotProduct = firstVector.x * secondVector.x + firstVector.y * secondVector.y;
   const double vector1Length = std::sqrt(
-    firstVector.first * firstVector.first + firstVector.second * firstVector.second);
+    firstVector.x * firstVector.x + firstVector.y * firstVector.y);
   const double vector2Length = std::sqrt(
-    secondVector.first * secondVector.first + secondVector.second * secondVector.second);
+    secondVector.x * secondVector.x + secondVector.y * secondVector.y);
   if (vector1Length == 0.0 || vector2Length == 0.0)
   {
     return 0.0;
@@ -23,7 +23,7 @@ double MathUtil::calculateAngleDifferenceBetweenVectors(const std::pair<int, int
   if (cosTheta > 1.0) cosTheta = 1.0;
 
   double angleRadians = std::acos(cosTheta);
-  double crossProduct = firstVector.first * secondVector.second - firstVector.second * secondVector.first;
+  double crossProduct = firstVector.x * secondVector.y - firstVector.y * secondVector.x;
 
   if (crossProduct > 0.0)
   {
@@ -35,7 +35,7 @@ double MathUtil::calculateAngleDifferenceBetweenVectors(const std::pair<int, int
   return angleDegrees;
 }
 
-std::pair<int, int> MathUtil::calculateVectorToObject(const CourseObject* robotFront, const CourseObject* courseObject)
+Vector MathUtil::calculateVectorToObject(const CourseObject* robotFront, const CourseObject* courseObject)
 {
   const int middleX = (courseObject->x1() + courseObject->x2()) / 2;
   const int middleY = (courseObject->y1() + courseObject->y2()) / 2;
@@ -43,7 +43,7 @@ std::pair<int, int> MathUtil::calculateVectorToObject(const CourseObject* robotF
   const int robotMiddleX = (robotFront->x1() + robotFront->x2()) / 2;
   const int robotMiddleY = (robotFront->y1() + robotFront->y2()) / 2;
 
-  return std::make_pair(middleX - robotMiddleX, middleY - robotMiddleY);
+  return Vector(middleX - robotMiddleX, middleY - robotMiddleY);
 }
 
 CourseObject MathUtil::getRobotMiddle(const CourseObject* robotBack, const CourseObject* robotFront)

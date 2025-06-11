@@ -22,6 +22,8 @@ add_library(CDIONavigation SHARED PythonBinding.cpp
         Controllers/MathUtil.h
         Controllers/ClientController.cpp
         Controllers/ClientController.h
+        Models/Vector.cpp
+        Models/Vector.h
 )
 
 target_link_libraries(CDIONavigation PUBLIC Utility)
