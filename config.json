@@ -29,5 +29,6 @@
   "SmallBit": 25,
   "AmountOfCommandsToAverage": 5,
   "MaxDifferenceInAngle": 1,
-  "MaxDifferenceInDistance": 5
+  "MaxDifferenceInDistance": 5,
+  "RobotHeightInMM": 15
 }

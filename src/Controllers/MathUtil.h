@@ -15,6 +15,11 @@ public:
                                                        const Vector& secondVector);
   static Vector calculateVectorToObject(const CourseObject* robotFront, const CourseObject* courseObject);
   static CourseObject getRobotMiddle(const CourseObject* robotBack, const CourseObject* robotFront);
+  static void correctCourseObjectForHeightOffset(CourseObject& robotBack, CourseObject& robotFront);
+
+private:
+  static constexpr int imageCenterX_ = 959;
+  static constexpr int imageCenterY_ = 539;
 };
 
 

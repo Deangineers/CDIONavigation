@@ -5,6 +5,8 @@
 #include <cmath>
 #include "MathUtil.h"
 
+#include "Utility/ConfigController.h"
+
 double MathUtil::calculateAngleDifferenceBetweenVectors(const Vector& firstVector,
                                                         const Vector& secondVector)
 {
@@ -54,6 +56,44 @@ CourseObject MathUtil::getRobotMiddle(const CourseObject* robotBack, const Cours
   const int middleY2 = (robotFront->y2() + robotBack->y2()) / 2;
 
   return CourseObject(middleX1, middleY1, middleX2, middleY2, "");
+}
+
+void MathUtil::correctCourseObjectForHeightOffset(CourseObject& robotBack, CourseObject& robotFront)
+{
+  const double robotHeight = ConfigController::getConfigInt("RobotHeightInMM");
+  const double robotLength = ConfigController::getConfigInt("RobotLengthInMM");
+
+  int backX = (robotBack.x1() + robotBack.x2()) / 2;
+  int backY = (robotBack.y1() + robotBack.y2()) / 2;
+  int frontX = (robotFront.x1() + robotFront.x2()) / 2;
+  int frontY = (robotFront.y1() + robotFront.y2()) / 2;
+
+  int dx = frontX - backX;
+  int dy = frontY - backY;
+  double pixelLength = std::sqrt(dx * dx + dy * dy);
+
+  if (pixelLength < 1e-3) {
+    return;
+  }
+
+  double mmPerPixel = robotLength / pixelLength;
+
+  double offsetPixels = robotHeight / mmPerPixel;
+
+  double ux = dx / pixelLength;
+  double uy = dy / pixelLength;
+
+  int correctionX = static_cast<int>(std::round(-ux * offsetPixels));
+  int correctionY = static_cast<int>(std::round(-uy * offsetPixels));
+
+  auto shift = [&](CourseObject& obj, int dx, int dy) {
+    obj = CourseObject(obj.x1() + dx, obj.y1() + dy,
+                       obj.x2() + dx, obj.y2() + dy,
+                       obj.name());
+  };
+
+  shift(robotBack, correctionX, correctionY);
+  shift(robotFront, correctionX, correctionY);
 }
 
 
