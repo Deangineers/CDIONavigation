@@ -101,7 +101,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   {
     removeBallsInsideRobot();
     removeBallsOutsideCourse();
-    objectToPathTowards = findClosestBall();
+    findClosestBall(&objectToPathTowards);
     toCollectBalls = true;
   }
 
@@ -215,11 +215,11 @@ void NavigationController::navigateToGoal(CourseObject** objectToPathTowards, bo
   }
 }
 
-CourseObject* NavigationController::findClosestBall() const
+void NavigationController::findClosestBall(CourseObject** objectToPathTowards) const
 {
   if (ballVector_.empty())
   {
-    return nullptr;
+    return;
   }
 
   double shortestDistance = INT32_MAX;
@@ -234,7 +234,7 @@ CourseObject* NavigationController::findClosestBall() const
       closestBall = ball.get();
     }
   }
-  return closestBall;
+  *objectToPathTowards = closestBall;
 }
 
 void NavigationController::handleCollision(CourseObject** objectToPathTowards)
