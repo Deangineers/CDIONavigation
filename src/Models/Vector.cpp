@@ -7,3 +7,8 @@
 Vector::Vector(int x, int y) : x(x), y(y)
 {
 }
+
+bool Vector::isNullVector()
+{
+  return x == 0 && y == 0;
+}

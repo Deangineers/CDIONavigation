@@ -10,6 +10,7 @@ class Vector
 {
 public:
   Vector(int x, int y);
+  bool isNullVector();
   int x, y;
 };
 

@@ -24,12 +24,12 @@ private:
   void removeBallsOutsideCourse();
   void removeBallsInsideRobot();
   std::unique_ptr<JourneyModel> makeJourneyModel(const Vector& objectVector, bool toCollectBalls);
-  void navigateToGoal(CourseObject** objectToPathTowards, bool& toCollectBalls);
-  void findClosestBall(CourseObject** objectToPathTowards) const;
+  [[nodiscard]] Vector navigateToGoal() const;
+  [[nodiscard]] Vector findClosestBall() const;
 
-  void handleCollision(CourseObject** objectToPathTowards);
+  Vector handleCollision(Vector objectVector);
 
-  bool checkCollisionOnRoute(const CourseObject* target, const Vector& targetVector) const;
+  bool checkCollisionOnRoute(const Vector& targetVector) const;
 
 
   std::vector<std::unique_ptr<CourseObject>> ballVector_;
@@ -44,8 +44,6 @@ private:
 
   int currentX_ = ConfigController::getConfigInt("safeXLeft");
   int currentY_ = ConfigController::getConfigInt("safeYBot");
-
-  std::unique_ptr<CourseObject> safeSpotPointer_;
 };
 
 
