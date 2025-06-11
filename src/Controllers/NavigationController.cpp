@@ -290,6 +290,8 @@ Vector NavigationController::getVectorForObjectNearWall(const CourseObject* cour
   }
 
   auto closestVectors = getVectorsForClosestBlockingObjects(courseObject);
+  Utility::appendToFile(
+    "log.txt", "ClosestVectors: " + closestVectors.first.toString() + " | " + closestVectors.second.toString() + "\n");
   if (closestVectors.second.getLength() > ConfigController::getConfigInt("DistanceToWallBeforeHandling"))
   {
     // 1 wall
