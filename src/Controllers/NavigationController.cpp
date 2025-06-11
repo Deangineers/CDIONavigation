@@ -94,7 +94,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   auto objectVector = Vector(0, 0);
   if (ballVector_.empty())
   {
-    navigateToGoal();
+    objectVector = navigateToGoal();
     toCollectBalls = false;
   }
   else
@@ -197,7 +197,7 @@ Vector NavigationController::navigateToGoal() const
   {
     targetX = goal_->x1() + ConfigController::getConfigInt("distanceToGoal");
   }
-  goal_ = std::make_unique<CourseObject>(targetX, goal_->y1(), targetX, goal_->y2(), "goal");
+  auto courseObject = CourseObject(targetX, goal_->y1(), targetX, goal_->y2(), "goal");
 
   auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
   return MathUtil::calculateVectorToObject(&robotMiddle, goal_.get());
