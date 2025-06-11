@@ -47,11 +47,11 @@ std::string Command::formatToSend() const
 
   if (ballCollectionGrabsBalls_)
   {
-    sendString += " out";
+    sendString += " in";
   }
   else
   {
-    sendString += " in";
+    sendString += " out";
   }
 
   return sendString;
