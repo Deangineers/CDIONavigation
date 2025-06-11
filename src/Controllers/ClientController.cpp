@@ -21,7 +21,7 @@ void ClientController::sendCommand(Command command)
     int speed = command.getSpeed();
     double distanceOrAngle = command.getDistanceOrAngle();
     bool bc = command.getBallCollectionGrabsBalls();
-    double distanceOrAngleSum = command.getDistanceOrAngle();
+    double distanceOrAngleSum = 0;
 
     for (auto& loopCommand : commands_)
     {
