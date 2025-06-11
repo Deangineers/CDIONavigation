@@ -49,8 +49,6 @@ void MainController::navigateAndSendCommand()
     "log.txt",
     "Journey: " + std::to_string(std::abs(journey->angle)) + ", " + std::to_string(journey->distance) + "\n");
 
-  auto navigationCommand = journeyToCommand(journey.get());
-
   clientController_->sendCommand(journeyToCommand(journey.get()));
 }
 
