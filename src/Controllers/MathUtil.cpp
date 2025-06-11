@@ -87,6 +87,8 @@ void MathUtil::correctCourseObjectForHeightOffset(CourseObject* robotBack, Cours
   int correctionX = static_cast<int>(std::round(-ux * offsetPixels));
   int correctionY = static_cast<int>(std::round(-uy * offsetPixels));
 
+  robotFront->shiftX(correctionX);
+  robotFront->shiftY(correctionY);
   robotBack->shiftX(correctionX);
   robotBack->shiftY(correctionY);
 }
