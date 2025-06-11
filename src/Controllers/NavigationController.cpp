@@ -111,7 +111,8 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     return nullptr;
   }
   handleCollision(&objectToPathTowards);
-  objectVector = MathUtil::calculateVectorToObject(robotFront_.get(), objectToPathTowards);
+  CourseObject* robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
+  objectVector = MathUtil::calculateVectorToObject(robotMiddle, objectToPathTowards);
 
   if (objectToPathTowards == nullptr)
   {
@@ -208,7 +209,7 @@ void NavigationController::navigateToGoal(CourseObject** objectToPathTowards, bo
     {
       targetX = goal_->x1() + ConfigController::getConfigInt("distanceToGoal");
     }
-    goal_ = std::make_unique<CourseObject>(targetX, goal_->y1(), targetX, goal_->y2(), "smallgoal");
+    goal_ = std::make_unique<CourseObject>(targetX, goal_->y1(), targetX, goal_->y2(), "goal");
     *objectToPathTowards = goal_.get();
     toCollectBalls = false;
   }
@@ -242,9 +243,10 @@ void NavigationController::handleCollision(CourseObject** objectToPathTowards)
                                                     (*objectToPathTowards)->x2(), (*objectToPathTowards)->y2(),
                                                     (*objectToPathTowards)->name());
   auto objectVector = MathUtil::calculateVectorToObject(robotFront_.get(), safeSpotPointer_.get());
+  int startX = currentX_;
+  int startY = currentY_;
   while (checkCollisionOnRoute(*objectToPathTowards, objectVector))
   {
-    std::cout << "Collision Detected, ignoring for now\n";
     safeSpotPointer_ = std::make_unique<CourseObject>(currentX_, currentY_, currentX_, currentY_, "safeSpot");
     *objectToPathTowards = safeSpotPointer_.get();
     objectVector = MathUtil::calculateVectorToObject(robotFront_.get(), *objectToPathTowards);
@@ -280,6 +282,12 @@ void NavigationController::handleCollision(CourseObject** objectToPathTowards)
     else if (currentY_ == ConfigController::getConfigInt("safeYBot"))
     {
       currentX_--;
+    }
+    if (currentX_ == startX && currentY_ == startY)
+    {
+      Utility::appendToFile("log.txt", "Broke out of collision, no safe places\n");
+      *objectToPathTowards = nullptr;
+      return;
     }
   }
 }
