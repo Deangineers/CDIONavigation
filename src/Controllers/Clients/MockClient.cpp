@@ -4,6 +4,8 @@
 
 #include "MockClient.h"
 
+#include "Utility/Utility.h"
+
 MockClient::MockClient()
 {
   MockClient::connectToServer();
@@ -12,11 +14,13 @@ MockClient::MockClient()
 void MockClient::sendCommandAndAddNewLine(const std::string& command)
 {
   std::cout << command << "\n";
+  Utility::appendToFile("log.txt", "\n//\n// Sent: " + command + "\n//\n");
 }
 
 void MockClient::sendBallCollectionCommand(const std::string& command)
 {
   std::cout << command << "\n";
+  Utility::appendToFile("log.txt", "\n//\n// Sent: " + command + "\n//\n");
 }
 
 void MockClient::connectToServer()
