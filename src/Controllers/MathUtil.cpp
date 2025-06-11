@@ -46,14 +46,14 @@ std::pair<int, int> MathUtil::calculateVectorToObject(const CourseObject* robotF
   return std::make_pair(middleX - robotMiddleX, middleY - robotMiddleY);
 }
 
-CourseObject* MathUtil::getRobotMiddle(const CourseObject* robotBack, const CourseObject* robotFront)
+CourseObject MathUtil::getRobotMiddle(const CourseObject* robotBack, const CourseObject* robotFront)
 {
   const int middleX1 = (robotFront->x1() + robotBack->x1()) / 2;
   const int middleX2 = (robotFront->x2() + robotBack->x2()) / 2;
   const int middleY1 = (robotFront->y1() + robotBack->y1()) / 2;
   const int middleY2 = (robotFront->y2() + robotBack->y2()) / 2;
 
-  return new CourseObject(middleX1, middleY1, middleX2, middleY2, "");
+  return CourseObject(middleX1, middleY1, middleX2, middleY2, "");
 }
 
 

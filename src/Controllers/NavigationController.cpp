@@ -111,8 +111,8 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     return nullptr;
   }
   handleCollision(&objectToPathTowards);
-  CourseObject* robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
-  objectVector = MathUtil::calculateVectorToObject(robotMiddle, objectToPathTowards);
+  CourseObject robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
+  objectVector = MathUtil::calculateVectorToObject(&robotMiddle, objectToPathTowards);
 
   if (objectToPathTowards == nullptr)
   {
