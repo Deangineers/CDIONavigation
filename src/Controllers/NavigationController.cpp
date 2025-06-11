@@ -242,6 +242,8 @@ void NavigationController::handleCollision(CourseObject** objectToPathTowards)
                                                     (*objectToPathTowards)->x2(), (*objectToPathTowards)->y2(),
                                                     (*objectToPathTowards)->name());
   auto objectVector = MathUtil::calculateVectorToObject(robotFront_.get(), safeSpotPointer_.get());
+  int startX = currentX_;
+  int startY = currentY_;
   while (checkCollisionOnRoute(*objectToPathTowards, objectVector))
   {
     safeSpotPointer_ = std::make_unique<CourseObject>(currentX_, currentY_, currentX_, currentY_, "safeSpot");
@@ -279,6 +281,12 @@ void NavigationController::handleCollision(CourseObject** objectToPathTowards)
     else if (currentY_ == ConfigController::getConfigInt("safeYBot"))
     {
       currentX_--;
+    }
+    if (currentX_ == startX && currentY_ == startY)
+    {
+      Utility::appendToFile("log.txt", "Broke out of collision, no safe places\n");
+      *objectToPathTowards = nullptr;
+      return;
     }
   }
 }
