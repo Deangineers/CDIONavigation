@@ -29,6 +29,8 @@ private:
 
   Vector handleCollision(Vector objectVector);
 
+  std::pair<Vector, Vector> getVectorToTwoClosestVectors(const CourseObject* courseObject) const;
+
   bool checkCollisionOnRoute(const Vector& targetVector) const;
 
 

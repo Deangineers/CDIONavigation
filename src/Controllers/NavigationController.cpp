@@ -282,6 +282,25 @@ Vector NavigationController::handleCollision(Vector objectVector)
   return objectVector;
 }
 
+std::pair<Vector, Vector> NavigationController::getVectorToTwoClosestVectors(const CourseObject* courseObject) const
+{
+  auto returnPair = std::make_pair(Vector(INT8_MAX,INT8_MAX), Vector(INT8_MAX,INT8_MAX));
+  for (const auto& blockingObject : blockingObjects_)
+  {
+    auto vector = MathUtil::calculateVectorToObject(courseObject, blockingObject.get());
+    if (vector.getLength() < returnPair.first.getLength())
+    {
+      returnPair.second = returnPair.first;
+      returnPair.first = vector;
+    }
+    else if (vector.getLength() < returnPair.second.getLength())
+    {
+      returnPair.second = vector;
+    }
+  }
+  return returnPair;
+}
+
 bool NavigationController::checkCollisionOnRoute(const Vector& targetVector) const
 {
   if (!robotFront_) return false;

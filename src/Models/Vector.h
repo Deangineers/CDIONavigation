@@ -11,6 +11,7 @@ class Vector
 public:
   Vector(int x, int y);
   bool isNullVector();
+  double getLength();
   int x, y;
 };
 
