@@ -90,7 +90,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     Utility::appendToFile("log.txt", "No Robot\n");
     return nullptr;
   }
-  MathUtil::correctCourseObjectForHeightOffset(robotBack_.get(), robotFront_.get());
+  //MathUtil::correctCourseObjectForHeightOffset(robotBack_.get(), robotFront_.get());
   bool toCollectBalls = true;
   auto objectVector = Vector(0, 0);
   if (ballVector_.empty())
