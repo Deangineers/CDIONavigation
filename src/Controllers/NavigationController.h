@@ -28,8 +28,8 @@ private:
   [[nodiscard]] Vector findClosestBall() const;
 
   Vector handleCollision(Vector objectVector);
-
-  std::pair<Vector, Vector> getVectorToTwoClosestVectors(const CourseObject* courseObject) const;
+  Vector getVectorForObjectNearWall(const CourseObject* courseObject) const;
+  std::pair<Vector, Vector> getVectorsForClosestBlockingObjects(const CourseObject* courseObject) const;
 
   bool checkCollisionOnRoute(const Vector& targetVector) const;
 

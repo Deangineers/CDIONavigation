@@ -282,7 +282,27 @@ Vector NavigationController::handleCollision(Vector objectVector)
   return objectVector;
 }
 
-std::pair<Vector, Vector> NavigationController::getVectorToTwoClosestVectors(const CourseObject* courseObject) const
+Vector NavigationController::getVectorForObjectNearWall(const CourseObject* courseObject) const
+{
+  if (courseObject == nullptr)
+  {
+    return {0, 0};
+  }
+
+  auto closestVectors = getVectorsForClosestBlockingObjects(courseObject);
+  if (closestVectors.second.getLength() > ConfigController::getConfigInt("DistanceToWallBeforeHandling"))
+  {
+    // 1 wall
+  }
+  else
+  {
+    // Corner
+  }
+  return {0, 0};
+}
+
+std::pair<Vector, Vector> NavigationController::getVectorsForClosestBlockingObjects(
+  const CourseObject* courseObject) const
 {
   auto returnPair = std::make_pair(Vector(INT8_MAX,INT8_MAX), Vector(INT8_MAX,INT8_MAX));
   for (const auto& blockingObject : blockingObjects_)
