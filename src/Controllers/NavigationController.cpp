@@ -182,7 +182,7 @@ void NavigationController::removeBallsInsideRobot()
   });
 }
 
-Vector NavigationController::navigateToGoal()
+Vector NavigationController::navigateToGoal() const
 {
   if (goal_ == nullptr)
   {
