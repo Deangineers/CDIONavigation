@@ -6,7 +6,8 @@
 
 #include <utility>
 
-CourseObject::CourseObject(int x1, int y1, int x2, int y2, std::string  name) : x1_(x1), y1_(y1),x2_(x2),y2_(y2), name_(std::move(name))
+CourseObject::CourseObject(int x1, int y1, int x2, int y2, std::string name) : x1_(x1), y1_(y1), x2_(x2), y2_(y2),
+                                                                               name_(std::move(name))
 {
 }
 
@@ -33,4 +34,16 @@ int CourseObject::y2() const
 std::string CourseObject::name() const
 {
   return name_;
+}
+
+void CourseObject::shiftX(int x)
+{
+  x1_ += x;
+  x2_ += x;
+}
+
+void CourseObject::shiftY(int y)
+{
+  y1_ += y;
+  y2_ += y;
 }
