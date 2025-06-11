@@ -132,7 +132,7 @@ int MainController::findMinValue(const int* cords, int size, int minValueAllowed
   int min = cords[0];
   for (int i = 0; i < size; i++)
   {
-    if (cords[i] > min && cords[i] > minValueAllowed)
+    if (cords[i] < min && cords[i] > minValueAllowed)
     {
       min = cords[i];
     }
