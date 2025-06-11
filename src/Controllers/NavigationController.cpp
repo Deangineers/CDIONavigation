@@ -48,7 +48,7 @@ void NavigationController::addCourseObject(std::unique_ptr<CourseObject>&& cours
   {
     blockingObjects_.push_back(std::move(courseObject));
   }
-  else if (name == "biggoal" || name == "smallgoal")
+  else if (name == "goal")
   {
     if (goal_ == nullptr)
     {
