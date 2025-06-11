@@ -15,7 +15,7 @@ ClientController::ClientController(std::unique_ptr<IClient> client) : client_(st
 void ClientController::sendCommand(Command command)
 {
   commands_.emplace_back(command);
-  if (commands_.size() > ConfigController::getConfigInt("AmountOfCommandsToAverage"))
+  if (commands_.size() == ConfigController::getConfigInt("AmountOfCommandsToAverage"))
   {
     std::string action = command.getAction();
     int speed = command.getSpeed();
@@ -62,6 +62,11 @@ void ClientController::sendCommand(Command command)
     client_->sendCommandAndAddNewLine(command.formatToSend());
     commands_.clear();
     commands_.reserve(ConfigController::getConfigInt("AmountOfCommandsToAverage"));
+  }
+  if (commands_.size() > ConfigController::getConfigInt("AmountOfCommandsToAverage"))
+  {
+    Utility::appendToFile("log.txt", "Commands.Size was too large\n");
+    clearCommands();
   }
 }
 
