@@ -11,11 +11,11 @@ class Vector
 {
 public:
   Vector(int x, int y);
-  bool isNullVector();
-  double getLength();
-  std::string toString();
-  bool hasSmallerValueThan(Vector v);
-  int getSmallestValue();
+  bool isNullVector() const;
+  double getLength() const;
+  std::string toString() const;
+  bool hasSmallerValueThan(Vector v) const;
+  int getSmallestValue() const;
   int x, y;
 };
 
