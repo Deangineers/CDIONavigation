@@ -70,27 +70,34 @@ void MathUtil::correctCourseObjectForHeightOffset(CourseObject* robotBack, Cours
 
   int dx = frontX - backX;
   int dy = frontY - backY;
-  double pixelLength = std::sqrt(dx * dx + dy * dy);
+  double pixelDistance = std::sqrt(dx * dx + dy * dy);
+  if (pixelDistance < 1e-3) return;
 
-  if (pixelLength < 1e-3)
-  {
-    return;
-  }
-
-  double mmPerPixel = robotLength / pixelLength;
+  double mmPerPixel = robotLength / pixelDistance;
 
   double offsetPixels = robotHeight / mmPerPixel;
 
-  double ux = dx / pixelLength;
-  double uy = dy / pixelLength;
+  auto correct = [&](CourseObject* obj) {
+    int cx = (obj->x1() + obj->x2()) / 2;
+    int cy = (obj->y1() + obj->y2()) / 2;
 
-  int correctionX = static_cast<int>(std::round(-ux * offsetPixels));
-  int correctionY = static_cast<int>(std::round(-uy * offsetPixels));
+    int dcx = cx - imageCenterX_;
+    int dcy = cy - imageCenterY_;
+    double dist = std::sqrt(dcx * dcx + dcy * dcy);
+    if (dist < 1e-3) return;
 
-  robotFront->shiftX(correctionX);
-  robotFront->shiftY(correctionY);
-  robotBack->shiftX(correctionX);
-  robotBack->shiftY(correctionY);
+    double ux = static_cast<double>(dcx) / dist;
+    double uy = static_cast<double>(dcy) / dist;
+
+    int correctionX = static_cast<int>(std::round(-ux * offsetPixels));
+    int correctionY = static_cast<int>(std::round(-uy * offsetPixels));
+
+    obj->shiftX(correctionX);
+    obj->shiftY(correctionY);
+  };
+
+  correct(robotBack);
+  correct(robotFront);
 }
 
 
