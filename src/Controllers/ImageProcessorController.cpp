@@ -61,7 +61,8 @@ void ImageProcessorController::detectRedPixels(const cv::Mat& frame)
             cv::Point p2 = approx[(i + 1) % approx.size()]; // Loop back to start if needed
 
             // Draw line (vector)
-            cv::arrowedLine(frame, p1, p2, cv::Scalar(255, 0, 0), 2, cv::LINE_AA, 0, 0.2); // green arrows
+            cv::arrowedLine(frame, p1, p2, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("WallWidth"),
+                            cv::LINE_AA, 0, 0.01); // green arrows
         }
     }
 }

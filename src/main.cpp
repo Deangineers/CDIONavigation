@@ -49,8 +49,10 @@ int main()
     );
     cv::imshow("EngineBase", frame);
     MainController::navigateAndSendCommand();
-    if (cv::waitKey(1) == 27) // Wait for 1 ms and break on 'Esc' key
+    if (cv::waitKey(33) == 27) // Wait for 1 ms and break on 'Esc' key
+    {
       break;
+    }
   }
 
   cap.release();

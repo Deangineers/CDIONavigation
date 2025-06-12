@@ -22,7 +22,7 @@
   "DistanceBeforeTargetReached": 10,
   "RobotWidth": 50,
   "TotalBalls": 5,
-  "WallWidth": 10,
+  "WallWidth": 40,
   "OuterWallOffsetWhenSearchingForCross": 10,
   "RobotLengthInMM": 20,
   "DistanceBeforeSmallBit": 35,
