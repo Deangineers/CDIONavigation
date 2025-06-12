@@ -24,6 +24,7 @@ int main()
   {
     // Apply red pixel detection
     processor.detectRedPixels(frame);
+    processor.detectBalls(frame);
 
     // Convert to HSV for color-based detection
     cv::Mat hsv;

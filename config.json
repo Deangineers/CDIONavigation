@@ -30,5 +30,7 @@
   "AmountOfCommandsToAverage": 5,
   "MaxDifferenceInAngle": 1,
   "MaxDifferenceInDistance": 5,
-  "RobotHeightInMM": 150
+  "RobotHeightInMM": 150,
+  "MinimumBallSize": 200,
+  "EggBallDiffVal": 1000
 }

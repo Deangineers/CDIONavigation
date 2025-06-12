@@ -75,23 +75,53 @@ void ImageProcessorController::detectBalls(const cv::Mat& frame)
     cv::Mat hsv;
     cv::cvtColor(frame, hsv, cv::COLOR_BGR2HSV);
 
-    cv::Mat mask1, mask2, redMask;
-    cv::inRange(hsv, cv::Scalar(200, 200, 200), cv::Scalar(255, 255, 255), mask1);
-    cv::inRange(hsv, cv::Scalar(200, 200, 200), cv::Scalar(255, 255, 255), mask2);
-    cv::bitwise_or(mask1, mask2, redMask);
+    // Create masks for orange and white colors
+    cv::Mat orangeMask, whiteMask, combinedMask;
+    cv::inRange(hsv, cv::Scalar(10, 100, 100), cv::Scalar(25, 255, 255), orangeMask); // Orange
+    cv::inRange(hsv, cv::Scalar(0, 0, 200), cv::Scalar(180, 40, 255), whiteMask); // White
+    cv::bitwise_or(orangeMask, whiteMask, combinedMask);
 
-    cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(3, 3));
-    cv::morphologyEx(redMask, redMask, cv::MORPH_OPEN, kernel);
+    // Clean the mask
+    cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(10, 10));
+    cv::morphologyEx(combinedMask, combinedMask, cv::MORPH_OPEN, kernel);
 
-    std::vector<cv::Point> redPoints;
-    cv::findNonZero(redMask, redPoints);
+    // Find contours (connected regions)
+    std::vector<std::vector<cv::Point>> contours;
+    cv::findContours(combinedMask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
-    MainController::addBlockedObjects(redPoints);
-    for (const auto& p : redPoints)
+    std::vector<cv::Point> allCenters;
+
+    for (const auto& contour : contours)
     {
-        cv::circle(frame, p, 1, cv::Scalar(0, 0, 255), -1);
+        // Filter small blobs if needed
+        double area = cv::contourArea(contour);
+        int minimumBallSize = ConfigController::getConfigInt("MinimumBallSize");
+        int eggBallDiffVal = ConfigController::getConfigInt("EggBallDiffVal");
+
+        if (area < minimumBallSize) continue; // adjust threshold based on ball size
+
+        // Get bounding box
+        cv::Rect bbox = cv::boundingRect(contour);
+        std::string label = area > eggBallDiffVal ? "egg" : "ball";
+
+        if (label == "egg")
+        {
+            cv::rectangle(frame, bbox, cv::Scalar(255, 0, 255), 2);
+        }
+        else
+        {
+            cv::rectangle(frame, bbox, cv::Scalar(0, 0, 255), 2);
+        }
+
+        // Label it as a "ball"
+        cv::putText(frame, label, cv::Point(bbox.x, bbox.y - 5),
+                    cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 1);
+
+        // Optional: record center point
+        allCenters.push_back((bbox.br() + bbox.tl()) * 0.5);
     }
 }
+
 
 void ImageProcessorController::findAndCreate(cv::Mat& frame, const cv::Mat& hsv,
                                              const cv::Scalar& lower, const cv::Scalar& upper,
