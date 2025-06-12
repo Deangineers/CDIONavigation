@@ -122,13 +122,14 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
 }
 
 std::unique_ptr<JourneyModel> NavigationController::makeJourneyModel(const Vector& objectVector,
-                                                                     bool toCollectBalls)
+                                                                     bool toCollectBalls) const
 {
   const Vector robotVector = {robotFront_->x1() - robotBack_->x1(), robotFront_->y1() - robotBack_->y1()};
   const double angle = MathUtil::calculateAngleDifferenceBetweenVectors(robotVector, objectVector);
 
   auto vectorToRobotBack = MathUtil::calculateVectorToObject(robotFront_.get(), robotBack_.get());
-  double distanceInCm = objectVector.getLength() * ((static_cast<double>(ConfigController::getConfigInt("RobotLengthInMM")) /
+  double distanceInCm = objectVector.getLength() * ((static_cast<double>(ConfigController::getConfigInt(
+      "RobotLengthInMM")) /
     10) / vectorToRobotBack.getLength());
   return std::make_unique<JourneyModel>(distanceInCm, angle, toCollectBalls);
 }
