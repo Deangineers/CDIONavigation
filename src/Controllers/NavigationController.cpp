@@ -288,13 +288,37 @@ Vector NavigationController::getVectorForObjectNearWall(const CourseObject* cour
   {
     return {0, 0};
   }
+  auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
 
   auto closestVectors = getVectorsForClosestBlockingObjects(courseObject);
   Utility::appendToFile(
     "log.txt", "ClosestVectors: " + closestVectors.first.toString() + " | " + closestVectors.second.toString() + "\n");
-  if (closestVectors.second.getLength() > ConfigController::getConfigInt("DistanceToWallBeforeHandling"))
+  if (closestVectors.second.getSmallestValue() < ConfigController::getConfigInt("DistanceToWallBeforeHandling"))
   {
+    auto vectorToWall = closestVectors.first;
+    if (vectorToWall.getSmallestValue() > ConfigController::getConfigInt("DistanceToWallBeforeHandling"))
+    {
+      return MathUtil::calculateVectorToObject(&robotMiddle, courseObject);
+    }
     // 1 wall
+    auto localCourseObject = CourseObject(*courseObject);
+    int singleWallShiftDiff = ConfigController::getConfigInt("SingleWallShiftDiff");
+    if (vectorToWall.x == vectorToWall.getSmallestValue())
+    {
+      localCourseObject.shiftX(vectorToWall.x > 0 ? -singleWallShiftDiff : singleWallShiftDiff);
+    }
+    else
+    {
+      localCourseObject.shiftY(vectorToWall.y > 0 ? -singleWallShiftDiff : singleWallShiftDiff);
+    }
+
+
+    auto vectorToDiffPoint = MathUtil::calculateVectorToObject(&robotMiddle, &localCourseObject);
+    if (vectorToDiffPoint.getLength() < ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning"))
+    {
+      return MathUtil::calculateVectorToObject(&robotMiddle, courseObject);
+    }
+    return MathUtil::calculateVectorToObject(&robotMiddle, &localCourseObject);
   }
   else
   {

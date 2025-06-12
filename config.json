@@ -31,5 +31,9 @@
   "MaxDifferenceInAngle": 1,
   "MaxDifferenceInDistance": 5,
   "RobotHeightInMM": 150,
-  "DistanceToWallBeforeHandling": 50
+  "DistanceToWallBeforeHandling": 50,
+  "DistanceToBallNear1Wall": 50,
+  "DistanceToBallInCorner": 50,
+  "SingleWallShiftDiff": 20,
+  "DistanceToShiftedPointBeforeTurning": 10
 }
