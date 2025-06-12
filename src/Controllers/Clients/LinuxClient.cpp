@@ -30,6 +30,11 @@ LinuxClient::~LinuxClient()
 void LinuxClient::sendCommandAndAddNewLine(const std::string& command)
 {
   std::lock_guard lock(mutex_);
+  if (first)
+  {
+    first = false;
+    return;
+  }
   commandToSend_ = command + "\n";
 }
 
@@ -101,6 +106,7 @@ void LinuxClient::sendCommand()
     ssize_t bytesReceived = recv(serverSocket, buffer, 1024, 0);
     if (bytesReceived > 0)
     {
+      first = true;
       commandToSend_ = "";
       Utility::appendToFile("log.txt", "Received Response\n");
     }

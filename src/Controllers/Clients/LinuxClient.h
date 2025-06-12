@@ -16,6 +16,7 @@ public:
   ~LinuxClient() override;
   void sendCommandAndAddNewLine(const std::string& command) override;
   void sendBallCollectionCommand(const std::string& command) override;
+
 private:
   void connectToServer() override;
   void sendCommand();
@@ -25,6 +26,7 @@ private:
   std::mutex mutex_;
   std::thread sendThread_;
   bool keepRunning_;
+  bool first = true;
 };
 
 #endif //LINUXCLIENT_H
