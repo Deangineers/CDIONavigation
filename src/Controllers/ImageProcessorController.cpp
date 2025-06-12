@@ -101,7 +101,7 @@ void ImageProcessorController::detectBalls(const cv::Mat& frame)
 
         // Optional: Circularity check
         double circularity = 4 * CV_PI * area / (perimeter * perimeter);
-        if (circularity < 0.7) // adjust threshold as needed
+        if (circularity < 0.6) // adjust threshold as needed
             continue;
 
         cv::Rect rect = cv::boundingRect(cnt);
