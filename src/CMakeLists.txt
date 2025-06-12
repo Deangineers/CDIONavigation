@@ -28,6 +28,8 @@ add_executable(CDIONavigationFull
         Models/Vector.cpp
         Models/Vector.h
         main.cpp
+        Controllers/ImageProcessorController.cpp
+        Controllers/ImageProcessorController.h
 )
 
 target_link_libraries(CDIONavigationFull PUBLIC Utility)

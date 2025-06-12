@@ -5,8 +5,11 @@
 #include "Controllers/MainController.h"
 #include <opencv2/opencv.hpp>
 
+#include "Controllers/ImageProcessorController.h"
+
 int main()
 {
+  MainController::mockInit();
   cv::VideoCapture cap(0);
   if (!cap.isOpened())
   {
@@ -14,10 +17,36 @@ int main()
     return -1;
   }
   cv::Mat frame;
+  ImageProcessorController processor;
+
+
   while (cap.read(frame))
   {
-    cv::imshow("frame", frame);
+    // Apply red pixel detection
+    processor.detectRedPixels(frame);
 
+    // Convert to HSV for color-based detection
+    cv::Mat hsv;
+    cv::cvtColor(frame, hsv, cv::COLOR_BGR2HSV);
+
+    // Find and create robot front (green-ish)
+    processor.findAndCreate(
+      frame,
+      hsv,
+      cv::Scalar(35, 50, 50), // Lower HSV bound for green
+      cv::Scalar(85, 255, 255), // Upper HSV bound for green
+      "robotFront"
+    );
+
+    // Find and create robot back (blue-purple)
+    processor.findAndCreate(
+      frame,
+      hsv,
+      cv::Scalar(125, 80, 80), // Lower HSV bound for purple
+      cv::Scalar(155, 255, 255), // Upper HSV bound for purple
+      "robotBack"
+    );
+    cv::imshow("EngineBase", frame);
     if (cv::waitKey(1) == 27) // Wait for 1 ms and break on 'Esc' key
       break;
   }

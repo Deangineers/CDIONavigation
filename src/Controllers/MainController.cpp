@@ -16,7 +16,7 @@
 
 void MainController::init()
 {
-  ConfigController::loadConfig("config.json");
+  ConfigController::loadConfig("../../config.json");
   Utility::writeToFile("log.txt", "");
   clientController_ = std::make_unique<ClientController>(std::make_unique<LinuxClient>());
   navigationController_ = std::make_unique<NavigationController>();
@@ -24,7 +24,7 @@ void MainController::init()
 
 void MainController::mockInit()
 {
-  ConfigController::loadConfig("config.json");
+  ConfigController::loadConfig("../../config.json");
   clientController_ = std::make_unique<ClientController>(std::make_unique<MockClient>());
   Utility::writeToFile("log.txt", "");
   navigationController_ = std::make_unique<NavigationController>();
@@ -33,6 +33,11 @@ void MainController::mockInit()
 void MainController::addCourseObject(std::unique_ptr<CourseObject>&& courseObject)
 {
   navigationController_->addCourseObject(std::move(courseObject));
+}
+
+void MainController::addBlockedObjects(const std::vector<cv::Point>& blockedObjects)
+{
+  // TODO
 }
 
 void MainController::navigateAndSendCommand()

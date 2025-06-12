@@ -2,7 +2,7 @@
 
 #include "Controllers/MainController.h"
 #include "Controllers/NavigationController.h"
-
+/*
 extern "C"
 {
 
@@ -23,9 +23,6 @@ extern "C"
 
   void navigateAndSendCommand()
   {
-    // Optimal but risky:
-    //auto thread = std::thread(MainController::navigateAndSendCommand);
-    //thread.detach();
     std::cout << "Calling into MainController\n";
     MainController::navigateAndSendCommand();
   }
@@ -76,3 +73,4 @@ extern "C"
   }
 
 }
+*/

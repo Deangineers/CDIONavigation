@@ -4,6 +4,8 @@
 
 #ifndef MAINCONTROLLER_H
 #define MAINCONTROLLER_H
+#include <opencv2/core/types.hpp>
+
 #include "ClientController.h"
 #include "NavigationController.h"
 #include "../Models/Command.h"
@@ -16,8 +18,11 @@ public:
   static void init();
   static void mockInit();
   static void addCourseObject(std::unique_ptr<CourseObject>&& courseObject);
+  static void addBlockedObjects(const std::vector<cv::Point>& blockedObjects);
   static void navigateAndSendCommand();
   static Command journeyToCommand(const JourneyModel* journey);
+
+private:
   static int findMaxValue(const int* cords, int size, int maxValueAllowed);
   static int findMinValue(const int* cords, int size, int minValueAllowed);
 
