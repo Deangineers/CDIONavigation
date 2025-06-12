@@ -75,50 +75,57 @@ void ImageProcessorController::detectBalls(const cv::Mat& frame)
     cv::Mat hsv;
     cv::cvtColor(frame, hsv, cv::COLOR_BGR2HSV);
 
-    // Create masks for orange and white colors
-    cv::Mat orangeMask, whiteMask, combinedMask;
+    // Define color ranges for orange and white
+    cv::Mat orangeMask, whiteMask, mask;
     cv::inRange(hsv, cv::Scalar(10, 100, 100), cv::Scalar(25, 255, 255), orangeMask); // Orange
     cv::inRange(hsv, cv::Scalar(0, 0, 200), cv::Scalar(180, 40, 255), whiteMask); // White
-    cv::bitwise_or(orangeMask, whiteMask, combinedMask);
 
-    // Clean the mask
-    cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(10, 10));
-    cv::morphologyEx(combinedMask, combinedMask, cv::MORPH_OPEN, kernel);
+    cv::bitwise_or(orangeMask, whiteMask, mask);
+    cv::morphologyEx(mask, mask, cv::MORPH_OPEN, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
 
-    // Find contours (connected regions)
     std::vector<std::vector<cv::Point>> contours;
-    cv::findContours(combinedMask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+    cv::findContours(mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
-    std::vector<cv::Point> allCenters;
-
-    for (const auto& contour : contours)
+    for (const auto& cnt : contours)
     {
-        // Filter small blobs if needed
-        double area = cv::contourArea(contour);
+        double area = cv::contourArea(cnt);
+        double perimeter = cv::arcLength(cnt, true);
+
         int minimumBallSize = ConfigController::getConfigInt("MinimumBallSize");
         int eggBallDiffVal = ConfigController::getConfigInt("EggBallDiffVal");
 
-        if (area < minimumBallSize) continue; // adjust threshold based on ball size
+        if (area < minimumBallSize || perimeter == 0)
+            continue;
 
-        // Get bounding box
-        cv::Rect bbox = cv::boundingRect(contour);
         std::string label = area > eggBallDiffVal ? "egg" : "ball";
 
-        if (label == "egg")
-        {
-            cv::rectangle(frame, bbox, cv::Scalar(255, 0, 255), 2);
-        }
-        else
-        {
-            cv::rectangle(frame, bbox, cv::Scalar(0, 0, 255), 2);
-        }
+        // Optional: Circularity check
+        double circularity = 4 * CV_PI * area / (perimeter * perimeter);
+        if (circularity < 0.6) // adjust threshold as needed
+            continue;
 
-        // Label it as a "ball"
-        cv::putText(frame, label, cv::Point(bbox.x, bbox.y - 5),
-                    cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 1);
+        cv::Rect rect = cv::boundingRect(cnt);
+        int x1 = rect.x, y1 = rect.y;
+        int x2 = x1 + rect.width, y2 = y1 + rect.height;
 
-        MainController::addCourseObject(
-            std::make_unique<CourseObject>(bbox.tl().x, bbox.tl().y, bbox.br().x, bbox.br().y, label));
+        MainController::addCourseObject(std::make_unique<CourseObject>(x1, y1, x2, y2, label));
+
+        // Draw bounding box and label
+        cv::rectangle(frame, rect, cv::Scalar(0, 255, 0), 2);
+        cv::putText(frame, label, cv::Point(x1, y1 - 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
+
+        // Optional: visualize edge points
+        cv::Mat roi_mask = mask(rect);
+        cv::GaussianBlur(roi_mask, roi_mask, cv::Size(5, 5), 0);
+        cv::Mat edges;
+        cv::Canny(roi_mask, edges, 50, 150);
+
+        std::vector<cv::Point> edge_points;
+        cv::findNonZero(edges, edge_points);
+        for (const auto& pt : edge_points)
+        {
+            cv::circle(frame, pt + rect.tl(), 1, cv::Scalar(0, 0, 255), -1);
+        }
     }
 }
 
@@ -148,7 +155,8 @@ void ImageProcessorController::findAndCreate(cv::Mat& frame, const cv::Mat& hsv,
 
             MainController::addCourseObject(std::make_unique<CourseObject>(x1, y1, x2, y2, label));
             cv::rectangle(frame, rect, cv::Scalar(0, 255, 0), 2);
-            cv::putText(frame, label, cv::Point(x1, y1 - 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
+            cv::putText(frame, label, cv::Point(x1, y1 - 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0),
+                        2);
 
             cv::Mat roi_mask = mask(rect);
             cv::GaussianBlur(roi_mask, roi_mask, cv::Size(5, 5), 0);
