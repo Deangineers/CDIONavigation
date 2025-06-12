@@ -117,8 +117,8 @@ void ImageProcessorController::detectBalls(const cv::Mat& frame)
         cv::putText(frame, label, cv::Point(bbox.x, bbox.y - 5),
                     cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 1);
 
-        // Optional: record center point
-        allCenters.push_back((bbox.br() + bbox.tl()) * 0.5);
+        MainController::addCourseObject(
+            std::make_unique<CourseObject>(bbox.tl().x, bbox.tl().y, bbox.br().x, bbox.br().y, label));
     }
 }
 
