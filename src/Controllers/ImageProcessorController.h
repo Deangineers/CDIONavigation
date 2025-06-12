@@ -16,6 +16,7 @@ public:
   cv::Mat applyHighContrast(const cv::Mat& frame);
   void detectRedPixels(const cv::Mat& frame);
   void detectBlackPixels(const cv::Mat& frame);
+  void detectBalls(const cv::Mat& frame);
   void findAndCreate(cv::Mat& frame, const cv::Mat& hsv, const cv::Scalar& lower, const cv::Scalar& upper,
                      const std::string& label);
 };

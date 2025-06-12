@@ -70,6 +70,29 @@ void ImageProcessorController::detectBlackPixels(const cv::Mat& frame)
     cv::findNonZero(mask, blackPoints);
 }
 
+void ImageProcessorController::detectBalls(const cv::Mat& frame)
+{
+    cv::Mat hsv;
+    cv::cvtColor(frame, hsv, cv::COLOR_BGR2HSV);
+
+    cv::Mat mask1, mask2, redMask;
+    cv::inRange(hsv, cv::Scalar(200, 200, 200), cv::Scalar(255, 255, 255), mask1);
+    cv::inRange(hsv, cv::Scalar(200, 200, 200), cv::Scalar(255, 255, 255), mask2);
+    cv::bitwise_or(mask1, mask2, redMask);
+
+    cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(3, 3));
+    cv::morphologyEx(redMask, redMask, cv::MORPH_OPEN, kernel);
+
+    std::vector<cv::Point> redPoints;
+    cv::findNonZero(redMask, redPoints);
+
+    MainController::addBlockedObjects(redPoints);
+    for (const auto& p : redPoints)
+    {
+        cv::circle(frame, p, 1, cv::Scalar(0, 0, 255), -1);
+    }
+}
+
 void ImageProcessorController::findAndCreate(cv::Mat& frame, const cv::Mat& hsv,
                                              const cv::Scalar& lower, const cv::Scalar& upper,
                                              const std::string& label)
