@@ -1,9 +1,12 @@
 cmake_minimum_required(VERSION 3.25)
-project(CDIONavigation)
+project(CDIONavigationFull)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_library(CDIONavigation SHARED PythonBinding.cpp
+find_package(OpenCV REQUIRED)
+
+add_executable(CDIONavigationFull
+        PythonBinding.cpp
         Controllers/NavigationController.cpp
         Controllers/NavigationController.h
         Models/Command.cpp
@@ -24,6 +27,9 @@ add_library(CDIONavigation SHARED PythonBinding.cpp
         Controllers/ClientController.h
         Models/Vector.cpp
         Models/Vector.h
+        main.cpp
 )
 
-target_link_libraries(CDIONavigation PUBLIC Utility)
+target_link_libraries(CDIONavigationFull PUBLIC Utility)
+target_include_directories(CDIONavigationFull PRIVATE ${OpenCV_INCLUDE_DIRS})
+target_link_libraries(CDIONavigationFull PRIVATE ${OpenCV_LIBS})

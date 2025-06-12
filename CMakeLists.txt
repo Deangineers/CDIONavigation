@@ -14,19 +14,15 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(Utility)
 
 set_target_properties(Utility PROPERTIES POSITION_INDEPENDENT_CODE ON)
+FetchContent_Declare(
+        googletest
+        GIT_REPOSITORY https://github.com/google/googletest.git
+        GIT_TAG release-1.12.1  # Specify the version you need
+)
+FetchContent_MakeAvailable(googletest)
+add_subdirectory(tests)
 
-if (testing)
-    FetchContent_Declare(
-            googletest
-            GIT_REPOSITORY https://github.com/google/googletest.git
-            GIT_TAG release-1.12.1  # Specify the version you need
-    )
-    FetchContent_MakeAvailable(googletest)
-    add_subdirectory(tests)
-
-    enable_testing()
-    add_subdirectory(Simulator)
-
-endif ()
+enable_testing()
+add_subdirectory(Simulator)
 
 add_subdirectory(src)
