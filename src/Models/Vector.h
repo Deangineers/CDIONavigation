@@ -14,6 +14,8 @@ public:
   bool isNullVector();
   double getLength();
   std::string toString();
+  bool hasSmallerValueThan(Vector v);
+  int getSmallestValue();
   int x, y;
 };
 

@@ -310,12 +310,12 @@ std::pair<Vector, Vector> NavigationController::getVectorsForClosestBlockingObje
   for (const auto& blockingObject : blockingObjects_)
   {
     auto vector = MathUtil::calculateVectorToObject(courseObject, blockingObject.get());
-    if (vector.getLength() < returnPair.first.getLength())
+    if (not returnPair.first.hasSmallerValueThan(vector))
     {
       returnPair.second = returnPair.first;
       returnPair.first = vector;
     }
-    else if (vector.getLength() < returnPair.second.getLength())
+    else if (not returnPair.second.hasSmallerValueThan(vector))
     {
       returnPair.second = vector;
     }

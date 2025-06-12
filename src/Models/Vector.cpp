@@ -23,3 +23,13 @@ std::string Vector::toString()
 {
   return "(" + std::to_string(x) + ", " + std::to_string(y) + ")";
 }
+
+bool Vector::hasSmallerValueThan(Vector v)
+{
+  return getSmallestValue() < v.getSmallestValue();
+}
+
+int Vector::getSmallestValue()
+{
+  return (x > y) ? x : y;
+}
