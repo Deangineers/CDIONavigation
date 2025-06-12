@@ -106,6 +106,7 @@ void LinuxClient::sendCommand()
     ssize_t bytesReceived = recv(serverSocket, buffer, 1024, 0);
     if (bytesReceived > 0)
     {
+      lock.lock();
       first = true;
       commandToSend_ = "";
       Utility::appendToFile("log.txt", "Received Response\n");
