@@ -45,13 +45,24 @@ void ImageProcessorController::detectRedPixels(const cv::Mat& frame)
     cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
     cv::morphologyEx(redMask, redMask, cv::MORPH_OPEN, kernel);
 
-    std::vector<cv::Point> redPoints;
-    cv::findNonZero(redMask, redPoints);
+    std::vector<std::vector<cv::Point>> contours;
+    cv::findContours(redMask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
-    MainController::addBlockedObjects(redPoints);
-    for (const auto& p : redPoints)
+    for (const auto& contour : contours)
     {
-        cv::circle(frame, p, 1, cv::Scalar(255, 0, 0), -1);
+        // Approximate contour to get corners
+        std::vector<cv::Point> approx;
+        cv::approxPolyDP(contour, approx, 10, true); // epsilon=10 can be tuned
+
+        // Draw vectors between points
+        for (size_t i = 0; i < approx.size(); ++i)
+        {
+            cv::Point p1 = approx[i];
+            cv::Point p2 = approx[(i + 1) % approx.size()]; // Loop back to start if needed
+
+            // Draw line (vector)
+            cv::arrowedLine(frame, p1, p2, cv::Scalar(255, 0, 0), 2, cv::LINE_AA, 0, 0.2); // green arrows
+        }
     }
 }
 
