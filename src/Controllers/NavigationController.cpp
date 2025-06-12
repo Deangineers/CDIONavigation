@@ -186,8 +186,8 @@ void NavigationController::removeBallsInsideRobot()
 
 Vector NavigationController::navigateToGoal() const
 {
-  Vector goal(-1,-1);
-  if (ConfigController::getConfigInt("goalIsLeft"))
+  Vector goal(-1, -1);
+  if (ConfigController::getConfigBool("goalIsLeft"))
   {
     goal = navigateToLeftGoal();
   }
