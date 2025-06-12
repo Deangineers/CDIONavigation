@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <opencv2/core/matx.hpp>
 
 #include "../Models/JourneyModel.h"
 #include "Utility/ConfigController.h"
@@ -185,23 +186,34 @@ void NavigationController::removeBallsInsideRobot()
 
 Vector NavigationController::navigateToGoal() const
 {
-  if (goal_ == nullptr)
+  Vector goal(-1,-1);
+  if (ConfigController::getConfigInt("goalIsLeft"))
   {
-    return {0, 0};
-  }
-  int targetX;
-  if (goal_->x1() > ConfigController::getConfigInt("middleXOnAxis"))
-  {
-    targetX = goal_->x1() - ConfigController::getConfigInt("distanceToGoal");
+    goal = navigateToLeftGoal();
   }
   else
   {
-    targetX = goal_->x1() + ConfigController::getConfigInt("distanceToGoal");
+    goal = navigateToRightGoal();
   }
-  auto courseObject = CourseObject(targetX, goal_->y1(), targetX, goal_->y2(), "goal");
+
+  if (goal.x == -1)
+  {
+    return {0, 0};
+  }
+
+  int targetX;
+  if (goal.x > ConfigController::getConfigInt("middleXOnAxis"))
+  {
+    targetX = goal.x - ConfigController::getConfigInt("distanceToGoal");
+  }
+  else
+  {
+    targetX = goal.x + ConfigController::getConfigInt("distanceToGoal");
+  }
+  auto courseObject = CourseObject(targetX, goal.y, targetX, goal.y, "goal");
 
   auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
-  return MathUtil::calculateVectorToObject(&robotMiddle, goal_.get());
+  return MathUtil::calculateVectorToObject(&robotMiddle, &courseObject);
 }
 
 Vector NavigationController::findClosestBall() const
@@ -225,6 +237,50 @@ Vector NavigationController::findClosestBall() const
   }
   auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
   return MathUtil::calculateVectorToObject(&robotMiddle, closestBall);
+}
+
+Vector NavigationController::navigateToLeftGoal() const
+{
+  int minY = -1;
+  int maxX = -1;
+  int maxY = -1;
+
+  for (const auto& object : blockingObjects_)
+  {
+    if (object->x1() > maxX)
+      maxX = object->x1();
+
+    if (object->y2() > maxY)
+      maxY = object->y2();
+
+    if (object->y1() < minY)
+      minY = object->y1();
+  }
+
+  int middleY = (minY + maxY) / 2;
+  return Vector(maxX, middleY);
+}
+
+Vector NavigationController::navigateToRightGoal() const
+{
+  int minY = -1;
+  int minX = -1;
+  int maxY = -1;
+
+  for (const auto& object : blockingObjects_)
+  {
+    if (object->x1() < minX)
+      minX = object->x1();
+
+    if (object->y2() > maxY)
+      maxY = object->y2();
+
+    if (object->y1() < minY)
+      minY = object->y1();
+  }
+
+  int middleY = (minY + maxY) / 2;
+  return Vector(minX, middleY);
 }
 
 Vector NavigationController::handleCollision(Vector objectVector)

@@ -26,6 +26,8 @@ private:
   std::unique_ptr<JourneyModel> makeJourneyModel(const Vector& objectVector, bool toCollectBalls);
   [[nodiscard]] Vector navigateToGoal() const;
   [[nodiscard]] Vector findClosestBall() const;
+  [[nodiscard]] Vector navigateToLeftGoal() const;
+  [[nodiscard]] Vector navigateToRightGoal() const;
 
   Vector handleCollision(Vector objectVector);
 

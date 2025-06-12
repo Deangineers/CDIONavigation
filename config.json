@@ -32,5 +32,6 @@
   "MaxDifferenceInDistance": 5,
   "RobotHeightInMM": 150,
   "MinimumBallSize": 250,
-  "EggBallDiffVal": 1000
+  "EggBallDiffVal": 1000,
+  "goalIsLeft": true
 }
