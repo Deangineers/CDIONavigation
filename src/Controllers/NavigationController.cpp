@@ -25,10 +25,10 @@ void NavigationController::addCourseObject(std::unique_ptr<CourseObject>&& cours
   }
   else if (name == "robotFront")
   {
-    int x1 = courseObject->x1() + ConfigController::getConfigInt("RobotFrontOffsetX");
-    int y1 = courseObject->y1() + ConfigController::getConfigInt("RobotFrontOffsetY");
-    int x2 = courseObject->x2() + ConfigController::getConfigInt("RobotFrontOffsetX");
-    int y2 = courseObject->y2() + ConfigController::getConfigInt("RobotFrontOffsetY");
+    int x1 = courseObject->x1(); + ConfigController::getConfigInt("RobotFrontOffsetX");
+    int y1 = courseObject->y1(); + ConfigController::getConfigInt("RobotFrontOffsetY");
+    int x2 = courseObject->x2(); + ConfigController::getConfigInt("RobotFrontOffsetX");
+    int y2 = courseObject->y2(); + ConfigController::getConfigInt("RobotFrontOffsetY");
 
     x1 = (x2 + x1)/2;
     y1 = (y2 + y1)/2;
@@ -37,10 +37,10 @@ void NavigationController::addCourseObject(std::unique_ptr<CourseObject>&& cours
   }
   else if (name == "robotBack")
   {
-    int x1 = courseObject->x1() + ConfigController::getConfigInt("RobotBackOffsetX");
-    int y1 = courseObject->y1() + ConfigController::getConfigInt("RobotBackOffsetY");
-    int x2 = courseObject->x2() + ConfigController::getConfigInt("RobotBackOffsetX");
-    int y2 = courseObject->y2() + ConfigController::getConfigInt("RobotBackOffsetY");
+    int x1 = courseObject->x1(); + ConfigController::getConfigInt("RobotBackOffsetX");
+    int y1 = courseObject->y1(); + ConfigController::getConfigInt("RobotBackOffsetY");
+    int x2 = courseObject->x2(); + ConfigController::getConfigInt("RobotBackOffsetX");
+    int y2 = courseObject->y2(); + ConfigController::getConfigInt("RobotBackOffsetY");
 
     x1 = (x2 + x1)/2;
     y1 = (y2 + y1)/2;
@@ -110,7 +110,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     Utility::appendToFile("log.txt", "No Robot\n");
     return nullptr;
   }
-  MathUtil::correctCourseObjectForHeightOffset(robotBack_.get(), robotFront_.get());
+  //MathUtil::correctCourseObjectForHeightOffset(robotBack_.get(), robotFront_.get());
   bool toCollectBalls = true;
   auto objectVector = Vector(0, 0);
   if (ballVector_.empty())
