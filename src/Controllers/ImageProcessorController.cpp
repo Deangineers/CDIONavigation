@@ -51,6 +51,11 @@ void ImageProcessorController::detectRedPixels(const cv::Mat& frame)
 
     for (const auto& contour : contours)
     {
+        double area = cv::contourArea(contour);
+        if (area < ConfigController::getConfigInt("minRedSize"))
+        {
+            continue;
+        }
         // Approximate contour to get corners
         std::vector<cv::Point> approx;
         cv::approxPolyDP(contour, approx, 10, true); // epsilon=10 can be tuned

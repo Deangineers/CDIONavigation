@@ -11,7 +11,7 @@
   "AllowedAngleDifference": 5,
   "MaxAngleBeforeSlowingDown": 20,
   "RotationSlowSpeed": 100,
-  "RotationFastSpeed": 500,
+  "RotationFastSpeed": 150,
   "FastSpeedMinimumDistance": 30,
   "ForwardFastSpeed": 500,
   "ForwardSlowSpeed": 100,
@@ -38,5 +38,6 @@
   "DistanceToShiftedPointBeforeTurning": 10,
   "MinimumBallSize": 250,
   "EggBallDiffVal": 1000,
-  "goalIsLeft": true
+  "goalIsLeft": true,
+  "minRedSize": 50
 }
