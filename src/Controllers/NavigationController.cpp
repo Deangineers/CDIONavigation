@@ -208,7 +208,11 @@ Vector NavigationController::navigateToGoal() const
   {
     targetX = goal.x + ConfigController::getConfigInt("distanceToGoal");
   }
+
   auto courseObject = CourseObject(targetX, goal.y, targetX, goal.y, "goal");
+
+  Utility::appendToFile(
+    "log.txt", "Navigating to Ball: " + std::to_string(courseObject.x1()) + ", " + std::to_string(courseObject.y1()));
 
   auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
   return MathUtil::calculateVectorToObject(&robotMiddle, &courseObject);
@@ -232,6 +236,16 @@ Vector NavigationController::findClosestBall() const
       shortestDistance = vectorToBall.getLength();
       closestBall = ball.get();
     }
+  }
+  if (closestBall != nullptr)
+  {
+    Utility::appendToFile(
+      "log.txt", "Navigating to Ball: " + std::to_string(closestBall->x1()) + ", " + std::to_string(closestBall->y1()));
+  }
+  else
+  {
+    Utility::appendToFile(
+      "log.txt", "Navigating to Ball: BUT NO BALLS FOUND");
   }
   auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
   return MathUtil::calculateVectorToObject(&robotMiddle, closestBall);
