@@ -10,12 +10,16 @@
 int main()
 {
   MainController::mockInit();
-  cv::VideoCapture cap(0);
+  cv::VideoCapture cap(2);
+
   if (!cap.isOpened())
   {
     std::cerr << "Failed to open webcam\n";
     return -1;
   }
+  cap.set(cv::CAP_PROP_FRAME_WIDTH,  1920);
+  cap.set(cv::CAP_PROP_FRAME_HEIGHT, 1080);
+
   cv::Mat frame;
   ImageProcessorController processor;
 
