@@ -55,7 +55,10 @@ CourseObject MathUtil::getRobotMiddle(const CourseObject* robotBack, const Cours
   const int middleY1 = (robotFront->y1() + robotBack->y1()) / 2;
   const int middleY2 = (robotFront->y2() + robotBack->y2()) / 2;
 
-  return CourseObject(middleX1, middleY1, middleX2, middleY2, "");
+  const int middleX = (middleX1 + middleX2) / 2;
+  const int middleY = (middleY1 + middleY2) / 2;
+
+  return CourseObject(middleX, middleY, middleX, middleY, "");
 }
 
 void MathUtil::correctCourseObjectForHeightOffset(CourseObject* robotBack, CourseObject* robotFront)

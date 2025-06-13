@@ -30,6 +30,8 @@ add_executable(CDIONavigationFull
         main.cpp
         Controllers/ImageProcessorController.cpp
         Controllers/ImageProcessorController.h
+        Models/BlockingObject.cpp
+        Models/BlockingObject.h
 )
 
 target_link_libraries(CDIONavigationFull PUBLIC Utility)

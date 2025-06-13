@@ -6,11 +6,13 @@
 
 #include <algorithm>
 #include <iostream>
+#include <opencv2/imgproc.hpp>
 #include <opencv2/core/matx.hpp>
 
 #include "../Models/JourneyModel.h"
 #include "Utility/ConfigController.h"
 #include "cmath"
+#include "MainController.h"
 #include "MathUtil.h"
 #include "Utility/Utility.h"
 
@@ -19,6 +21,7 @@ void NavigationController::addCourseObject(std::unique_ptr<CourseObject>&& cours
   const std::string name = courseObject->name();
   if (name == "ball")
   {
+    //std::cout << "Added ball\n";
     ballVector_.push_back(std::move(courseObject));
   }
   else if (name == "robotFront")
@@ -28,8 +31,8 @@ void NavigationController::addCourseObject(std::unique_ptr<CourseObject>&& cours
     int x2 = courseObject->x2() + ConfigController::getConfigInt("RobotFrontOffsetX");
     int y2 = courseObject->y2() + ConfigController::getConfigInt("RobotFrontOffsetY");
 
-    x1 += x2 - x1;
-    y1 += y2 - y1;
+    x1 = (x2 + x1)/2;
+    y1 = (y2 + y1)/2;
 
     robotFront_ = std::make_unique<CourseObject>(x1, y1, x1, y1, "robotFront");
   }
@@ -40,14 +43,26 @@ void NavigationController::addCourseObject(std::unique_ptr<CourseObject>&& cours
     int x2 = courseObject->x2() + ConfigController::getConfigInt("RobotBackOffsetX");
     int y2 = courseObject->y2() + ConfigController::getConfigInt("RobotBackOffsetY");
 
-    x1 += x2 - x1;
-    y1 += y2 - y1;
+    x1 = (x2 + x1)/2;
+    y1 = (y2 + y1)/2;
 
     robotBack_ = std::make_unique<CourseObject>(x1, y1, x1, y1, "robotBack");
   }
-  else if (name == "blockedObject" || name == "egg")
+  else if (name == "egg")
   {
-    blockingObjects_.push_back(std::move(courseObject));
+    auto horizontalVector = Vector(courseObject->x2() - courseObject->x1(), 0);
+    auto verticalVector = Vector(0,courseObject->y2() - courseObject->y1());
+
+    auto topBar = std::make_unique<BlockingObject>(courseObject->x1(),courseObject->y1(),horizontalVector);
+    auto bottomBar = std::make_unique<BlockingObject>(courseObject->x1(),courseObject->y2(),horizontalVector);
+
+    auto leftBar = std::make_unique<BlockingObject>(courseObject->x1(),courseObject->y1(),verticalVector);
+    auto rightBar = std::make_unique<BlockingObject>(courseObject->x2(),courseObject->y1(),verticalVector);
+
+    blockingObjects_.push_back(std::move(topBar));
+    blockingObjects_.push_back(std::move(bottomBar));
+    blockingObjects_.push_back(std::move(leftBar));
+    blockingObjects_.push_back(std::move(rightBar));
   }
   else if (name == "goal")
   {
@@ -73,6 +88,11 @@ void NavigationController::addCourseObject(std::unique_ptr<CourseObject>&& cours
   {
     throw std::runtime_error("Invalid courseObject name" + name);
   }
+}
+
+void NavigationController::addBlockingObject(std::unique_ptr<BlockingObject>&& blockingObject)
+{
+  blockingObjects_.push_back(std::move(blockingObject));
 }
 
 void NavigationController::clearObjects()
@@ -119,6 +139,10 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     Utility::appendToFile("log.txt", "objectVector = {0,0}, secondCheck\n");
   }
 
+  auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(),robotFront_.get());
+  cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(),robotMiddle.y1()}, {robotMiddle.x1() + objectVector.x, robotMiddle.y1() + objectVector.y}, cv::Scalar(255, 0, 255), 1,
+                                  cv::LINE_AA, 0, 0.01);
+
   return makeJourneyModel(objectVector, toCollectBalls);
 }
 
@@ -141,24 +165,39 @@ void NavigationController::removeBallsOutsideCourse()
   {
     return;
   }
-  auto topLeftCornerLambda = [](const std::unique_ptr<CourseObject>& a, const std::unique_ptr<CourseObject>& b) -> bool
-  {
-    return a->x1() < b->x1() && a->y1() < b->y1();
-  };
-  auto topLeftCorner = std::max_element(blockingObjects_.begin(), blockingObjects_.end(), topLeftCornerLambda)->get();
-  auto bottomRightCornerLambda = [](const std::unique_ptr<CourseObject>& a,
-                                    const std::unique_ptr<CourseObject>& b) -> bool
-  {
-    return a->x1() > b->x1() && a->y1() > b->y1();
-  };
 
-  auto bottomRightCorner = std::max_element(blockingObjects_.begin(), blockingObjects_.end(), bottomRightCornerLambda)->
-    get();
+  int minX = INT_MAX;
+  int minY = INT_MAX;
+  int highX = INT_MIN;
+  int highY = INT_MIN;
 
-  auto deletionLambda = [topLeftCorner,bottomRightCorner](const std::unique_ptr<CourseObject>& a) -> bool
+  for (const auto& blockingObject : blockingObjects_)
   {
-    return a->x1() > topLeftCorner->x1() && bottomRightCorner->x1() > a->x1() && a->y1() > topLeftCorner->y1() &&
-      bottomRightCorner->y1() > a->y1();
+    auto max = blockingObject->maxPoints();
+    auto min = blockingObject->minimalPoints();
+
+    if (min.x < minX)
+    {
+      minX = min.x;
+    }
+    if (min.y < minY)
+    {
+      minY = min.y;
+    }
+    if (highX < max.x)
+    {
+      highX = max.x;
+    }
+    if (highY < max.y)
+    {
+      highY = max.y;
+    }
+  }
+
+  auto deletionLambda = [minX,minY,highX,highY](const std::unique_ptr<CourseObject>& a) -> bool
+  {
+    return (a->x1() < minX || highX > a->x2()) && (a->y1() < minY ||
+      highY > a->y2());
   };
 
   std::erase_if(ballVector_, deletionLambda);
@@ -232,6 +271,7 @@ Vector NavigationController::findClosestBall() const
   {
     auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
     auto vectorToBall = MathUtil::calculateVectorToObject(&robotMiddle, ball.get());
+    vectorToBall = getVectorForObjectNearWall(ball.get());
     if (vectorToBall.getLength() < shortestDistance)
     {
       shortestDistance = vectorToBall.getLength();
@@ -256,45 +296,49 @@ Vector NavigationController::findClosestBall() const
 Vector NavigationController::navigateToLeftGoal() const
 {
   int minY = -1;
-  int maxX = -1;
-  int maxY = -1;
-
-  for (const auto& object : blockingObjects_)
-  {
-    if (object->x1() > maxX)
-      maxX = object->x1();
-
-    if (object->y2() > maxY)
-      maxY = object->y2();
-
-    if (object->y1() < minY)
-      minY = object->y1();
-  }
-
-  int middleY = (minY + maxY) / 2;
-  return Vector(maxX, middleY);
-}
-
-Vector NavigationController::navigateToRightGoal() const
-{
-  int minY = -1;
   int minX = -1;
   int maxY = -1;
 
   for (const auto& object : blockingObjects_)
   {
-    if (object->x1() < minX)
-      minX = object->x1();
+    const int x0 = object->x();
+    const int y0 = object->y();
 
-    if (object->y2() > maxY)
-      maxY = object->y2();
+    const Vector v = object->vector();
+    const int x1 = x0 + v.x;
+    const int y1 = y0 + v.y;
 
-    if (object->y1() < minY)
-      minY = object->y1();
+    minX = std::min({minX, x0, x1});
+    minY = std::min({minY, y0, y1});
+    maxY = std::max({maxY, y0, y1});
   }
 
-  int middleY = (minY + maxY) / 2;
-  return Vector(minX, middleY);
+  const int middleY = (minY + maxY) / 2;
+  return Vector{minX, middleY};
+}
+
+Vector NavigationController::navigateToRightGoal() const
+{
+  int minY = -1;
+  int maxX = -1;
+  int maxY = -1;
+
+  for (const auto& object : blockingObjects_)
+  {
+    const int x0 = object->x();
+    const int y0 = object->y();
+
+    const Vector v = object->vector();
+    const int x1 = x0 + v.x;
+    const int y1 = y0 + v.y;
+
+    maxX = std::max({maxX, x0, x1});
+    minY = std::min({minY, y0, y1});
+    maxY = std::max({maxY, y0, y1});
+  }
+
+  const int middleY = (minY + maxY) / 2;
+  return Vector{maxX, middleY};
 }
 
 Vector NavigationController::handleCollision(Vector objectVector)
@@ -356,6 +400,7 @@ Vector NavigationController::getVectorForObjectNearWall(const CourseObject* cour
 {
   if (courseObject == nullptr)
   {
+    Utility::appendToFile("log.txt","getVectorForObjectNearWall(), courseObject is nullptr");
     return {0, 0};
   }
   auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
@@ -363,6 +408,15 @@ Vector NavigationController::getVectorForObjectNearWall(const CourseObject* cour
   auto closestVectors = getVectorsForClosestBlockingObjects(courseObject);
   Utility::appendToFile(
     "log.txt", "ClosestVectors: " + closestVectors.first.toString() + " | " + closestVectors.second.toString() + "\n");
+
+  if (ConfigController::getConfigBool("showVectorsToWall"))
+  {
+    cv::arrowedLine(*MainController::getFrame(), {(courseObject->x1() + courseObject->x2())/2,(courseObject->y1() + courseObject->y2())/2}, {courseObject->x1() + closestVectors.first.x, courseObject->y1() + closestVectors.first.y}, cv::Scalar(0, 0, 255), 1,
+                                cv::LINE_AA, 0, 0.01);
+    cv::arrowedLine(*MainController::getFrame(), {(courseObject->x1() + courseObject->x2())/2,(courseObject->y1() + courseObject->y2())/2}, {courseObject->x1() + closestVectors.second.x, courseObject->y1() + closestVectors.second.y}, cv::Scalar(0, 0, 255), 1,
+                                cv::LINE_AA, 0, 0.01);
+  }
+
   if (closestVectors.second.getSmallestValue() < ConfigController::getConfigInt("DistanceToWallBeforeHandling"))
   {
     auto vectorToWall = closestVectors.first;
@@ -403,7 +457,10 @@ std::pair<Vector, Vector> NavigationController::getVectorsForClosestBlockingObje
   auto returnPair = std::make_pair(Vector(INT8_MAX,INT8_MAX), Vector(INT8_MAX,INT8_MAX));
   for (const auto& blockingObject : blockingObjects_)
   {
-    auto vector = MathUtil::calculateVectorToObject(courseObject, blockingObject.get());
+    auto startVector = Vector(blockingObject->x(),blockingObject->y());
+    auto fromPointVector = Vector(courseObject->x1(),courseObject->y1());
+    auto vector = blockingObject->vector().closestVectorFromPoint(startVector,fromPointVector);
+
     if (not returnPair.first.hasSmallerValueThan(vector))
     {
       returnPair.second = returnPair.first;
@@ -417,42 +474,85 @@ std::pair<Vector, Vector> NavigationController::getVectorsForClosestBlockingObje
   return returnPair;
 }
 
+bool segmentsIntersect(int x1, int y1, int x2, int y2,
+                       int x3, int y3, int x4, int y4)
+{
+  auto orientation = [](int ax, int ay, int bx, int by, int cx, int cy) {
+    int val = (by - ay) * (cx - bx) - (bx - ax) * (cy - by);
+    if (val == 0) return 0;
+    return (val > 0) ? 1 : 2;
+  };
+
+  int o1 = orientation(x1, y1, x2, y2, x3, y3);
+  int o2 = orientation(x1, y1, x2, y2, x4, y4);
+  int o3 = orientation(x3, y3, x4, y4, x1, y1);
+  int o4 = orientation(x3, y3, x4, y4, x2, y2);
+
+  if (o1 != o2 && o3 != o4) return true;
+
+  auto onSegment = [](int ax, int ay, int bx, int by, int cx, int cy) {
+    return cx >= std::min(ax, bx) && cx <= std::max(ax, bx) &&
+           cy >= std::min(ay, by) && cy <= std::max(ay, by);
+  };
+
+  if (o1 == 0 && onSegment(x1, y1, x2, y2, x3, y3)) return true;
+  if (o2 == 0 && onSegment(x1, y1, x2, y2, x4, y4)) return true;
+  if (o3 == 0 && onSegment(x3, y3, x4, y4, x1, y1)) return true;
+  if (o4 == 0 && onSegment(x3, y3, x4, y4, x2, y2)) return true;
+
+  return false;
+}
+
 bool NavigationController::checkCollisionOnRoute(const Vector& targetVector) const
 {
-  if (!robotFront_) return false;
+  if (!robotFront_)
+  {
+    return false;
+  }
 
-  int startX = robotFront_->x1();
-  int startY = robotFront_->y1();
+  int startX = (robotFront_->x1() + robotFront_->x2())/2;
+  int startY = (robotFront_->y1() + robotFront_->y2())/2;
   int endX = startX + targetVector.x;
   int endY = startY + targetVector.y;
 
   double length = std::sqrt(targetVector.x * targetVector.x + targetVector.y * targetVector.y);
   if (length == 0.0) return false;
 
-  double offsetX = -(targetVector.y / length) * (robotWidth_ / 2.0);
-  double offsetY = (targetVector.x / length) * (robotWidth_ / 2.0);
+  double halfWidth = robotWidth_ / 2.0;
 
-  double topX = std::max(startX + offsetX, endX + offsetX);
-  double topY = std::max(startY + offsetY, endY + offsetY);
-  double bottomX = std::min(startX + offsetX, endX + offsetX);
-  double bottomY = std::min(startY + offsetY, endY + offsetY);
+  double perpX = -(targetVector.y / length);
+  double perpY = (targetVector.x / length);
+
+  double offsetX = perpX * halfWidth;
+  double offsetY = perpY * halfWidth;
+
+  struct Segment {
+    double x1, y1, x2, y2;
+  };
+
+  Segment center = Segment(startX,startY,endX,endY);
+  Segment left{
+    startX + offsetX, startY + offsetY,
+    endX + offsetX, endY + offsetY
+  };
+  Segment right{
+    startX - offsetX, startY - offsetY,
+    endX - offsetX, endY - offsetY
+  };
 
   for (const auto& blocker : blockingObjects_)
   {
-    double blockerMaxX = std::max(blocker->x1(), blocker->x2());
-    double blockerMaxY = std::max(blocker->y1(), blocker->y2());
-    double blockerMinX = std::min(blocker->x1(), blocker->x2());
-    double blockerMinY = std::min(blocker->y1(), blocker->y2());
+    int bx1 = blocker->x();
+    int by1 = blocker->y();
+    int bx2 = bx1 + blocker->vector().x;
+    int by2 = by1 + blocker->vector().y;
 
-    if (blockerMaxX < bottomX || blockerMaxY < bottomY)
+    if (segmentsIntersect(center.x1, center.y1, center.x2, center.y2, bx1, by1, bx2, by2) ||
+        segmentsIntersect(left.x1, left.y1, left.x2, left.y2, bx1, by1, bx2, by2) ||
+        segmentsIntersect(right.x1, right.y1, right.x2, right.y2, bx1, by1, bx2, by2))
     {
-      continue;
+      return true;
     }
-    if (blockerMinX > topX || blockerMinY > topY)
-    {
-      continue;
-    }
-    return true;
   }
 
   return false;

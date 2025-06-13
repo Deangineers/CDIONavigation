@@ -39,5 +39,6 @@
   "MinimumBallSize": 250,
   "EggBallDiffVal": 1000,
   "goalIsLeft": true,
-  "minRedSize": 50
+  "minRedSize": 50,
+  "showVectorsToWall": true
 }

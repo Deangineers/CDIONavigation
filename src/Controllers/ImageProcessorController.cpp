@@ -6,6 +6,8 @@
 
 #include "MainController.h"
 #include "Utility/ConfigController.h"
+#include "../Models/BlockingObject.h"
+#include "../Models/Vector.h"
 
 ImageProcessorController::ImageProcessorController()
 {
@@ -69,6 +71,8 @@ void ImageProcessorController::detectRedPixels(const cv::Mat& frame)
             // Draw line (vector)
             cv::arrowedLine(frame, p1, p2, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("WallWidth"),
                             cv::LINE_AA, 0, 0.01); // green arrows
+            Vector vector(p2.x - p1.x, p2.y - p1.y);
+            MainController::addBlockedObject(std::make_unique<BlockingObject>(p1.x, p1.y, vector));
         }
     }
 }

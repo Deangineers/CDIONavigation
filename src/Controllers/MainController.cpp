@@ -6,6 +6,7 @@
 
 #include <sstream>
 #include <thread>
+#include <opencv2/core/mat.hpp>
 
 #include "../Models/Command.h"
 #include "../Models/JourneyModel.h"
@@ -35,13 +36,14 @@ void MainController::addCourseObject(std::unique_ptr<CourseObject>&& courseObjec
   navigationController_->addCourseObject(std::move(courseObject));
 }
 
-void MainController::addBlockedObjects(const std::vector<cv::Point>& blockedObjects)
+void MainController::addBlockedObject(std::unique_ptr<BlockingObject> blockingObject)
 {
-  // TODO
+  navigationController_->addBlockingObject(std::move(blockingObject));
 }
 
-void MainController::navigateAndSendCommand()
+void MainController::navigateAndSendCommand(cv::Mat* frame)
 {
+  frame_ = frame;
   auto journey = navigationController_->calculateDegreesAndDistanceToObject();
   navigationController_->clearObjects();
 
@@ -109,6 +111,11 @@ Command MainController::journeyToCommand(const JourneyModel* journey)
   }
   command.setAction("s");
   return command;
+}
+
+cv::Mat * MainController::getFrame()
+{
+  return frame_;
 }
 
 int MainController::findMaxValue(const int* cords, const int size, int maxValueAllowed)

@@ -51,8 +51,8 @@ int main()
       cv::Scalar(155, 255, 255), // Upper HSV bound for purple
       "robotBack"
     );
+    MainController::navigateAndSendCommand(&frame);
     cv::imshow("EngineBase", frame);
-    MainController::navigateAndSendCommand();
     if (cv::waitKey(33) == 27) // Wait for 1 ms and break on 'Esc' key
     {
       break;

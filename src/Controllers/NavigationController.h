@@ -7,6 +7,8 @@
 #include <memory>
 #include <string>
 #include <vector>
+
+#include "../Models/BlockingObject.h"
 #include "../Models/CourseObject.h"
 #include "../Models/JourneyModel.h"
 #include "../Models/Vector.h"
@@ -17,6 +19,7 @@ class NavigationController
 public:
   NavigationController() = default;
   void addCourseObject(std::unique_ptr<CourseObject>&& courseObject);
+  void addBlockingObject(std::unique_ptr<BlockingObject>&& blockingObject);
   void clearObjects();
   std::unique_ptr<JourneyModel> calculateDegreesAndDistanceToObject();
 
@@ -40,7 +43,7 @@ private:
   std::unique_ptr<CourseObject> goal_;
   std::unique_ptr<CourseObject> robotFront_;
   std::unique_ptr<CourseObject> robotBack_;
-  std::vector<std::unique_ptr<CourseObject>> blockingObjects_;
+  std::vector<std::unique_ptr<BlockingObject>> blockingObjects_;
   int robotWidth_ = ConfigController::getConfigInt("RobotWidth");
 
   int totalBalls_ = ConfigController::getConfigInt("TotalBalls");
