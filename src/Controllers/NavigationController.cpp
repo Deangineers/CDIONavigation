@@ -53,7 +53,7 @@ void NavigationController::addCourseObject(std::unique_ptr<CourseObject>&& cours
     auto verticalVector = Vector(0,courseObject->y2() - courseObject->y1());
 
     auto topBar = std::make_unique<BlockingObject>(courseObject->x1(),courseObject->y1(),horizontalVector);
-    auto bottomBar = std::make_unique<BlockingObject>(courseObject->x1(),courseObject->y2(),horizontalVector);
+    auto bottomBar = std::make_unique<BlockingObject>(courseObject->x1(),courseObject->y1(),horizontalVector);
 
     auto leftBar = std::make_unique<BlockingObject>(courseObject->x1(),courseObject->y1(),verticalVector);
     auto rightBar = std::make_unique<BlockingObject>(courseObject->x2(),courseObject->y1(),verticalVector);
@@ -62,6 +62,7 @@ void NavigationController::addCourseObject(std::unique_ptr<CourseObject>&& cours
     blockingObjects_.push_back(std::move(bottomBar));
     blockingObjects_.push_back(std::move(leftBar));
     blockingObjects_.push_back(std::move(rightBar));
+
   }
   else if (name == "goal")
   {
@@ -457,8 +458,10 @@ std::pair<Vector, Vector> NavigationController::getVectorsForClosestBlockingObje
   for (const auto& blockingObject : blockingObjects_)
   {
     auto startVector = Vector(blockingObject->x(),blockingObject->y());
-    auto fromPointVector = Vector(courseObject->x1(),courseObject->y1());
+    auto fromPointVector = Vector((courseObject->x1() + courseObject->x2())/2,(courseObject->y1() + courseObject->y2())/2);
     auto vector = blockingObject->vector().closestVectorFromPoint(startVector,fromPointVector);
+    cv::arrowedLine(*MainController::getFrame(), {fromPointVector.x,fromPointVector.y}, {fromPointVector.x + vector.x, fromPointVector.y + vector.y}, cv::Scalar(0, 0, 255), 1,
+                                cv::LINE_AA, 0, 0.01);
 
     if (not returnPair.first.hasSmallerValueThan(vector))
     {

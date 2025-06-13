@@ -50,7 +50,7 @@ void ImageProcessorController::detectRedPixels(const cv::Mat& frame)
 
     std::vector<std::vector<cv::Point>> contours;
     cv::findContours(redMask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-
+    int label = 0;
     for (const auto& contour : contours)
     {
         double area = cv::contourArea(contour);
@@ -67,11 +67,15 @@ void ImageProcessorController::detectRedPixels(const cv::Mat& frame)
         {
             cv::Point p1 = approx[i];
             cv::Point p2 = approx[(i + 1) % approx.size()]; // Loop back to start if needed
-
-            // Draw line (vector)
-            cv::arrowedLine(frame, p1, p2, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("WallWidth"),
-                            cv::LINE_AA, 0, 0.01); // green arrows
             Vector vector(p2.x - p1.x, p2.y - p1.y);
+            if (vector.getLength() < ConfigController::getConfigInt("MinimumSizeOfBlockingObject"))
+            {
+                continue;
+            }
+            // Draw line (vector)
+            cv::line(frame, p1, p2, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("WallWidth"),
+                            cv::LINE_AA, 0);
+            cv::putText(frame, std::to_string(label++), p1, cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
             MainController::addBlockedObject(std::make_unique<BlockingObject>(p1.x, p1.y, vector));
         }
     }

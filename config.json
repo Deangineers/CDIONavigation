@@ -40,5 +40,6 @@
   "EggBallDiffVal": 1000,
   "goalIsLeft": true,
   "minRedSize": 50,
-  "showVectorsToWall": true
+  "showVectorsToWall": true,
+  "MinimumSizeOfBlockingObject": 50
 }
