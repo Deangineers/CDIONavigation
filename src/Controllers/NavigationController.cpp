@@ -123,17 +123,15 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
 }
 
 std::unique_ptr<JourneyModel> NavigationController::makeJourneyModel(const Vector& objectVector,
-                                                                     bool toCollectBalls)
+                                                                     bool toCollectBalls) const
 {
   const Vector robotVector = {robotFront_->x1() - robotBack_->x1(), robotFront_->y1() - robotBack_->y1()};
   const double angle = MathUtil::calculateAngleDifferenceBetweenVectors(robotVector, objectVector);
-  const double distanceToObject = std::sqrt(
-    objectVector.x * objectVector.x + objectVector.y * objectVector.y);
 
   auto vectorToRobotBack = MathUtil::calculateVectorToObject(robotFront_.get(), robotBack_.get());
-  double distanceInCm = distanceToObject * ((static_cast<double>(ConfigController::getConfigInt("RobotLengthInMM")) /
-    10) / std::sqrt(
-    vectorToRobotBack.x * vectorToRobotBack.x + vectorToRobotBack.y * vectorToRobotBack.y));
+  double distanceInCm = objectVector.getLength() * ((static_cast<double>(ConfigController::getConfigInt(
+      "RobotLengthInMM")) /
+    10) / vectorToRobotBack.getLength());
   return std::make_unique<JourneyModel>(distanceInCm, angle, toCollectBalls);
 }
 
@@ -336,6 +334,71 @@ Vector NavigationController::handleCollision(Vector objectVector)
     "log.txt",
     "Navigating to vector: " + std::to_string(objectVector.x) + ", " + std::to_string(objectVector.y) + "\n");
   return objectVector;
+}
+
+Vector NavigationController::getVectorForObjectNearWall(const CourseObject* courseObject) const
+{
+  if (courseObject == nullptr)
+  {
+    return {0, 0};
+  }
+  auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
+
+  auto closestVectors = getVectorsForClosestBlockingObjects(courseObject);
+  Utility::appendToFile(
+    "log.txt", "ClosestVectors: " + closestVectors.first.toString() + " | " + closestVectors.second.toString() + "\n");
+  if (closestVectors.second.getSmallestValue() < ConfigController::getConfigInt("DistanceToWallBeforeHandling"))
+  {
+    auto vectorToWall = closestVectors.first;
+    if (vectorToWall.getSmallestValue() > ConfigController::getConfigInt("DistanceToWallBeforeHandling"))
+    {
+      return MathUtil::calculateVectorToObject(&robotMiddle, courseObject);
+    }
+    // 1 wall
+    auto localCourseObject = CourseObject(*courseObject);
+    int singleWallShiftDiff = ConfigController::getConfigInt("SingleWallShiftDiff");
+    if (vectorToWall.x == vectorToWall.getSmallestValue())
+    {
+      localCourseObject.shiftX(vectorToWall.x > 0 ? -singleWallShiftDiff : singleWallShiftDiff);
+    }
+    else
+    {
+      localCourseObject.shiftY(vectorToWall.y > 0 ? -singleWallShiftDiff : singleWallShiftDiff);
+    }
+
+
+    auto vectorToDiffPoint = MathUtil::calculateVectorToObject(&robotMiddle, &localCourseObject);
+    if (vectorToDiffPoint.getLength() < ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning"))
+    {
+      return MathUtil::calculateVectorToObject(&robotMiddle, courseObject);
+    }
+    return MathUtil::calculateVectorToObject(&robotMiddle, &localCourseObject);
+  }
+  else
+  {
+    // Corner
+  }
+  return {0, 0};
+}
+
+std::pair<Vector, Vector> NavigationController::getVectorsForClosestBlockingObjects(
+  const CourseObject* courseObject) const
+{
+  auto returnPair = std::make_pair(Vector(INT8_MAX,INT8_MAX), Vector(INT8_MAX,INT8_MAX));
+  for (const auto& blockingObject : blockingObjects_)
+  {
+    auto vector = MathUtil::calculateVectorToObject(courseObject, blockingObject.get());
+    if (not returnPair.first.hasSmallerValueThan(vector))
+    {
+      returnPair.second = returnPair.first;
+      returnPair.first = vector;
+    }
+    else if (not returnPair.second.hasSmallerValueThan(vector))
+    {
+      returnPair.second = vector;
+    }
+  }
+  return returnPair;
 }
 
 bool NavigationController::checkCollisionOnRoute(const Vector& targetVector) const

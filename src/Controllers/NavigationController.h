@@ -23,13 +23,15 @@ public:
 private:
   void removeBallsOutsideCourse();
   void removeBallsInsideRobot();
-  std::unique_ptr<JourneyModel> makeJourneyModel(const Vector& objectVector, bool toCollectBalls);
+  std::unique_ptr<JourneyModel> makeJourneyModel(const Vector& objectVector, bool toCollectBalls) const;
   [[nodiscard]] Vector navigateToGoal() const;
   [[nodiscard]] Vector findClosestBall() const;
   [[nodiscard]] Vector navigateToLeftGoal() const;
   [[nodiscard]] Vector navigateToRightGoal() const;
 
   Vector handleCollision(Vector objectVector);
+  Vector getVectorForObjectNearWall(const CourseObject* courseObject) const;
+  std::pair<Vector, Vector> getVectorsForClosestBlockingObjects(const CourseObject* courseObject) const;
 
   bool checkCollisionOnRoute(const Vector& targetVector) const;
 
