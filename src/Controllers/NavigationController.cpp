@@ -348,7 +348,7 @@ Vector NavigationController::handleCollision(Vector objectVector)
   }
   Utility::appendToFile(
     "log.txt",
-    "Navigating to vector: " + std::to_string(objectVector.x) + ", " + std::to_string(objectVector.y) + "\n");
+    "Collision Detected, moving to: " + std::to_string(objectVector.x) + ", " + std::to_string(objectVector.y) + "\n");
   return objectVector;
 }
 
