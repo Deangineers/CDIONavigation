@@ -195,7 +195,7 @@ void NavigationController::removeBallsOutsideCourse()
 
   auto deletionLambda = [minX,minY,highX,highY](const std::unique_ptr<CourseObject>& a) -> bool
   {
-    return (a->x1() < minX || highX > a->x2()) && (a->y1() < minY ||
+    return not(a->x1() < minX || highX > a->x2() || a->y1() < minY ||
       highY > a->y2());
   };
 
@@ -269,8 +269,7 @@ Vector NavigationController::findClosestBall() const
   for (const auto& ball : ballVector_)
   {
     auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
-    auto vectorToBall = MathUtil::calculateVectorToObject(&robotMiddle, ball.get());
-    vectorToBall = getVectorForObjectNearWall(ball.get());
+    auto vectorToBall = getVectorForObjectNearWall(ball.get());
     if (vectorToBall.getLength() < shortestDistance)
     {
       shortestDistance = vectorToBall.getLength();
@@ -410,9 +409,10 @@ Vector NavigationController::getVectorForObjectNearWall(const CourseObject* cour
 
   if (ConfigController::getConfigBool("showVectorsToWall"))
   {
-    cv::arrowedLine(*MainController::getFrame(), {(courseObject->x1() + courseObject->x2())/2,(courseObject->y1() + courseObject->y2())/2}, {courseObject->x1() + closestVectors.first.x, courseObject->y1() + closestVectors.first.y}, cv::Scalar(0, 0, 255), 1,
+    Vector startPoint = Vector((courseObject->x1() + courseObject->x2())/2,(courseObject->y1() + courseObject->y2())/2);
+    cv::arrowedLine(*MainController::getFrame(), {startPoint.x,startPoint.y}, {startPoint.x + closestVectors.first.x, startPoint.y + closestVectors.first.y}, cv::Scalar(0, 0, 255), 1,
                                 cv::LINE_AA, 0, 0.01);
-    cv::arrowedLine(*MainController::getFrame(), {(courseObject->x1() + courseObject->x2())/2,(courseObject->y1() + courseObject->y2())/2}, {courseObject->x1() + closestVectors.second.x, courseObject->y1() + closestVectors.second.y}, cv::Scalar(0, 0, 255), 1,
+    cv::arrowedLine(*MainController::getFrame(), {startPoint.x,startPoint.y}, {startPoint.x + closestVectors.second.x, startPoint.y + closestVectors.second.y}, cv::Scalar(0, 0, 255), 1,
                                 cv::LINE_AA, 0, 0.01);
   }
 

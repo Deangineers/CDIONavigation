@@ -131,7 +131,6 @@ void ImageProcessorController::detectBalls(const cv::Mat& frame)
         int x2 = x1 + rect.width, y2 = y1 + rect.height;
 
         MainController::addCourseObject(std::make_unique<CourseObject>(x1, y1, x2, y2, label));
-
         // Draw bounding box and label
         cv::rectangle(frame, rect, cv::Scalar(0, 255, 0), 2);
         cv::putText(frame, label, cv::Point(x1, y1 - 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
