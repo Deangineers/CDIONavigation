@@ -5,6 +5,7 @@
 #include "ImageProcessorController.h"
 
 #include "MainController.h"
+#include "Utility/ConfigController.h"
 
 ImageProcessorController::ImageProcessorController()
 {
@@ -89,7 +90,7 @@ void ImageProcessorController::detectBalls(const cv::Mat& frame)
 
     // Define color ranges for orange and white
     cv::Mat orangeMask, whiteMask, mask;
-    cv::inRange(hsv, cv::Scalar(10, 100, 100), cv::Scalar(25, 255, 255), orangeMask); // Orange
+    cv::inRange(hsv, cv::Scalar(5, 50, 50), cv::Scalar(30, 255, 255), orangeMask); // Orange
     cv::inRange(hsv, cv::Scalar(0, 0, 200), cv::Scalar(180, 40, 255), whiteMask); // White
 
     cv::bitwise_or(orangeMask, whiteMask, mask);
