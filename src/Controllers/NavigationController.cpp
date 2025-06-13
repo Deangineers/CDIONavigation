@@ -225,11 +225,11 @@ Vector NavigationController::findClosestBall() const
   CourseObject* closestBall = nullptr;
   for (const auto& ball : ballVector_)
   {
-    auto vectorToBall = MathUtil::calculateVectorToObject(robotFront_.get(), ball.get());
-    double length = std::sqrt(vectorToBall.x * vectorToBall.x + vectorToBall.y * vectorToBall.y);
-    if (length < shortestDistance)
+    auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
+    auto vectorToBall = MathUtil::calculateVectorToObject(&robotMiddle, ball.get());
+    if (vectorToBall.getLength() < shortestDistance)
     {
-      shortestDistance = length;
+      shortestDistance = vectorToBall.getLength();
       closestBall = ball.get();
     }
   }
