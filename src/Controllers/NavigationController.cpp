@@ -53,7 +53,7 @@ void NavigationController::addCourseObject(std::unique_ptr<CourseObject>&& cours
     auto verticalVector = Vector(0,courseObject->y2() - courseObject->y1());
 
     auto topBar = std::make_unique<BlockingObject>(courseObject->x1(),courseObject->y1(),horizontalVector);
-    auto bottomBar = std::make_unique<BlockingObject>(courseObject->x1(),courseObject->y1(),horizontalVector);
+    auto bottomBar = std::make_unique<BlockingObject>(courseObject->x1(),courseObject->y2(),horizontalVector);
 
     auto leftBar = std::make_unique<BlockingObject>(courseObject->x1(),courseObject->y1(),verticalVector);
     auto rightBar = std::make_unique<BlockingObject>(courseObject->x2(),courseObject->y1(),verticalVector);
