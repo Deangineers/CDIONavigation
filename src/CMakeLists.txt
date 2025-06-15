@@ -28,12 +28,14 @@ add_executable(CDIONavigationFull
         Models/Vector.cpp
         Models/Vector.h
         main.cpp
-        Controllers/ImageProcessorController.cpp
-        Controllers/ImageProcessorController.h
         Models/VectorWithStartPos.cpp
         Models/VectorWithStartPos.h
         Models/Egg.cpp
         Models/Egg.h
+        Controllers/ImageProcessing/ImageProcessor.cpp
+        Controllers/ImageProcessing/ImageProcessor.h
+        Controllers/ImageProcessing/CloudyImageProcessor.cpp
+        Controllers/ImageProcessing/CloudyImageProcessor.h
 )
 
 target_link_libraries(CDIONavigationFull PUBLIC Utility)

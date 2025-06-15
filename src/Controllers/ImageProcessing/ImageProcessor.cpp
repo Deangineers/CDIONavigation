@@ -1,0 +1,144 @@
+//
+// Created by Elias Aggergaard Larsen on 15/06/2025.
+//
+#include "ImageProcessor.h"
+
+#include "../MainController.h"
+#include "../../Models/Vector.h"
+#include "Utility/ConfigController.h"
+
+void ImageProcessor::processImage(const cv::Mat& frame)
+{
+  cv::cvtColor(frame, hsv_, cv::COLOR_BGR2HSV);
+  detectRedPixels(frame);
+  detectBalls(frame);
+  detectFrontAndBack(frame);
+}
+
+void ImageProcessor::redPixelHelperFunction(const cv::Mat& frame, cv::Mat& mask)
+{
+  cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
+  cv::morphologyEx(mask, mask, cv::MORPH_OPEN, kernel);
+
+  std::vector<std::vector<cv::Point>> contours;
+  cv::findContours(mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+  int label = 0;
+  for (const auto& contour : contours)
+  {
+    double area = cv::contourArea(contour);
+    if (area < ConfigController::getConfigInt("minRedSize"))
+    {
+      continue;
+    }
+    // Approximate contour to get corners
+    std::vector<cv::Point> approx;
+    cv::approxPolyDP(contour, approx, 10, true); // epsilon=10 can be tuned
+
+    // Draw vectors between points
+    for (size_t i = 0; i < approx.size(); ++i)
+    {
+      cv::Point p1 = approx[i];
+      cv::Point p2 = approx[(i + 1) % approx.size()]; // Loop back to start if needed
+      Vector vector(p2.x - p1.x, p2.y - p1.y);
+      if (vector.getLength() < ConfigController::getConfigInt("MinimumSizeOfBlockingObject"))
+      {
+        continue;
+      }
+      // Draw line (vector)
+      cv::line(frame, p1, p2, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("WallWidth"),
+               cv::LINE_AA, 0);
+      cv::putText(frame, std::to_string(label++), p1, cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
+      MainController::addBlockedObject(std::make_unique<VectorWithStartPos>(p1.x, p1.y, vector));
+    }
+  }
+}
+
+void ImageProcessor::ballHelperFunction(const cv::Mat& frame, cv::Mat& mask)
+{
+  cv::morphologyEx(mask, mask, cv::MORPH_OPEN, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
+
+  std::vector<std::vector<cv::Point>> contours;
+  cv::findContours(mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+  for (const auto& cnt : contours)
+  {
+    double area = cv::contourArea(cnt);
+    double perimeter = cv::arcLength(cnt, true);
+
+    int minimumBallSize = ConfigController::getConfigInt("MinimumBallSize");
+    int eggBallDiffVal = ConfigController::getConfigInt("EggBallDiffVal");
+
+    if (area < minimumBallSize || perimeter == 0)
+      continue;
+
+    std::string label = area > eggBallDiffVal ? "egg" : "ball";
+
+    // Optional: Circularity check
+    double circularity = 4 * CV_PI * area / (perimeter * perimeter);
+    if (circularity < 0.6) // adjust threshold as needed
+      continue;
+
+    cv::Rect rect = cv::boundingRect(cnt);
+    int x1 = rect.x, y1 = rect.y;
+    int x2 = x1 + rect.width, y2 = y1 + rect.height;
+
+    MainController::addCourseObject(std::make_unique<CourseObject>(x1, y1, x2, y2, label));
+    // Draw bounding box and label
+    cv::rectangle(frame, rect, cv::Scalar(0, 255, 0), 2);
+    cv::putText(frame, label, cv::Point(x1, y1 - 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
+
+    // Optional: visualize edge points
+    cv::Mat roi_mask = mask(rect);
+    cv::GaussianBlur(roi_mask, roi_mask, cv::Size(5, 5), 0);
+    cv::Mat edges;
+    cv::Canny(roi_mask, edges, 50, 150);
+
+    std::vector<cv::Point> edge_points;
+    cv::findNonZero(edges, edge_points);
+    for (const auto& pt : edge_points)
+    {
+      cv::circle(frame, pt + rect.tl(), 1, cv::Scalar(0, 0, 255), -1);
+    }
+  }
+}
+
+void ImageProcessor::frontAndBackHelperFunction(const cv::Mat& frame, cv::Mat& mask, std::string label)
+{
+  cv::Mat hsv;
+  cv::cvtColor(frame, hsv, cv::COLOR_BGR2HSV);
+  cv::morphologyEx(mask, mask, cv::MORPH_OPEN, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
+
+  std::vector<std::vector<cv::Point>> contours;
+  cv::findContours(mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+  for (const auto& cnt : contours)
+  {
+    double epsilon = 0.04 * cv::arcLength(cnt, true);
+    std::vector<cv::Point> approx;
+    cv::approxPolyDP(cnt, approx, epsilon, true);
+
+    if (approx.size() == 4 && cv::isContourConvex(approx) && cv::contourArea(cnt) > 100)
+    {
+      cv::Rect rect = cv::boundingRect(approx);
+      int x1 = rect.x, y1 = rect.y;
+      int x2 = x1 + rect.width, y2 = y1 + rect.height;
+
+      MainController::addCourseObject(std::make_unique<CourseObject>(x1, y1, x2, y2, label));
+      cv::rectangle(frame, rect, cv::Scalar(0, 255, 0), 2);
+      cv::putText(frame, label, cv::Point(x1, y1 - 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0),
+                  2);
+
+      cv::Mat roi_mask = mask(rect);
+      cv::GaussianBlur(roi_mask, roi_mask, cv::Size(5, 5), 0);
+      cv::Mat edges;
+      cv::Canny(roi_mask, edges, 50, 150);
+
+      std::vector<cv::Point> edge_points;
+      cv::findNonZero(edges, edge_points);
+      for (const auto& pt : edge_points)
+      {
+        cv::circle(frame, pt + rect.tl(), 1, cv::Scalar(0, 0, 255), -1);
+      }
+    }
+  }
+}
