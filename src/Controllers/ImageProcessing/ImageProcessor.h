@@ -2,8 +2,8 @@
 // Created by Elias Aggergaard Larsen on 15/06/2025.
 //
 
-#ifndef IIMAGEPROCESSOR_H
-#define IIMAGEPROCESSOR_H
+#ifndef IMAGEPROCESSOR_H
+#define IMAGEPROCESSOR_H
 #include <opencv2/opencv.hpp>
 
 class ImageProcessor
@@ -24,4 +24,4 @@ protected:
   cv::Mat hsv_;
 };
 
-#endif //IIMAGEPROCESSOR_H
+#endif //IMAGEPROCESSOR_H
