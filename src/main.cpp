@@ -7,7 +7,6 @@
 
 #include "Controllers/ImageProcessing/CloudyImageProcessor.h"
 #include "Controllers/ImageProcessing/ImageProcessor.h"
-#include "Controllers/ImageProcessing/ImageProcessorController.h"
 
 int main()
 {

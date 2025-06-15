@@ -18,8 +18,8 @@ void CloudyImageProcessor::detectRedPixels(const cv::Mat& frame)
 void CloudyImageProcessor::detectBalls(const cv::Mat& frame)
 {
   cv::Mat orangeMask, whiteMask, mask;
-  cv::inRange(hsv_, cv::Scalar(5, 50, 50), cv::Scalar(30, 255, 255), orangeMask); // Orange
-  cv::inRange(hsv_, cv::Scalar(0, 0, 200), cv::Scalar(180, 40, 255), whiteMask); // White
+  cv::inRange(hsv_, cv::Scalar(5, 50, 50), cv::Scalar(30, 255, 255), orangeMask);
+  cv::inRange(hsv_, cv::Scalar(0, 0, 200), cv::Scalar(180, 40, 255), whiteMask);
 
   cv::bitwise_or(orangeMask, whiteMask, mask);
 
