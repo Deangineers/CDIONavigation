@@ -26,8 +26,6 @@ public:
   [[nodiscard]] bool isNullVector() const;
   [[nodiscard]] double getLength() const;
   [[nodiscard]] std::string toString() const;
-  [[nodiscard]] bool hasSmallerValueThan(Vector v) const;
-  [[nodiscard]] int getSmallestValue() const;
   int x, y;
 };
 

@@ -58,13 +58,3 @@ std::string Vector::toString() const
 {
   return "(" + std::to_string(x) + ", " + std::to_string(y) + ")";
 }
-
-bool Vector::hasSmallerValueThan(Vector v) const
-{
-  return getSmallestValue() < v.getSmallestValue();
-}
-
-int Vector::getSmallestValue() const
-{
-  return (std::abs(x) > std::abs(y)) ? std::abs(x) : std::abs(y);
-}

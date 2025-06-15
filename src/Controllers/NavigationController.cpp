@@ -259,15 +259,14 @@ Vector NavigationController::findClosestBall() const
     return {0, 0};
   }
 
-  double shortestDistance = INT32_MAX;
+  auto shortestVector = Vector(5000, 5000);
   CourseObject* closestBall = nullptr;
   for (const auto& ball : ballVector_)
   {
-    auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
     auto vectorToBall = getVectorForObjectNearWall(ball.get());
-    if (vectorToBall.getLength() < shortestDistance)
+    if (vectorToBall.getLength() < shortestVector.getLength() && not vectorToBall.isNullVector())
     {
-      shortestDistance = vectorToBall.getLength();
+      shortestVector = vectorToBall;
       closestBall = ball.get();
     }
   }
@@ -282,8 +281,7 @@ Vector NavigationController::findClosestBall() const
     Utility::appendToFile(
       "log.txt", "Navigating to Ball: BUT NO BALLS FOUND\n");
   }
-  auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
-  return MathUtil::calculateVectorToObject(&robotMiddle, closestBall);
+  return shortestVector;
 }
 
 Vector NavigationController::navigateToLeftGoal() const
@@ -414,17 +412,19 @@ Vector NavigationController::getVectorForObjectNearWall(const CourseObject* cour
                     cv::LINE_AA, 0, 0.01);
   }
 
-  if (closestVectors.second.getSmallestValue() < ConfigController::getConfigInt("DistanceToWallBeforeHandling"))
+  if (closestVectors.second.getLength() > ConfigController::getConfigInt("DistanceToWallBeforeHandling"))
   {
     auto vectorToWall = closestVectors.first;
-    if (vectorToWall.getSmallestValue() > ConfigController::getConfigInt("DistanceToWallBeforeHandling"))
+
+    if (vectorToWall.getLength() > ConfigController::getConfigInt("DistanceToWallBeforeHandling"))
     {
       return MathUtil::calculateVectorToObject(&robotMiddle, courseObject);
     }
     // 1 wall
-    auto localCourseObject = CourseObject(*courseObject);
+    auto localCourseObject = CourseObject(courseObject->x1(), courseObject->y1(), courseObject->x2(),
+                                          courseObject->y2(), courseObject->name());
     int singleWallShiftDiff = ConfigController::getConfigInt("SingleWallShiftDiff");
-    if (vectorToWall.x == vectorToWall.getSmallestValue())
+    if (std::abs(vectorToWall.x) > std::abs(vectorToWall.y))
     {
       localCourseObject.shiftX(vectorToWall.x > 0 ? -singleWallShiftDiff : singleWallShiftDiff);
     }
@@ -461,12 +461,12 @@ std::pair<Vector, Vector> NavigationController::getVectorsForClosestBlockingObje
                     {fromPointVector.x + vector.x, fromPointVector.y + vector.y}, cv::Scalar(0, 0, 255), 1,
                     cv::LINE_AA, 0, 0.01);
 */
-    if (not returnPair.first.hasSmallerValueThan(vector))
+    if (returnPair.first.getLength() > vector.getLength())
     {
       returnPair.second = returnPair.first;
       returnPair.first = vector;
     }
-    else if (not returnPair.second.hasSmallerValueThan(vector))
+    else if (returnPair.second.getLength() > vector.getLength())
     {
       returnPair.second = vector;
     }
