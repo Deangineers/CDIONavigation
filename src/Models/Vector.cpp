@@ -3,6 +3,8 @@
 //
 
 #include "Vector.h"
+
+#include <algorithm>
 #include <cmath>
 
 Vector::Vector(int x, int y) : x(x), y(y)
@@ -29,12 +31,17 @@ double Vector::dot(const Vector &a, const Vector &b) const
   return a.x * b.x + a.y * b.y;
 }
 
-Vector Vector::closestVectorFromPoint(const Vector& vectorStart , const Vector &fromPoint) const
+Vector Vector::closestVectorFromPoint(const Vector& vectorStart, const Vector& fromPoint) const
 {
   Vector AP = fromPoint - vectorStart;
-  double t = dot(AP, *this) / dot(*this, *this);
-  Vector Q = vectorStart + *this * t;        // Closest point on the line
-  return Q - fromPoint;                // Vector from point P to closest point
+  double denom = dot(*this, *this);
+  if (denom == 0) return {0, 0};
+
+  double t = dot(AP, *this) / denom;
+  t = std::clamp(t, 0.0, 1.0);
+
+  Vector Q = vectorStart + (*this * t);
+  return Q - fromPoint;
 }
 
 bool Vector::isNullVector() const
