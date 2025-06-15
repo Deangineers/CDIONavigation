@@ -11,6 +11,7 @@ class Vector
 {
 public:
   Vector(int x, int y);
+  virtual ~Vector() = default;
 
   Vector operator-(const Vector& other) const;
 
@@ -20,13 +21,13 @@ public:
 
   double dot(const Vector& a, const Vector& b) const;
 
-  Vector closestVectorFromPoint(const Vector& vectorStart , const Vector &fromPoint) const;
+  Vector closestVectorFromPoint(const Vector& vectorStart, const Vector& fromPoint) const;
 
-  bool isNullVector() const;
-  double getLength() const;
-  std::string toString() const;
-  bool hasSmallerValueThan(Vector v) const;
-  int getSmallestValue() const;
+  [[nodiscard]] bool isNullVector() const;
+  [[nodiscard]] double getLength() const;
+  [[nodiscard]] std::string toString() const;
+  [[nodiscard]] bool hasSmallerValueThan(Vector v) const;
+  [[nodiscard]] int getSmallestValue() const;
   int x, y;
 };
 

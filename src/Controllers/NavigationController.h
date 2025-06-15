@@ -7,8 +7,7 @@
 #include <memory>
 #include <string>
 #include <vector>
-
-#include "../Models/BlockingObject.h"
+#include "../Models/VectorWithStartPos.h"
 #include "../Models/CourseObject.h"
 #include "../Models/JourneyModel.h"
 #include "../Models/Vector.h"
@@ -19,14 +18,14 @@ class NavigationController
 public:
   NavigationController() = default;
   void addCourseObject(std::unique_ptr<CourseObject>&& courseObject);
-  void addBlockingObject(std::unique_ptr<BlockingObject>&& blockingObject);
+  void addBlockingObject(std::unique_ptr<VectorWithStartPos>&& blockingObject);
   void clearObjects();
   std::unique_ptr<JourneyModel> calculateDegreesAndDistanceToObject();
 
 private:
   void removeBallsOutsideCourse();
   void removeBallsInsideRobot();
-  std::unique_ptr<JourneyModel> makeJourneyModel(const Vector& objectVector, bool toCollectBalls) const;
+  [[nodiscard]] std::unique_ptr<JourneyModel> makeJourneyModel(const Vector& objectVector, bool toCollectBalls) const;
   [[nodiscard]] Vector navigateToGoal() const;
   [[nodiscard]] Vector findClosestBall() const;
   [[nodiscard]] Vector navigateToLeftGoal() const;
@@ -36,14 +35,14 @@ private:
   Vector getVectorForObjectNearWall(const CourseObject* courseObject) const;
   std::pair<Vector, Vector> getVectorsForClosestBlockingObjects(const CourseObject* courseObject) const;
 
-  bool checkCollisionOnRoute(const Vector& targetVector) const;
+  [[nodiscard]] bool checkCollisionOnRoute(const Vector& targetVector) const;
 
 
   std::vector<std::unique_ptr<CourseObject>> ballVector_;
   std::unique_ptr<CourseObject> goal_;
   std::unique_ptr<CourseObject> robotFront_;
   std::unique_ptr<CourseObject> robotBack_;
-  std::vector<std::unique_ptr<BlockingObject>> blockingObjects_;
+  std::vector<std::unique_ptr<VectorWithStartPos>> blockingObjects_;
   int robotWidth_ = ConfigController::getConfigInt("RobotWidth");
 
   int totalBalls_ = ConfigController::getConfigInt("TotalBalls");
