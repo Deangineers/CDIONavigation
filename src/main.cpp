@@ -24,9 +24,9 @@ int main()
   cv::Mat frame;
   std::unique_ptr<ImageProcessor> processor = std::make_unique<CloudyImageProcessor>();
 
-
   while (cap.read(frame))
   {
+    frame = cv::imread("../../TestImages/img3.jpg", cv::IMREAD_COLOR_BGR);
     processor->processImage(frame);
 
     MainController::navigateAndSendCommand(&frame);
