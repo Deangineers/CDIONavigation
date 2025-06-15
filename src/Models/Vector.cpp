@@ -11,12 +11,12 @@ Vector::Vector(int x, int y) : x(x), y(y)
 {
 }
 
-Vector Vector::operator-(const Vector &other) const
+Vector Vector::operator-(const Vector& other) const
 {
   return Vector(x - other.x, y - other.y);
 }
 
-Vector Vector::operator+(const Vector &other) const
+Vector Vector::operator+(const Vector& other) const
 {
   return Vector(x + other.x, y + other.y);
 }
@@ -26,7 +26,7 @@ Vector Vector::operator*(double scalar) const
   return Vector(x * scalar, y * scalar);
 }
 
-double Vector::dot(const Vector &a, const Vector &b) const
+double Vector::dot(const Vector& a, const Vector& b) const
 {
   return a.x * b.x + a.y * b.y;
 }
@@ -66,5 +66,5 @@ bool Vector::hasSmallerValueThan(Vector v) const
 
 int Vector::getSmallestValue() const
 {
-  return (x > y) ? x : y;
+  return (std::abs(x) > std::abs(y)) ? std::abs(x) : std::abs(y);
 }
