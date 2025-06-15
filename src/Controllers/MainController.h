@@ -8,7 +8,7 @@
 
 #include "ClientController.h"
 #include "NavigationController.h"
-#include "../Models/BlockingObject.h"
+#include "../Models/VectorWithStartPos.h"
 #include "../Models/Command.h"
 #include "Clients/IClient.h"
 
@@ -19,7 +19,7 @@ public:
   static void init();
   static void mockInit();
   static void addCourseObject(std::unique_ptr<CourseObject>&& courseObject);
-  static void addBlockedObject(std::unique_ptr<BlockingObject> blockingObject);
+  static void addBlockedObject(std::unique_ptr<VectorWithStartPos> blockingObject);
   static void navigateAndSendCommand(cv::Mat* frame);
   static Command journeyToCommand(const JourneyModel* journey);
   static cv::Mat* getFrame();

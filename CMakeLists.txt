@@ -23,6 +23,6 @@ FetchContent_MakeAvailable(googletest)
 add_subdirectory(tests)
 
 enable_testing()
-add_subdirectory(Simulator)
+#add_subdirectory(Simulator)
 
 add_subdirectory(src)

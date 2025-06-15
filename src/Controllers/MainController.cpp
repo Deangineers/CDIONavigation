@@ -36,7 +36,7 @@ void MainController::addCourseObject(std::unique_ptr<CourseObject>&& courseObjec
   navigationController_->addCourseObject(std::move(courseObject));
 }
 
-void MainController::addBlockedObject(std::unique_ptr<BlockingObject> blockingObject)
+void MainController::addBlockedObject(std::unique_ptr<VectorWithStartPos> blockingObject)
 {
   navigationController_->addBlockingObject(std::move(blockingObject));
 }

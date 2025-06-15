@@ -6,7 +6,7 @@
 
 #include "MainController.h"
 #include "Utility/ConfigController.h"
-#include "../Models/BlockingObject.h"
+#include "../Models/VectorWithStartPos.h"
 #include "../Models/Vector.h"
 
 ImageProcessorController::ImageProcessorController()
@@ -76,7 +76,7 @@ void ImageProcessorController::detectRedPixels(const cv::Mat& frame)
             cv::line(frame, p1, p2, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("WallWidth"),
                             cv::LINE_AA, 0);
             cv::putText(frame, std::to_string(label++), p1, cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
-            MainController::addBlockedObject(std::make_unique<BlockingObject>(p1.x, p1.y, vector));
+            MainController::addBlockedObject(std::make_unique<VectorWithStartPos>(p1.x, p1.y, vector));
         }
     }
 }
