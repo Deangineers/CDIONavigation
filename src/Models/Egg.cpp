@@ -4,6 +4,9 @@
 
 #include "Egg.h"
 
+#include <iostream>
+#include <ostream>
+
 Egg::Egg(const int x1, const int y1, const int x2, const int y2) : VectorWithStartPos(x1, y1, Vector(x2 - x1, y2 - y1))
 {
   auto horizontalVector = Vector(x2 - x1, 0);
@@ -17,7 +20,7 @@ Egg::Egg(const int x1, const int y1, const int x2, const int y2) : VectorWithSta
 
 Vector Egg::closestVectorFromPoint(const Vector& fromPoint) const
 {
-  Vector smallestVector = {INT_MAX,INT_MAX};
+  Vector smallestVector = {5000, 5000};
   for (const auto& vector : vectors_)
   {
     auto closestVector = vector.closestVectorFromPoint(fromPoint);
