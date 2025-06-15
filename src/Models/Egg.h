@@ -16,7 +16,7 @@ public:
   [[nodiscard]] Vector closestVectorFromPoint(const Vector& fromPoint) const override;
 
 private:
-  std::vector<VectorWithStartPos> vectors_;;
+  std::vector<VectorWithStartPos> vectors_;
 };
 
 

@@ -288,9 +288,9 @@ Vector NavigationController::findClosestBall() const
 
 Vector NavigationController::navigateToLeftGoal() const
 {
-  int minY = -1;
-  int minX = -1;
-  int maxY = -1;
+  int minY = INT_MAX;
+  int minX = INT_MAX;
+  int maxY = INT_MIN;
 
   for (const auto& object : blockingObjects_)
   {
@@ -311,9 +311,9 @@ Vector NavigationController::navigateToLeftGoal() const
 
 Vector NavigationController::navigateToRightGoal() const
 {
-  int minY = -1;
-  int maxX = -1;
-  int maxY = -1;
+  int minY = INT_MAX;
+  int maxX = INT_MIN;
+  int maxY = INT_MIN;
 
   for (const auto& object : blockingObjects_)
   {
