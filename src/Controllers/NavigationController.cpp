@@ -108,7 +108,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   bool toCollectBalls = true;
   auto objectVector = Vector(0, 0);
   if (frontIsToCloseToBlockingObject())
-    return std::make_unique<JourneyModel>(-10,0,true);
+    return std::make_unique<JourneyModel>(-10, 0, true);
 
   if (ballVector_.empty())
   {
@@ -593,9 +593,9 @@ bool NavigationController::checkCollisionOnRoute(const Vector& targetVector) con
 bool NavigationController::frontIsToCloseToBlockingObject() const
 {
   auto vectorsToBlockingObjects = getVectorsForClosestBlockingObjects(robotFront_.get());
-  for (const Vector& vector : vectorsToBlockingObjects)
+  if (vectorsToBlockingObjects.first.getLength() < ConfigController::getConfigInt("DistanceBeforeToCloseToWall"))
   {
-    if (vector.getLength() < ConfigController::getConfigInt("DistanceBeforeToCloseToWall"))
-      return true;
+    return true;
   }
+  return false;
 }
