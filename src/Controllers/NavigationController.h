@@ -26,7 +26,7 @@ private:
   void removeBallsOutsideCourse();
   void removeBallsInsideRobot();
   [[nodiscard]] std::unique_ptr<JourneyModel> makeJourneyModel(const Vector& objectVector, bool toCollectBalls) const;
-  [[nodiscard]] Vector navigateToGoal() const;
+  [[nodiscard]] Vector navigateToGoal();
   [[nodiscard]] Vector findClosestBall() const;
   [[nodiscard]] Vector navigateToLeftGoal() const;
   [[nodiscard]] Vector navigateToRightGoal() const;

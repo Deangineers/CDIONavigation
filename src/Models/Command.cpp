@@ -38,11 +38,7 @@ void Command::setBallCollection(const bool ballCollectionStatus)
 std::string Command::formatToSend() const
 {
   std::string sendString = action_;
-  if (speed_ > 0)
-  {
-    sendString += " " + std::to_string(speed_);
-  }
-
+  sendString += " " + std::to_string(speed_);
   sendString += " " + std::to_string(distanceOrAngle_);
 
   if (ballCollectionGrabsBalls_)

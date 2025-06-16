@@ -110,7 +110,18 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   if (ballVector_.empty())
   {
     objectVector = navigateToGoal();
-    toCollectBalls = false;
+    auto vectorToRobotBack = MathUtil::calculateVectorToObject(robotBack_.get(), robotFront_.get());
+    auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(),robotFront_.get());
+    auto goalVector = MathUtil::calculateVectorToObject(&robotMiddle,goal_.get());
+    double angleDiff = MathUtil::calculateAngleDifferenceBetweenVectors(goalVector, vectorToRobotBack);
+    if (std::abs(angleDiff) > 5)
+    {
+      objectVector = goalVector;
+    }
+    else if (objectVector.getLength() < ConfigController::getConfigInt("DistanceBeforeTargetReached"))
+    {
+      return std::make_unique<JourneyModel>(0,0,false);
+    }
   }
   else
   {
@@ -215,7 +226,7 @@ void NavigationController::removeBallsInsideRobot()
   });
 }
 
-Vector NavigationController::navigateToGoal() const
+Vector NavigationController::navigateToGoal()
 {
   Vector goal(-1, -1);
   if (ConfigController::getConfigBool("goalIsLeft"))
@@ -242,14 +253,13 @@ Vector NavigationController::navigateToGoal() const
     targetX = goal.x + ConfigController::getConfigInt("distanceToGoal");
   }
 
-  auto courseObject = CourseObject(targetX, goal.y, targetX, goal.y, "goal");
-
+  goal_ = std::make_unique<CourseObject>(goal.x, goal.y, goal.x, goal.y, "goal");
+  auto localGoal = CourseObject(targetX,goal.y,targetX,goal.y,"goal");
   Utility::appendToFile(
     "log.txt",
-    "Navigating to Goal: " + std::to_string(courseObject.x1()) + ", " + std::to_string(courseObject.y1()) + "\n");
+    "Navigating to Goal: " + std::to_string(goal_->x1()) + ", " + std::to_string(goal_->y1()) + "\n");
 
-  auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
-  return MathUtil::calculateVectorToObject(&robotMiddle, &courseObject);
+  return getVectorForObjectNearWall(&localGoal);
 }
 
 Vector NavigationController::findClosestBall() const
@@ -280,6 +290,7 @@ Vector NavigationController::findClosestBall() const
   {
     Utility::appendToFile(
       "log.txt", "Navigating to Ball: BUT NO BALLS FOUND\n");
+    return {0,0};
   }
   return shortestVector;
 }
@@ -439,11 +450,28 @@ Vector NavigationController::getVectorForObjectNearWall(const CourseObject* cour
     }
     return MathUtil::calculateVectorToObject(&robotMiddle, &localCourseObject);
   }
-  else
+  int xAvg = (closestVectors.first.x + closestVectors.second.x) / 2;
+  int yAvg = (closestVectors.first.y + closestVectors.second.y) / 2;
+
+  xAvg = (closestVectors.first.x + xAvg) / 2;
+  yAvg = (closestVectors.first.y + yAvg) / 2;
+
+  auto offsetCourseObject = CourseObject(*courseObject);
+
+  int distanceBeforeTurning = ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning");
+  if (yAvg == 0)
   {
-    // Corner
+    yAvg = 1;
   }
-  return {0, 0};
+  double offset = xAvg / yAvg;
+  offsetCourseObject.shiftX(xAvg > 0 ? -distanceBeforeTurning*offset : distanceBeforeTurning*offset);
+  offsetCourseObject.shiftY(yAvg > 0 ? -distanceBeforeTurning : distanceBeforeTurning);
+  auto vectorToDiffPoint = MathUtil::calculateVectorToObject(&robotMiddle, &offsetCourseObject);
+  if (vectorToDiffPoint.getLength() < ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning"))
+  {
+    return MathUtil::calculateVectorToObject(&robotMiddle, courseObject);
+  }
+  return MathUtil::calculateVectorToObject(&robotMiddle, &offsetCourseObject);
 }
 
 std::pair<Vector, Vector> NavigationController::getVectorsForClosestBlockingObjects(

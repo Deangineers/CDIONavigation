@@ -62,6 +62,14 @@ void MainController::navigateAndSendCommand(cv::Mat* frame)
 Command MainController::journeyToCommand(const JourneyModel* journey)
 {
   Command command;
+  if (journey->angle == 0 && journey->distance == 0)
+  {
+    command.setAction("f");
+    command.setBallCollection(false);
+    command.setSpeed(0);
+    command.setDistanceOrAngle(0);
+    return command;
+  }
   int allowedAngleDiff = ConfigController::getConfigInt("AllowedAngleDifference");
   command.setBallCollection(journey->collectBalls);
   if (journey->angle > allowedAngleDiff || journey->angle < -allowedAngleDiff)
