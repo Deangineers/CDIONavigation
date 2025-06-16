@@ -36,6 +36,7 @@ private:
   std::pair<Vector, Vector> getVectorsForClosestBlockingObjects(const CourseObject* courseObject) const;
 
   [[nodiscard]] bool checkCollisionOnRoute(const Vector& targetVector) const;
+  [[nodiscard]] bool frontIsToCloseToBlockingObject() const;
 
 
   std::vector<std::unique_ptr<CourseObject>> ballVector_;

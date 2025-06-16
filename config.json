@@ -36,5 +36,6 @@
   "goalIsLeft": false,
   "minRedSize": 50,
   "showVectorsToWall": true,
-  "MinimumSizeOfBlockingObject": 50
+  "MinimumSizeOfBlockingObject": 50,
+  "DistanceBeforeToCloseToWall": 50
 }

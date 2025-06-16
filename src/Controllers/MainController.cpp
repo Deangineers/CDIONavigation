@@ -95,9 +95,12 @@ Command MainController::journeyToCommand(const JourneyModel* journey)
     return command;
   }
 
-  if (journey->distance > 0.0)
+  if (journey->distance != 0.0)
   {
-    command.setAction("f");
+    if (journey->distance > 0)
+      command.setAction("f");
+    else
+      command.setAction("b");
 
     if (journey->distance > ConfigController::getConfigInt("FastSpeedMinimumDistance"))
     {
@@ -117,6 +120,7 @@ Command MainController::journeyToCommand(const JourneyModel* journey)
     }
     return command;
   }
+
   command.setAction("s");
   return command;
 }
