@@ -53,54 +53,45 @@ void ImageProcessor::redPixelHelperFunction(const cv::Mat& frame, cv::Mat& mask)
   }
 }
 
-void ImageProcessor::ballHelperFunction(const cv::Mat& frame, cv::Mat& mask)
+void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const cv::Mat& mask, const std::string& colorLabel)
 {
-  cv::morphologyEx(mask, mask, cv::MORPH_OPEN, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
+  cv::Mat blurred;
+  cv::GaussianBlur(mask, blurred, cv::Size(9, 9), 2);
 
-  std::vector<std::vector<cv::Point>> contours;
-  cv::findContours(mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+  std::vector<cv::Vec3f> circles;
+  cv::HoughCircles(blurred, circles, cv::HOUGH_GRADIENT, 1,
+                   30,     // minDist between centers
+                   100,    // param1: upper threshold for Canny
+                   30,     // param2: threshold for center detection
+                   10, 50); // minRadius, maxRadius
 
-  for (const auto& cnt : contours)
+  int eggBallDiffVal = ConfigController::getConfigInt("EggBallDiffVal");
+
+  for (const auto& circle : circles)
   {
-    double area = cv::contourArea(cnt);
-    double perimeter = cv::arcLength(cnt, true);
+    int cx = cvRound(circle[0]);
+    int cy = cvRound(circle[1]);
+    int r = cvRound(circle[2]);
 
-    int minimumBallSize = ConfigController::getConfigInt("MinimumBallSize");
-    int eggBallDiffVal = ConfigController::getConfigInt("EggBallDiffVal");
-
-    if (area < minimumBallSize || perimeter == 0)
+    cv::Rect rect(cx - r, cy - r, 2 * r, 2 * r);
+    if ((rect & cv::Rect(0, 0, frame.cols, frame.rows)) != rect)
       continue;
 
-    std::string label = area > eggBallDiffVal ? "egg" : "ball";
+    double area = CV_PI * r * r;
+    std::string shapeLabel = area > eggBallDiffVal ? "egg" : "ball";
+    std::string label = shapeLabel; // at some point we might want to add the colorLabel here to separate white and orange balls
 
-    // Optional: Circularity check
-    double circularity = 4 * CV_PI * area / (perimeter * perimeter);
-    if (circularity < 0.6) // adjust threshold as needed
-      continue;
-
-    cv::Rect rect = cv::boundingRect(cnt);
     int x1 = rect.x, y1 = rect.y;
     int x2 = x1 + rect.width, y2 = y1 + rect.height;
 
     MainController::addCourseObject(std::make_unique<CourseObject>(x1, y1, x2, y2, label));
-    // Draw bounding box and label
+
     cv::rectangle(frame, rect, cv::Scalar(0, 255, 0), 2);
     cv::putText(frame, label, cv::Point(x1, y1 - 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
-
-    // Optional: visualize edge points
-    cv::Mat roi_mask = mask(rect);
-    cv::GaussianBlur(roi_mask, roi_mask, cv::Size(5, 5), 0);
-    cv::Mat edges;
-    cv::Canny(roi_mask, edges, 50, 150);
-
-    std::vector<cv::Point> edge_points;
-    cv::findNonZero(edges, edge_points);
-    for (const auto& pt : edge_points)
-    {
-      cv::circle(frame, pt + rect.tl(), 1, cv::Scalar(0, 0, 255), -1);
-    }
+    cv::circle(frame, cv::Point(cx, cy), 2, cv::Scalar(255, 0, 255), -1); // circle center
   }
 }
+
 
 void ImageProcessor::frontAndBackHelperFunction(const cv::Mat& frame, cv::Mat& mask, std::string label)
 {

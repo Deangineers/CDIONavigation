@@ -4,6 +4,9 @@
 
 #include "CloudyImageProcessor.h"
 
+#include "Utility/ConfigController.h"
+#include "../MainController.h"
+
 
 void CloudyImageProcessor::detectRedPixels(const cv::Mat& frame)
 {
@@ -17,13 +20,12 @@ void CloudyImageProcessor::detectRedPixels(const cv::Mat& frame)
 
 void CloudyImageProcessor::detectBalls(const cv::Mat& frame)
 {
-  cv::Mat orangeMask, whiteMask, mask;
+  cv::Mat orangeMask, whiteMask;
   cv::inRange(hsv_, cv::Scalar(5, 50, 50), cv::Scalar(30, 255, 255), orangeMask);
   cv::inRange(hsv_, cv::Scalar(0, 0, 200), cv::Scalar(180, 40, 255), whiteMask);
 
-  cv::bitwise_or(orangeMask, whiteMask, mask);
-
-  ballHelperFunction(frame, mask);
+  ballHelperFunction(frame, orangeMask, "orange");
+  ballHelperFunction(frame, whiteMask, "white");
 }
 
 void CloudyImageProcessor::detectFrontAndBack(const cv::Mat& frame)

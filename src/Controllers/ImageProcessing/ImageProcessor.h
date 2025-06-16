@@ -18,7 +18,7 @@ protected:
   virtual void detectBalls(const cv::Mat& frame) = 0;
   virtual void detectFrontAndBack(const cv::Mat& frame) = 0;
   void redPixelHelperFunction(const cv::Mat& frame, cv::Mat& mask);
-  void ballHelperFunction(const cv::Mat& frame, cv::Mat& mask);
+  void ballHelperFunction(const cv::Mat& frame, const cv::Mat& mask, const std::string& colorLabel);
   void frontAndBackHelperFunction(const cv::Mat& frame, cv::Mat& mask, std::string label);
 
   cv::Mat hsv_;
