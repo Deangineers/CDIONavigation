@@ -16,6 +16,7 @@ public:
 protected:
   void detectRedPixels(const cv::Mat& frame) override;
   void detectBalls(const cv::Mat& frame) override;
+  void detectEgg(const cv::Mat& frame) override;
   void detectFrontAndBack(const cv::Mat& frame) override;
 };
 

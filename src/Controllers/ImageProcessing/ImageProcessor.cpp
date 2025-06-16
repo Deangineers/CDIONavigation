@@ -12,6 +12,7 @@ void ImageProcessor::processImage(const cv::Mat& frame)
   cv::cvtColor(frame, hsv_, cv::COLOR_BGR2HSV);
   detectRedPixels(frame);
   detectBalls(frame);
+  detectEgg(frame);
   detectFrontAndBack(frame);
 }
 
@@ -65,8 +66,6 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const cv::Mat& mas
                    30,     // param2: threshold for center detection
                    10, 50); // minRadius, maxRadius
 
-  int eggBallDiffVal = ConfigController::getConfigInt("EggBallDiffVal");
-
   for (const auto& circle : circles)
   {
     int cx = cvRound(circle[0]);
@@ -78,8 +77,7 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const cv::Mat& mas
       continue;
 
     double area = CV_PI * r * r;
-    std::string shapeLabel = area > eggBallDiffVal ? "egg" : "ball";
-    std::string label = shapeLabel; // at some point we might want to add the colorLabel here to separate white and orange balls
+    std::string label = "egg"; // at some point we might want to add the colorLabel here to separate white and orange balls
 
     int x1 = rect.x, y1 = rect.y;
     int x2 = x1 + rect.width, y2 = y1 + rect.height;
@@ -89,6 +87,51 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const cv::Mat& mas
     cv::rectangle(frame, rect, cv::Scalar(0, 255, 0), 2);
     cv::putText(frame, label, cv::Point(x1, y1 - 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
     cv::circle(frame, cv::Point(cx, cy), 2, cv::Scalar(255, 0, 255), -1); // circle center
+  }
+}
+
+void ImageProcessor::eggHelperFunction(const cv::Mat& frame, const cv::Mat& mask)
+{
+  cv::morphologyEx(mask, mask, cv::MORPH_OPEN, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
+
+  std::vector<std::vector<cv::Point>> contours;
+  cv::findContours(mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+  for (const auto& cnt : contours)
+  {
+    double area = cv::contourArea(cnt);
+    double perimeter = cv::arcLength(cnt, true);
+
+    int eggMinSize = ConfigController::getConfigInt("EggBallDiffVal");
+
+    if (area < eggMinSize || perimeter == 0)
+      continue;
+
+    std::string label = "egg";
+
+    double circularity = 4 * CV_PI * area / (perimeter * perimeter);
+    if (circularity < 0.6)
+      continue;
+
+    cv::Rect rect = cv::boundingRect(cnt);
+    int x1 = rect.x, y1 = rect.y;
+    int x2 = x1 + rect.width, y2 = y1 + rect.height;
+
+    MainController::addCourseObject(std::make_unique<CourseObject>(x1, y1, x2, y2, label));
+    cv::rectangle(frame, rect, cv::Scalar(0, 255, 0), 2);
+    cv::putText(frame, label, cv::Point(x1, y1 - 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
+
+    cv::Mat roi_mask = mask(rect);
+    cv::GaussianBlur(roi_mask, roi_mask, cv::Size(5, 5), 0);
+    cv::Mat edges;
+    cv::Canny(roi_mask, edges, 50, 150);
+
+    std::vector<cv::Point> edge_points;
+    cv::findNonZero(edges, edge_points);
+    for (const auto& pt : edge_points)
+    {
+      cv::circle(frame, pt + rect.tl(), 1, cv::Scalar(0, 0, 255), -1);
+    }
   }
 }
 
