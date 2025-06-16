@@ -111,16 +111,16 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   {
     objectVector = navigateToGoal();
     auto vectorToRobotBack = MathUtil::calculateVectorToObject(robotBack_.get(), robotFront_.get());
-    auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(),robotFront_.get());
-    auto goalVector = MathUtil::calculateVectorToObject(&robotMiddle,goal_.get());
+    auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
+    auto goalVector = MathUtil::calculateVectorToObject(&robotMiddle, goal_.get());
     double angleDiff = MathUtil::calculateAngleDifferenceBetweenVectors(goalVector, vectorToRobotBack);
-    if (std::abs(angleDiff) > 5)
+    if (objectVector.getLength() < ConfigController::getConfigInt("DistanceBeforeTargetReached"))
     {
-      objectVector = goalVector;
-    }
-    else if (objectVector.getLength() < ConfigController::getConfigInt("DistanceBeforeTargetReached"))
-    {
-      return std::make_unique<JourneyModel>(0,0,false);
+      if (std::abs(angleDiff) > ConfigController::getConfigInt("AllowedAngleDifference"))
+      {
+        return std::make_unique<JourneyModel>(0, angleDiff, true);
+      }
+      return std::make_unique<JourneyModel>(0, 0, false);
     }
   }
   else
@@ -254,7 +254,7 @@ Vector NavigationController::navigateToGoal()
   }
 
   goal_ = std::make_unique<CourseObject>(goal.x, goal.y, goal.x, goal.y, "goal");
-  auto localGoal = CourseObject(targetX,goal.y,targetX,goal.y,"goal");
+  auto localGoal = CourseObject(targetX, goal.y, targetX, goal.y, "goal");
   Utility::appendToFile(
     "log.txt",
     "Navigating to Goal: " + std::to_string(goal_->x1()) + ", " + std::to_string(goal_->y1()) + "\n");
@@ -290,7 +290,7 @@ Vector NavigationController::findClosestBall() const
   {
     Utility::appendToFile(
       "log.txt", "Navigating to Ball: BUT NO BALLS FOUND\n");
-    return {0,0};
+    return {0, 0};
   }
   return shortestVector;
 }
@@ -464,7 +464,7 @@ Vector NavigationController::getVectorForObjectNearWall(const CourseObject* cour
     yAvg = 1;
   }
   double offset = xAvg / yAvg;
-  offsetCourseObject.shiftX(xAvg > 0 ? -distanceBeforeTurning*offset : distanceBeforeTurning*offset);
+  offsetCourseObject.shiftX(xAvg > 0 ? -distanceBeforeTurning * offset : distanceBeforeTurning * offset);
   offsetCourseObject.shiftY(yAvg > 0 ? -distanceBeforeTurning : distanceBeforeTurning);
   auto vectorToDiffPoint = MathUtil::calculateVectorToObject(&robotMiddle, &offsetCourseObject);
   if (vectorToDiffPoint.getLength() < ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning"))
