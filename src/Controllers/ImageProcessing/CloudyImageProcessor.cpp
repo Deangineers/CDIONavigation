@@ -22,7 +22,7 @@ void CloudyImageProcessor::detectBalls(const cv::Mat& frame)
 {
   cv::Mat orangeMask, whiteMask;
   cv::inRange(hsv_, cv::Scalar(5, 50, 50), cv::Scalar(30, 255, 255), orangeMask);
-  cv::inRange(hsv_, cv::Scalar(0, 0, 200), cv::Scalar(180, 40, 255), whiteMask);
+  cv::inRange(hsv_, cv::Scalar(0, 0, 200), cv::Scalar(179, 65, 255), whiteMask);
 
   ballHelperFunction(frame, orangeMask, "orange");
   ballHelperFunction(frame, whiteMask, "white");
@@ -44,7 +44,7 @@ void CloudyImageProcessor::detectFrontAndBack(const cv::Mat& frame)
   cv::Mat frontMask, backMask, finalMask;
 
   cv::inRange(hsv_, cv::Scalar(35, 50, 50), cv::Scalar(85, 255, 255), frontMask);
-  cv::inRange(hsv_, cv::Scalar(125, 80, 80), cv::Scalar(155, 255, 255), backMask);
+  cv::inRange(hsv_, cv::Scalar(120, 85, 85), cv::Scalar(170, 255, 255), backMask);
 
   frontAndBackHelperFunction(frame, frontMask, "robotFront");
   frontAndBackHelperFunction(frame, backMask, "robotBack");

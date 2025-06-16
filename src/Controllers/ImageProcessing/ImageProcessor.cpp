@@ -77,7 +77,12 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const cv::Mat& mas
       continue;
 
     double area = CV_PI * r * r;
-    std::string label = "egg"; // at some point we might want to add the colorLabel here to separate white and orange balls
+    if (area < ConfigController::getConfigInt("MinimumSizeOfBlockingObject")
+      || area > ConfigController::getConfigInt("EggBallDiffVal"))
+    {
+      continue;
+    }
+    std::string label = "ball"; // at some point we might want to add the colorLabel here to separate white and orange balls
 
     int x1 = rect.x, y1 = rect.y;
     int x2 = x1 + rect.width, y2 = y1 + rect.height;
@@ -92,7 +97,7 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const cv::Mat& mas
 
 void ImageProcessor::eggHelperFunction(const cv::Mat& frame, const cv::Mat& mask)
 {
-  cv::morphologyEx(mask, mask, cv::MORPH_OPEN, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
+  cv::morphologyEx(mask, mask, cv::MORPH_OPEN, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(3, 3)));
 
   std::vector<std::vector<cv::Point>> contours;
   cv::findContours(mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
@@ -110,7 +115,7 @@ void ImageProcessor::eggHelperFunction(const cv::Mat& frame, const cv::Mat& mask
     std::string label = "egg";
 
     double circularity = 4 * CV_PI * area / (perimeter * perimeter);
-    if (circularity < 0.6)
+    if (circularity < 0.2)
       continue;
 
     cv::Rect rect = cv::boundingRect(cnt);

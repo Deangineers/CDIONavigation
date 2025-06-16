@@ -125,7 +125,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     Utility::appendToFile("log.txt", "objectVector = {0,0}, firstCheck\n");
     return nullptr;
   }
-  objectVector = handleCollision(objectVector);
+  //objectVector = handleCollision(objectVector);
 
   if (objectVector.isNullVector())
   {
@@ -395,8 +395,6 @@ Vector NavigationController::getVectorForObjectNearWall(const CourseObject* cour
   auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
 
   auto closestVectors = getVectorsForClosestBlockingObjects(courseObject);
-  Utility::appendToFile(
-    "log.txt", "ClosestVectors: " + closestVectors.first.toString() + " | " + closestVectors.second.toString() + "\n");
 
   if (ConfigController::getConfigBool("showVectorsToWall"))
   {
