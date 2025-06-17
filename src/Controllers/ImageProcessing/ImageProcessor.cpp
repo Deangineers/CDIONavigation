@@ -62,9 +62,9 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const cv::Mat& mas
   std::vector<cv::Vec3f> circles;
   cv::HoughCircles(blurred, circles, cv::HOUGH_GRADIENT, 1,
                    20,     // minDist between centers
-                   100,    // param1: upper threshold for Canny
-                   30,     // param2: threshold for center detection
-                   10, 50); // minRadius, maxRadius
+                   150,    // param1: upper threshold for Canny
+                   25,     // param2: threshold for center detection
+                   10, 40); // minRadius, maxRadius
 
   for (const auto& circle : circles)
   {
@@ -94,7 +94,7 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const cv::Mat& mas
     cv::circle(frame, cv::Point(cx, cy), 2, cv::Scalar(255, 0, 255), -1); // circle center
   }
 
-  findBallsInCorners(frame, mask);
+  //findBallsInCorners(frame, mask);
 }
 
 void ImageProcessor::eggHelperFunction(const cv::Mat& frame, const cv::Mat& mask)
