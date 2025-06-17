@@ -32,7 +32,10 @@ private:
   [[nodiscard]] Vector navigateToRightGoal() const;
 
   Vector handleCollision(Vector objectVector);
-  Vector getVectorForObjectNearWall(const CourseObject* courseObject) const;
+  Vector handleObjectNextToBlocking(const CourseObject* courseObject) const;
+  Vector handleObjectNearWall(const CourseObject* courseObject, const Vector& vectorToWall) const;
+  Vector handleObjectNearCorner(const CourseObject* courseObject,
+                                const std::pair<Vector, Vector>& closestVectors) const;
   std::pair<Vector, Vector> getVectorsForClosestBlockingObjects(const CourseObject* courseObject) const;
 
   [[nodiscard]] bool checkCollisionOnRoute(const Vector& targetVector) const;

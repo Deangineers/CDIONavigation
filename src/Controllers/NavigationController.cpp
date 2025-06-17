@@ -262,7 +262,7 @@ Vector NavigationController::navigateToGoal()
     "log.txt",
     "Navigating to Goal: " + std::to_string(goal_->x1()) + ", " + std::to_string(goal_->y1()) + "\n");
 
-  return getVectorForObjectNearWall(&localGoal);
+  return handleObjectNextToBlocking(&localGoal);
 }
 
 Vector NavigationController::findClosestBall() const
@@ -276,7 +276,7 @@ Vector NavigationController::findClosestBall() const
   CourseObject* closestBall = nullptr;
   for (const auto& ball : ballVector_)
   {
-    auto vectorToBall = getVectorForObjectNearWall(ball.get());
+    auto vectorToBall = handleObjectNextToBlocking(ball.get());
     if (vectorToBall.getLength() < shortestVector.getLength() && not vectorToBall.isNullVector())
     {
       shortestVector = vectorToBall;
@@ -399,7 +399,7 @@ Vector NavigationController::handleCollision(Vector objectVector)
   return objectVector;
 }
 
-Vector NavigationController::getVectorForObjectNearWall(const CourseObject* courseObject) const
+Vector NavigationController::handleObjectNextToBlocking(const CourseObject* courseObject) const
 {
   if (courseObject == nullptr)
   {
@@ -432,27 +432,41 @@ Vector NavigationController::getVectorForObjectNearWall(const CourseObject* cour
     {
       return MathUtil::calculateVectorToObject(&robotMiddle, courseObject);
     }
-    // 1 wall
-    auto localCourseObject = CourseObject(courseObject->x1(), courseObject->y1(), courseObject->x2(),
-                                          courseObject->y2(), courseObject->name());
-    int singleWallShiftDiff = ConfigController::getConfigInt("SingleWallShiftDiff");
-    if (std::abs(vectorToWall.x) > std::abs(vectorToWall.y))
-    {
-      localCourseObject.shiftX(vectorToWall.x > 0 ? -singleWallShiftDiff : singleWallShiftDiff);
-    }
-    else
-    {
-      localCourseObject.shiftY(vectorToWall.y > 0 ? -singleWallShiftDiff : singleWallShiftDiff);
-    }
-
-
-    auto vectorToDiffPoint = MathUtil::calculateVectorToObject(&robotMiddle, &localCourseObject);
-    if (vectorToDiffPoint.getLength() < ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning"))
-    {
-      return MathUtil::calculateVectorToObject(&robotMiddle, courseObject);
-    }
-    return MathUtil::calculateVectorToObject(&robotMiddle, &localCourseObject);
+    return handleObjectNearWall(courseObject, vectorToWall);
   }
+  return handleObjectNearCorner(courseObject, closestVectors);
+}
+
+Vector NavigationController::handleObjectNearWall(const CourseObject* courseObject,
+                                                  const Vector& vectorToWall) const
+{
+  auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
+  // 1 wall
+  auto localCourseObject = CourseObject(courseObject->x1(), courseObject->y1(), courseObject->x2(),
+                                        courseObject->y2(), courseObject->name());
+  int singleWallShiftDiff = ConfigController::getConfigInt("SingleWallShiftDiff");
+  if (std::abs(vectorToWall.x) > std::abs(vectorToWall.y))
+  {
+    localCourseObject.shiftX(vectorToWall.x > 0 ? -singleWallShiftDiff : singleWallShiftDiff);
+  }
+  else
+  {
+    localCourseObject.shiftY(vectorToWall.y > 0 ? -singleWallShiftDiff : singleWallShiftDiff);
+  }
+
+
+  auto vectorToDiffPoint = MathUtil::calculateVectorToObject(&robotMiddle, &localCourseObject);
+  if (vectorToDiffPoint.getLength() < ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning"))
+  {
+    return MathUtil::calculateVectorToObject(&robotMiddle, courseObject);
+  }
+  return MathUtil::calculateVectorToObject(&robotMiddle, &localCourseObject);
+}
+
+Vector NavigationController::handleObjectNearCorner(const CourseObject* courseObject,
+                                                    const std::pair<Vector, Vector>& closestVectors) const
+{
+  auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
   int xAvg = (closestVectors.first.x + closestVectors.second.x) / 2;
   int yAvg = (closestVectors.first.y + closestVectors.second.y) / 2;
 
@@ -466,7 +480,7 @@ Vector NavigationController::getVectorForObjectNearWall(const CourseObject* cour
   {
     yAvg = 1;
   }
-  double offset = xAvg / yAvg;
+  double offset = static_cast<double>(xAvg) / static_cast<double>(yAvg);
   offsetCourseObject.shiftX(xAvg > 0 ? -distanceBeforeTurning * offset : distanceBeforeTurning * offset);
   offsetCourseObject.shiftY(yAvg > 0 ? -distanceBeforeTurning : distanceBeforeTurning);
   auto vectorToDiffPoint = MathUtil::calculateVectorToObject(&robotMiddle, &offsetCourseObject);
