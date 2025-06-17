@@ -22,6 +22,7 @@ protected:
   void ballHelperFunction(const cv::Mat& frame, const cv::Mat& mask, const std::string& colorLabel);
   void eggHelperFunction(const cv::Mat& frame, const cv::Mat& mask);
   void frontAndBackHelperFunction(const cv::Mat& frame, cv::Mat& mask, std::string label);
+  void findBallsInCorners(const cv::Mat& frame, const cv::Mat& mask);
 
   cv::Mat hsv_;
 };
