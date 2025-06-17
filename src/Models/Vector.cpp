@@ -6,7 +6,7 @@
 
 #include <algorithm>
 #include <cmath>
-#include <__numeric/gcd_lcm.h>
+#include <numeric>
 
 Vector::Vector(int x, int y) : x(x), y(y)
 {
