@@ -33,7 +33,7 @@ int main()
 
   while (cap.read(frame))
   {
-    //frame = cv::imread("../../TestImages/ballsInCorner.jpg", cv::IMREAD_COLOR_BGR);
+    //frame = cv::imread("../../TestImages/img2.jpg", cv::IMREAD_COLOR_BGR);
     processor->processImage(frame);
 
     MainController::navigateAndSendCommand(&frame);

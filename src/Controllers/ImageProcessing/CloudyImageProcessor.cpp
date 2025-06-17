@@ -16,6 +16,7 @@ void CloudyImageProcessor::detectRedPixels(const cv::Mat& frame)
   cv::bitwise_or(mask1, mask2, redMask);
 
   redPixelHelperFunction(frame, redMask);
+  crossHelperFunction(frame, redMask);
 }
 
 void CloudyImageProcessor::detectBalls(const cv::Mat& frame)
@@ -34,7 +35,7 @@ void CloudyImageProcessor::detectEgg(const cv::Mat& frame)
   cv::inRange(hsv_, cv::Scalar(0, 0, 200), cv::Scalar(180, 40, 255), eggMask);
 
   cv::morphologyEx(eggMask, eggMask, cv::MORPH_OPEN,
-    cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)));
+                   cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)));
 
   eggHelperFunction(frame, eggMask);
 }

@@ -29,7 +29,7 @@ private:
   void removeBallsInsideRobot();
   [[nodiscard]] std::unique_ptr<JourneyModel> makeJourneyModel(const Vector& objectVector, bool toCollectBalls) const;
   [[nodiscard]] Vector navigateToGoal();
-  [[nodiscard]] Vector findClosestBall() const;
+  [[nodiscard]] Vector findClosestBall();
   [[nodiscard]] Vector navigateToLeftGoal() const;
   [[nodiscard]] Vector navigateToRightGoal() const;
 
@@ -49,6 +49,7 @@ private:
   std::unique_ptr<CourseObject> robotFront_;
   std::unique_ptr<CourseObject> robotBack_;
   std::vector<std::unique_ptr<VectorWithStartPos>> blockingObjects_;
+  std::unique_ptr<CourseObject> target_;
   int robotWidth_ = ConfigController::getConfigInt("RobotWidth");
 
   int totalBalls_ = ConfigController::getConfigInt("TotalBalls");
@@ -61,6 +62,7 @@ private:
   const int stableThreshold = 3;
 
   bool hasDeliveredBallsOnce_ = false;
+  bool toCollectBalls_ = true;
 };
 
 

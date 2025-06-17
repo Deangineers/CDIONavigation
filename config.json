@@ -37,5 +37,6 @@
   "minRedSize": 50,
   "showVectorsToWall": true,
   "MinimumSizeOfBlockingObject": 50,
-  "DistanceBeforeToCloseToWall": 50
+  "DistanceBeforeToCloseToWall": 50,
+  "CrossWallWidth": 10
 }
