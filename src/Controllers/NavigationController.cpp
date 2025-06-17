@@ -121,7 +121,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     {
       if (std::abs(angleDiff) > ConfigController::getConfigInt("AllowedAngleDifference"))
       {
-        return std::make_unique<JourneyModel>(0, angleDiff, true);
+        return std::make_unique<JourneyModel>(0, -angleDiff, true);
       }
       return std::make_unique<JourneyModel>(0, 0, false);
     }
