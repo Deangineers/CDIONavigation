@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <__numeric/gcd_lcm.h>
 
 Vector::Vector(int x, int y) : x(x), y(y)
 {
@@ -42,6 +43,15 @@ Vector Vector::closestVectorFromPoint(const Vector& vectorStart, const Vector& f
 
   Vector Q = vectorStart + (*this * t);
   return Q - fromPoint;
+}
+
+Vector Vector::normalize() const
+{
+  if (x == 0 && y == 0)
+    return {0, 0};
+
+  int divisor = std::gcd(std::abs(x), std::abs(y));
+  return Vector(x / divisor, y / divisor);
 }
 
 bool Vector::isNullVector() const
