@@ -107,16 +107,17 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
 
   if (target_ != nullptr)
   {
-    auto vectorToObject = MathUtil::calculateVectorToObject(robotFront_.get(), target_.get());
+    auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
+    auto vectorToObject = MathUtil::calculateVectorToObject(&robotMiddle, target_.get());
     if (vectorToObject.getLength() < ConfigController::getConfigInt("DistanceBeforeTargetReached"))
     {
       target_ = nullptr;
     }
     else
     {
-      auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
       cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},
-                      {robotMiddle.x1() + vectorToObject.x, robotMiddle.y1() + vectorToObject.y}, cv::Scalar(255, 0, 255), 1,
+                      {robotMiddle.x1() + vectorToObject.x, robotMiddle.y1() + vectorToObject.y},
+                      cv::Scalar(255, 0, 255), 1,
                       cv::LINE_AA, 0, 0.01);
 
       return makeJourneyModel(vectorToObject, toCollectBalls_);
@@ -323,7 +324,8 @@ Vector NavigationController::findClosestBall()
     Utility::appendToFile(
       "log.txt",
       "Navigating to Ball: " + std::to_string(closestBall->x1()) + ", " + std::to_string(closestBall->y1()) + "\n");
-    target_ = std::make_unique<CourseObject>(closestBall->x1(), closestBall->y1(), closestBall->x2(), closestBall->y2(), "ball");
+    target_ = std::make_unique<CourseObject>(closestBall->x1(), closestBall->y1(), closestBall->x2(), closestBall->y2(),
+                                             "ball");
   }
   else
   {
