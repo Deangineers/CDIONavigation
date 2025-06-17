@@ -289,6 +289,7 @@ Vector NavigationController::navigateToGoal()
   }
 
   target_ = std::make_unique<CourseObject>(goal.x, goal.y, goal.x, goal.y, "goal");
+  goal_ = std::make_unique<CourseObject>(goal.x, goal.y, goal.x, goal.y, "goal");
   auto localGoal = CourseObject(targetX, goal.y, targetX, goal.y, "goal");
   Utility::appendToFile(
     "log.txt",
