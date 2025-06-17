@@ -469,17 +469,23 @@ Vector NavigationController::handleObjectNearCorner(const CourseObject* courseOb
                                                     const std::pair<Vector, Vector>& closestVectors) const
 {
   auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
-  Vector vector1Normalized = closestVectors.first.normalize();
-  Vector vector2Normalized = closestVectors.second.normalize();
+  int xAvg = (closestVectors.first.x + closestVectors.second.x) / 2;
+  int yAvg = (closestVectors.first.y + closestVectors.second.y) / 2;
 
-  Vector approachVector = (vector1Normalized * 3 + vector2Normalized * 1).normalize();
+  xAvg = (closestVectors.first.x + xAvg) / 2;
+  yAvg = (closestVectors.first.y + yAvg) / 2;
+
   auto offsetCourseObject = CourseObject(*courseObject);
 
   int distanceBeforeTurning = ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning");
+  if (yAvg == 0)
+  {
+    yAvg = 1;
+  }
+  double offset = static_cast<double>(xAvg) / static_cast<double>(yAvg) * 4;
+  offsetCourseObject.shiftX(xAvg > 0 ? -distanceBeforeTurning * offset : distanceBeforeTurning * offset);
+  offsetCourseObject.shiftY(yAvg > 0 ? -distanceBeforeTurning : distanceBeforeTurning);
 
-  Vector shiftVector = approachVector * (-distanceBeforeTurning);
-  offsetCourseObject.shiftX(shiftVector.x);
-  offsetCourseObject.shiftY(shiftVector.y);
 
   auto vectorToDiffPoint = MathUtil::calculateVectorToObject(&robotMiddle, &offsetCourseObject);
   if (vectorToDiffPoint.getLength() < ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning"))
