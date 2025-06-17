@@ -480,29 +480,35 @@ Vector NavigationController::handleObjectNearWall(const CourseObject* courseObje
 }
 
 Vector NavigationController::handleObjectNearCorner(const CourseObject* courseObject,
-                                                    const std::pair<Vector, Vector>& closestVectors) const
+                                                    const std::pair<Vector, Vector>& /*closestVectors*/) const
 {
   auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
-  double xAvg = (closestVectors.first.x + closestVectors.second.x) / 2.0;
-  double yAvg = (closestVectors.first.y + closestVectors.second.y) / 2.0;
 
-  xAvg = (closestVectors.first.x + xAvg) / 2.0;
-  yAvg = (closestVectors.first.y + yAvg) / 2.0;
+  const int ballCenterX = (courseObject->x1() + courseObject->x2()) / 2;
+  const int ballCenterY = (courseObject->y1() + courseObject->y2()) / 2;
 
-  auto offsetCourseObject = CourseObject(*courseObject);
+  int imageWidth = 1920;
+  int imageHeight = 1080;
 
-  int distanceBeforeTurning = ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning");
-  double offset = xAvg / yAvg * 4;
-  offsetCourseObject.shiftX(xAvg > 0 ? -distanceBeforeTurning * offset : distanceBeforeTurning * offset);
-  offsetCourseObject.shiftY(yAvg > 0 ? -distanceBeforeTurning : distanceBeforeTurning);
+  int sx = (ballCenterX > imageWidth / 2) ? -1 : 1;
+  int sy = (ballCenterY > imageHeight / 2) ? -1 : 1;
 
+  double angleDeg = 22.5;
+  double angleRad = angleDeg * CV_PI / 180.0;
+  int shiftDist = ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning") * 3;
 
-  auto vectorToDiffPoint = MathUtil::calculateVectorToObject(&robotMiddle, &offsetCourseObject);
-  if (vectorToDiffPoint.getLength() < ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning"))
-  {
+  double dx = std::tan(angleRad) * shiftDist;
+
+  CourseObject shiftedTarget(*courseObject);
+  shiftedTarget.shiftX(sx * dx);
+  shiftedTarget.shiftY(sy * shiftDist);
+
+  auto vectorToShifted = MathUtil::calculateVectorToObject(&robotMiddle, &shiftedTarget);
+
+  if (vectorToShifted.getLength() < shiftDist)
     return MathUtil::calculateVectorToObject(&robotMiddle, courseObject);
-  }
-  return MathUtil::calculateVectorToObject(&robotMiddle, &offsetCourseObject);
+
+  return vectorToShifted;
 }
 
 std::pair<Vector, Vector> NavigationController::getVectorsForClosestBlockingObjects(
