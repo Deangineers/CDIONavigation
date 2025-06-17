@@ -528,7 +528,17 @@ Vector NavigationController::handleObjectNearCorner(const CourseObject* courseOb
   auto vectorToIntermediaryPoint = MathUtil::calculateVectorToObject(&robotMiddle, &shiftedTarget);
 
   if (vectorToIntermediaryPoint.getLength() < shiftDist)
-    return MathUtil::calculateVectorToObject(&robotMiddle, courseObject);
+  {
+    auto localObject = CourseObject(*courseObject);
+    if (courseObject->x1() > ConfigController::getConfigInt("middleXOnAxis"))
+    {
+        localObject.shiftX(-10);
+    }
+    else {
+      localObject.shiftX(10);
+    }
+    return MathUtil::calculateVectorToObject(&robotMiddle, &localObject);
+  }
 
   return vectorToIntermediaryPoint;
 }
