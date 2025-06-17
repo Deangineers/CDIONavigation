@@ -8,7 +8,7 @@
   "RobotIP": "192.168.0.1",
   "RobotPort": 1234,
   "DistanceBeforeBallCollection": 30,
-  "AllowedAngleDifference": 5,
+  "AllowedAngleDifference": 1,
   "MaxAngleBeforeSlowingDown": 20,
   "RotationSlowSpeed": 100,
   "RotationFastSpeed": 100,
