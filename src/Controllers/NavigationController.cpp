@@ -469,20 +469,16 @@ Vector NavigationController::handleObjectNearCorner(const CourseObject* courseOb
                                                     const std::pair<Vector, Vector>& closestVectors) const
 {
   auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
-  int xAvg = (closestVectors.first.x + closestVectors.second.x) / 2;
-  int yAvg = (closestVectors.first.y + closestVectors.second.y) / 2;
+  double xAvg = (closestVectors.first.x + closestVectors.second.x) / 2.0;
+  double yAvg = (closestVectors.first.y + closestVectors.second.y) / 2.0;
 
-  xAvg = (closestVectors.first.x + xAvg) / 2;
-  yAvg = (closestVectors.first.y + yAvg) / 2;
+  xAvg = (closestVectors.first.x + xAvg) / 2.0;
+  yAvg = (closestVectors.first.y + yAvg) / 2.0;
 
   auto offsetCourseObject = CourseObject(*courseObject);
 
   int distanceBeforeTurning = ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning");
-  if (yAvg == 0)
-  {
-    yAvg = 1;
-  }
-  double offset = static_cast<double>(xAvg) / static_cast<double>(yAvg) * 4;
+  double offset = xAvg / yAvg * 4;
   offsetCourseObject.shiftX(xAvg > 0 ? -distanceBeforeTurning * offset : distanceBeforeTurning * offset);
   offsetCourseObject.shiftY(yAvg > 0 ? -distanceBeforeTurning : distanceBeforeTurning);
 
