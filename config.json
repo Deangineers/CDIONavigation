@@ -22,7 +22,7 @@
   "RobotLengthInMM": 100,
   "DistanceBeforeSmallBit": 50,
   "SmallBit": 40,
-  "AmountOfCommandsToAverage": 3,
+  "AmountOfCommandsToAverage": 2,
   "MaxDifferenceInAngle": 1,
   "MaxDifferenceInDistance": 5,
   "RobotHeightInMM": 150,
