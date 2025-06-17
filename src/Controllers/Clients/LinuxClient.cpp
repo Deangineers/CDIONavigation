@@ -11,6 +11,7 @@
 #include <string>
 #include <thread>
 
+#include "../MainController.h"
 #include "Utility/ConfigController.h"
 #include "Utility/DebugController.h"
 #include "Utility/Utility.h"
@@ -90,7 +91,7 @@ void LinuxClient::sendCommand()
       continue;
     }
 
-
+    bool atGoal = false;
     ssize_t bytesSent = send(serverSocket, commandToSend_.c_str(), commandToSend_.size(), 0);
     if (bytesSent < 0)
     {
@@ -99,6 +100,7 @@ void LinuxClient::sendCommand()
     else
     {
       Utility::appendToFile("log.txt", "\n//\n// Sent: " + commandToSend_ + "\n//\n");
+      atGoal = commandToSend_.contains("out");
     }
     commandToSend_ = "";
 
@@ -110,6 +112,10 @@ void LinuxClient::sendCommand()
       lock.lock();
       first = true;
       commandToSend_ = "";
+      if (atGoal)
+      {
+        MainController::completedGoalDelivery();
+      }
       Utility::appendToFile("log.txt", "Received Response\n");
     }
     Utility::appendToFile("log.txt", "Done with sending\n");

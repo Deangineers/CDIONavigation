@@ -110,7 +110,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   if (frontIsToCloseToBlockingObject())
     return std::make_unique<JourneyModel>(-10, 0, true);
 
-  if (ballVector_.empty() || ballVector_.size() == 5)
+  if (ballVector_.empty() || (ballVector_.size() == 5 && not hasDeliveredBallsOnce_))
   {
     goToGoalCount_++;
   }
@@ -132,7 +132,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
       {
         return std::make_unique<JourneyModel>(0, -angleDiff, true);
       }
-      return std::make_unique<JourneyModel>(0, 0, false);
+      return std::make_unique<JourneyModel>(-10, 0, false);
     }
   }
   else
@@ -161,6 +161,11 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
                   cv::LINE_AA, 0, 0.01);
 
   return makeJourneyModel(objectVector, toCollectBalls);
+}
+
+void NavigationController::setHasDeliveredOnce()
+{
+  hasDeliveredBallsOnce_ = true;
 }
 
 std::unique_ptr<JourneyModel> NavigationController::makeJourneyModel(const Vector& objectVector,

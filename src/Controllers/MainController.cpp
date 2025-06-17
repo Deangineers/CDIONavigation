@@ -122,9 +122,14 @@ Command MainController::journeyToCommand(const JourneyModel* journey)
   return command;
 }
 
-cv::Mat * MainController::getFrame()
+cv::Mat* MainController::getFrame()
 {
   return frame_;
+}
+
+void MainController::completedGoalDelivery()
+{
+  navigationController_->setHasDeliveredOnce();
 }
 
 int MainController::findMaxValue(const int* cords, const int size, int maxValueAllowed)

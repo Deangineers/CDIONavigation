@@ -22,6 +22,8 @@ public:
   void clearObjects();
   std::unique_ptr<JourneyModel> calculateDegreesAndDistanceToObject();
 
+  void setHasDeliveredOnce();
+
 private:
   void removeBallsOutsideCourse();
   void removeBallsInsideRobot();
@@ -57,6 +59,8 @@ private:
 
   int goToGoalCount_ = 0;
   const int stableThreshold = 3;
+
+  bool hasDeliveredBallsOnce_ = false;
 };
 
 

@@ -23,6 +23,7 @@ public:
   static void navigateAndSendCommand(cv::Mat* frame);
   static Command journeyToCommand(const JourneyModel* journey);
   static cv::Mat* getFrame();
+  static void completedGoalDelivery();
 
 private:
   static int findMaxValue(const int* cords, int size, int maxValueAllowed);
