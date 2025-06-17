@@ -490,8 +490,8 @@ Vector NavigationController::handleObjectNearCorner(const CourseObject* courseOb
   int imageWidth = 1920;
   int imageHeight = 1080;
 
-  int sx = (ballCenterX > imageWidth / 2) ? -1 : 1;
-  int sy = (ballCenterY > imageHeight / 2) ? -1 : 1;
+  int shiftedX = (ballCenterX > imageWidth / 2) ? -1 : 1;
+  int shiftedY = (ballCenterY > imageHeight / 2) ? -1 : 1;
 
   double angleDeg = 22.5;
   double angleRad = angleDeg * CV_PI / 180.0;
@@ -500,15 +500,15 @@ Vector NavigationController::handleObjectNearCorner(const CourseObject* courseOb
   double dx = std::tan(angleRad) * shiftDist;
 
   CourseObject shiftedTarget(*courseObject);
-  shiftedTarget.shiftX(sx * dx);
-  shiftedTarget.shiftY(sy * shiftDist);
+  shiftedTarget.shiftX(shiftedX * dx);
+  shiftedTarget.shiftY(shiftedY * shiftDist);
 
-  auto vectorToShifted = MathUtil::calculateVectorToObject(&robotMiddle, &shiftedTarget);
+  auto vectorToIntermediaryPoint = MathUtil::calculateVectorToObject(&robotMiddle, &shiftedTarget);
 
-  if (vectorToShifted.getLength() < shiftDist)
+  if (vectorToIntermediaryPoint.getLength() < shiftDist)
     return MathUtil::calculateVectorToObject(&robotMiddle, courseObject);
 
-  return vectorToShifted;
+  return vectorToIntermediaryPoint;
 }
 
 std::pair<Vector, Vector> NavigationController::getVectorsForClosestBlockingObjects(
