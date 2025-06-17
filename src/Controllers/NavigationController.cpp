@@ -471,7 +471,7 @@ Vector NavigationController::handleObjectNearCorner(const CourseObject* courseOb
   Vector vector2Normalized = closestVectors.second.normalize();
 
   Vector approachVector = (vector1Normalized * 3 + vector2Normalized * 1).normalize();
-
+  approachVector = approachVector * 3;
   auto offsetCourseObject = CourseObject(*courseObject);
 
   int distanceBeforeTurning = ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning");
