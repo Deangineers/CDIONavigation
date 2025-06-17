@@ -122,7 +122,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     {
       if (std::abs(angleDiff) > ConfigController::getConfigInt("AllowedAngleDifference"))
       {
-        return std::make_unique<JourneyModel>(0, angleDiff, true);
+        return std::make_unique<JourneyModel>(0, -angleDiff, true);
       }
       return std::make_unique<JourneyModel>(0, 0, false);
     }
@@ -267,7 +267,8 @@ Vector NavigationController::navigateToGoal()
     "log.txt",
     "Navigating to Goal: " + std::to_string(goal_->x1()) + ", " + std::to_string(goal_->y1()) + "\n");
 
-  return handleObjectNextToBlocking(&localGoal);
+  auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
+  return MathUtil::calculateVectorToObject(&robotMiddle, &localGoal);
 }
 
 Vector NavigationController::findClosestBall() const
@@ -281,7 +282,8 @@ Vector NavigationController::findClosestBall() const
   CourseObject* closestBall = nullptr;
   for (const auto& ball : ballVector_)
   {
-    auto vectorToBall = handleObjectNextToBlocking(ball.get());
+    auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
+    auto vectorToBall = MathUtil::calculateVectorToObject(&robotMiddle, ball.get());
     if (vectorToBall.getLength() < shortestVector.getLength() && not vectorToBall.isNullVector())
     {
       shortestVector = vectorToBall;
@@ -300,7 +302,7 @@ Vector NavigationController::findClosestBall() const
       "log.txt", "Navigating to Ball: BUT NO BALLS FOUND\n");
     return {0, 0};
   }
-  return shortestVector;
+  return handleObjectNextToBlocking(closestBall);
 }
 
 Vector NavigationController::navigateToLeftGoal() const
@@ -472,17 +474,19 @@ Vector NavigationController::handleObjectNearCorner(const CourseObject* courseOb
                                                     const std::pair<Vector, Vector>& closestVectors) const
 {
   auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
-  Vector vector1Normalized = closestVectors.first.normalize();
-  Vector vector2Normalized = closestVectors.second.normalize();
+  double xAvg = (closestVectors.first.x + closestVectors.second.x) / 2.0;
+  double yAvg = (closestVectors.first.y + closestVectors.second.y) / 2.0;
 
-  Vector approachVector = (vector1Normalized * 3 + vector2Normalized * 1).normalize();
+  xAvg = (closestVectors.first.x + xAvg) / 2.0;
+  yAvg = (closestVectors.first.y + yAvg) / 2.0;
+
   auto offsetCourseObject = CourseObject(*courseObject);
 
   int distanceBeforeTurning = ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning");
+  double offset = xAvg / yAvg * 4;
+  offsetCourseObject.shiftX(xAvg > 0 ? -distanceBeforeTurning * offset : distanceBeforeTurning * offset);
+  offsetCourseObject.shiftY(yAvg > 0 ? -distanceBeforeTurning : distanceBeforeTurning);
 
-  Vector shiftVector = approachVector * (-distanceBeforeTurning);
-  offsetCourseObject.shiftX(shiftVector.x);
-  offsetCourseObject.shiftY(shiftVector.y);
 
   auto vectorToDiffPoint = MathUtil::calculateVectorToObject(&robotMiddle, &offsetCourseObject);
   if (vectorToDiffPoint.getLength() < ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning"))
