@@ -10,12 +10,13 @@
 
 int main()
 {
-  MainController::mockInit();
 
   cv::VideoCapture cap;
 #if __linux__
+  MainController::init();
   cap = cv::VideoCapture(2);
 #else
+  MainController::mockInit();
   cap = cv::VideoCapture(0);
 #endif
 
