@@ -135,7 +135,7 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const cv::Mat& mas
     cv::circle(frame, cv::Point(cx, cy), 2, cv::Scalar(255, 0, 255), -1); // circle center
   }
 
-  //findBallsInCorners(frame, mask);
+  findBallsInCorners(frame, mask);
 }
 
 void ImageProcessor::eggHelperFunction(const cv::Mat& frame, const cv::Mat& mask)
