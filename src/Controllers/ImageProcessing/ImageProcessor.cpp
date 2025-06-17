@@ -67,7 +67,7 @@ void ImageProcessor::crossHelperFunction(const cv::Mat& frame, cv::Mat& mask)
   for (const auto& contour : contours)
   {
     double area = cv::contourArea(contour);
-    if (area < ConfigController::getConfigInt("minRedSize"))
+    if (area > ConfigController::getConfigInt("MaxCrossSize"))
     {
       continue;
     }
