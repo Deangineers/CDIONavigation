@@ -262,7 +262,8 @@ Vector NavigationController::navigateToGoal()
     "log.txt",
     "Navigating to Goal: " + std::to_string(goal_->x1()) + ", " + std::to_string(goal_->y1()) + "\n");
 
-  return handleObjectNextToBlocking(&localGoal);
+  auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
+  return MathUtil::calculateVectorToObject(&robotMiddle, &localGoal);
 }
 
 Vector NavigationController::findClosestBall() const
