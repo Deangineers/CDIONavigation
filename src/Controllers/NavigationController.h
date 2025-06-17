@@ -42,7 +42,6 @@ private:
 
   [[nodiscard]] bool checkCollisionOnRoute(const Vector& targetVector) const;
   [[nodiscard]] bool frontIsToCloseToBlockingObject() const;
-  [[nodiscard]] bool didReachTarget() const;
 
 
   std::vector<std::unique_ptr<CourseObject>> ballVector_;
