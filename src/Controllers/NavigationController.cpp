@@ -499,7 +499,7 @@ Vector NavigationController::handleObjectNearWall(const CourseObject* courseObje
 }
 
 Vector NavigationController::handleObjectNearCorner(const CourseObject* courseObject,
-                                                    const std::pair<Vector, Vector>& /*closestVectors*/) const
+                                                    const std::pair<Vector, Vector>&) const
 {
   auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
 
