@@ -108,7 +108,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   if (target_ != nullptr)
   {
     auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
-    auto vectorToObject = MathUtil::calculateVectorToObject(&robotMiddle, target_.get());
+    auto vectorToObject = handleObjectNextToBlocking(target_.get());
     if (vectorToObject.getLength() < ConfigController::getConfigInt("DistanceBeforeTargetReached"))
     {
       target_ = nullptr;
@@ -289,7 +289,7 @@ Vector NavigationController::navigateToGoal()
     targetX = goal.x + ConfigController::getConfigInt("distanceToGoal");
   }
 
-  target_ = std::make_unique<CourseObject>(goal.x, goal.y, goal.x, goal.y, "goal");
+  target_ = std::make_unique<CourseObject>(targetX, goal.y, targetX, goal.y, "goal");
   goal_ = std::make_unique<CourseObject>(goal.x, goal.y, goal.x, goal.y, "goal");
   auto localGoal = CourseObject(targetX, goal.y, targetX, goal.y, "goal");
   Utility::appendToFile(
@@ -515,7 +515,7 @@ Vector NavigationController::handleObjectNearCorner(const CourseObject* courseOb
   int shiftedX = (ballCenterX > imageWidth / 2) ? -1 : 1;
   int shiftedY = (ballCenterY > imageHeight / 2) ? -1 : 1;
 
-  double angleDeg = 22.5;
+  double angleDeg = 19;
   double angleRad = angleDeg * CV_PI / 180.0;
   int shiftDist = ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning") * 3;
 
