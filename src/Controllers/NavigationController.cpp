@@ -471,14 +471,14 @@ Vector NavigationController::handleObjectNearCorner(const CourseObject* courseOb
   Vector vector2Normalized = closestVectors.second.normalize();
 
   Vector approachVector = (vector1Normalized * 3 + vector2Normalized * 1).normalize();
-  approachVector = approachVector * 3;
   auto offsetCourseObject = CourseObject(*courseObject);
 
   int distanceBeforeTurning = ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning");
 
-  double offset = static_cast<double>(approachVector.x) / static_cast<double>(approachVector.y);
-  offsetCourseObject.shiftX(approachVector.x > 0 ? -distanceBeforeTurning * offset : distanceBeforeTurning * offset);
-  offsetCourseObject.shiftY(approachVector.y > 0 ? -distanceBeforeTurning : distanceBeforeTurning);
+  Vector shiftVector = approachVector * (-distanceBeforeTurning);
+  offsetCourseObject.shiftX(shiftVector.x);
+  offsetCourseObject.shiftY(shiftVector.y);
+
   auto vectorToDiffPoint = MathUtil::calculateVectorToObject(&robotMiddle, &offsetCourseObject);
   if (vectorToDiffPoint.getLength() < ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning"))
   {
