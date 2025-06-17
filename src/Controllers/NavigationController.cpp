@@ -119,7 +119,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     goToGoalCount_ = 0;
   }
 
-  if (goToGoalCount_ == stableThreshold)
+  if (goToGoalCount_ >= stableThreshold)
   {
     objectVector = navigateToGoal();
     auto vectorToRobotBack = MathUtil::calculateVectorToObject(robotBack_.get(), robotFront_.get());
