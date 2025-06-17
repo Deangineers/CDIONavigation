@@ -10,7 +10,7 @@
 
 int main()
 {
-  MainController::init();
+  MainController::mockInit();
 
   cv::VideoCapture cap;
 #if __linux__
