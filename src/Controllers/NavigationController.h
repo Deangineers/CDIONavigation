@@ -55,8 +55,8 @@ private:
   int currentX_ = ConfigController::getConfigInt("safeXLeft");
   int currentY_ = ConfigController::getConfigInt("safeYBot");
 
-  int ballVectorSizeIsFiveCount_ = 0;
-  const int stabeThreshold = 3;
+  int goToGoalCount_ = 0;
+  const int stableThreshold = 3;
 };
 
 

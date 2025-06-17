@@ -110,9 +110,17 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   if (frontIsToCloseToBlockingObject())
     return std::make_unique<JourneyModel>(-10, 0, true);
 
-  if (ballVector_.empty() || (ballVector_.size() == 5 && ++ballVectorSizeIsFiveCount_ >= stabeThreshold))
+  if (ballVector_.empty() || ballVector_.size() == 5)
   {
-    ballVectorSizeIsFiveCount_ = std::min(ballVectorSizeIsFiveCount_, stabeThreshold);
+    goToGoalCount_++;
+  }
+  else
+  {
+    goToGoalCount_ = 0;
+  }
+
+  if (goToGoalCount_ == stableThreshold)
+  {
     objectVector = navigateToGoal();
     auto vectorToRobotBack = MathUtil::calculateVectorToObject(robotBack_.get(), robotFront_.get());
     auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
@@ -129,10 +137,6 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   }
   else
   {
-    if (ballVector_.size() != 5)
-    {
-      ballVectorSizeIsFiveCount_ = 0;
-    }
     removeBallsInsideRobot();
     removeBallsOutsideCourse();
     objectVector = findClosestBall();
