@@ -25,6 +25,7 @@ LinuxClient::LinuxClient() : commandToSend_(""), keepRunning_(true)
 LinuxClient::~LinuxClient()
 {
   keepRunning_ = false;
+  sendThread_.join();
 }
 
 void LinuxClient::sendCommandAndAddNewLine(const std::string& command)
