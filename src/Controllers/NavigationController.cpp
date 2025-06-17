@@ -276,7 +276,8 @@ Vector NavigationController::findClosestBall() const
   CourseObject* closestBall = nullptr;
   for (const auto& ball : ballVector_)
   {
-    auto vectorToBall = handleObjectNextToBlocking(ball.get());
+    auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
+    auto vectorToBall = MathUtil::calculateVectorToObject(&robotMiddle, ball.get());
     if (vectorToBall.getLength() < shortestVector.getLength() && not vectorToBall.isNullVector())
     {
       shortestVector = vectorToBall;
@@ -295,7 +296,7 @@ Vector NavigationController::findClosestBall() const
       "log.txt", "Navigating to Ball: BUT NO BALLS FOUND\n");
     return {0, 0};
   }
-  return shortestVector;
+  return handleObjectNextToBlocking(closestBall);
 }
 
 Vector NavigationController::navigateToLeftGoal() const
