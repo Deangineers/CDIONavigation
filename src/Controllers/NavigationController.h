@@ -43,7 +43,7 @@ private:
   [[nodiscard]] bool checkCollisionOnRoute(const Vector& targetVector) const;
   [[nodiscard]] bool frontIsToCloseToBlockingObject() const;
   Vector navigateToSafeSpot();
-  void NavigationController::findSafeSpots();
+  void findSafeSpots();
 
   bool targetStillActual();
 
