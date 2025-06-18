@@ -197,10 +197,12 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
 
   if (!target.has_value() || !target_ || *target != *target_)
   {
+    Utility::appendToFile("log.txt", "Target changed\n");
     sameTargetCount_ = 1;
   }
   else
   {
+    Utility::appendToFile("log.txt", "Same target count" + std::to_string(sameTargetCount_) + "\n");
     sameTargetCount_++;
   }
 
