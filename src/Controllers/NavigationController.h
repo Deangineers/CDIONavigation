@@ -45,6 +45,8 @@ private:
   Vector navigateToSafeSpot();
   void NavigationController::findSafeSpots();
 
+  bool targetStillActual();
+
 
   std::vector<std::unique_ptr<CourseObject>> ballVector_;
   std::unique_ptr<CourseObject> goal_;
