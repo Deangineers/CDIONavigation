@@ -119,7 +119,8 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
                     {robotMiddle.x1() + vectorToObject.x, robotMiddle.y1() + vectorToObject.y},
                     cv::Scalar(255, 0, 255), 1,
                     cv::LINE_AA, 0, 0.01);
-    if (vectorToObject.getLength() < ConfigController::getConfigInt("DistanceBeforeTargetReached"))
+    auto directVectorToObject = MathUtil::calculateVectorToObject(&robotMiddle,target_.get());
+    if (directVectorToObject.getLength() < ConfigController::getConfigInt("DistanceBeforeTargetReached"))
     {
       Utility::appendToFile("log.txt", "target_ is now null\n");
       target_ = nullptr;
