@@ -773,16 +773,23 @@ void NavigationController::findSafeSpots()
     maxX = std::max({maxX, x0, x1});
   }
 
-  const int xOffset = (maxX - minX) / 3;
-  const int yOffset = (maxY - minY) / 3;
+  const int xOffset = (maxX - minX) / 5;
+  const int yOffset = (maxY - minY) / 5;
 
-  for (int i = 1; i < 3; i++)
-  {
-    for (int j = 1; j < 3; j++)
-    {
-      safeSpots_.emplace_back(minX + i * xOffset, minY + j * yOffset);
-      cv::drawMarker(*MainController::getFrame(), {minX + i * xOffset, minY + j * yOffset}, cv::Scalar(0, 0, 255),
+  safeSpots_.emplace_back(minX + xOffset, minY + yOffset);
+  safeSpots_.emplace_back(maxX - xOffset, minY + yOffset);
+  safeSpots_.emplace_back(maxX - xOffset, maxY - yOffset);
+  safeSpots_.emplace_back(minX + xOffset, maxY - yOffset);
+
+  cv::drawMarker(*MainController::getFrame(), {minX + xOffset, minY + yOffset}, cv::Scalar(0, 0, 255),
                      cv::MARKER_CROSS, 10, 2);
-    }
-  }
+
+  cv::drawMarker(*MainController::getFrame(), {maxX - xOffset, minY + yOffset}, cv::Scalar(0, 0, 255),
+                     cv::MARKER_CROSS, 10, 2);
+
+  cv::drawMarker(*MainController::getFrame(), {maxX - xOffset, maxY - yOffset}, cv::Scalar(0, 0, 255),
+                     cv::MARKER_CROSS, 10, 2);
+
+  cv::drawMarker(*MainController::getFrame(), {minX + xOffset, maxY - yOffset}, cv::Scalar(0, 0, 255),
+                     cv::MARKER_CROSS, 10, 2);
 }
