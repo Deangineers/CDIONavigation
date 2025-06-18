@@ -10,7 +10,6 @@
 
 int main()
 {
-
   cv::VideoCapture cap;
 #if __linux__
   MainController::init();
