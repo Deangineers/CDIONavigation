@@ -33,6 +33,7 @@
   "DistanceToShiftedPointBeforeTurning": 50,
   "MinimumBallSize": 250,
   "EggBallDiffVal": 1000,
+  "EggMaxSize": 5000,
   "goalIsLeft": false,
   "minRedSize": 50,
   "showVectorsToWall": true,
