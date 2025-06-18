@@ -7,6 +7,10 @@
 #include "../../Models/Vector.h"
 #include "Utility/ConfigController.h"
 
+ImageProcessor::ImageProcessor() : ballProcessor_(std::make_unique<BallProcessor>())
+{
+}
+
 void ImageProcessor::processImage(const cv::Mat& frame)
 {
   cv::cvtColor(frame, hsv_, cv::COLOR_BGR2HSV);
@@ -105,7 +109,6 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const cv::Mat& mas
                    150, // param1: upper threshold for Canny
                    25, // param2: threshold for center detection
                    10, 40); // minRadius, maxRadius
-
   for (const auto& circle : circles)
   {
     int cx = cvRound(circle[0]);
@@ -128,10 +131,17 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const cv::Mat& mas
     int x1 = rect.x, y1 = rect.y;
     int x2 = x1 + rect.width, y2 = y1 + rect.height;
 
-    MainController::addCourseObject(std::make_unique<CourseObject>(x1, y1, x2, y2, label));
+    auto courseObject = std::make_unique<CourseObject>(x1, y1, x2, y2, label);
+
+    if (not ballProcessor_->isBallValid(courseObject.get()))
+    {
+      continue;
+    }
+
+    MainController::addCourseObject(std::move(courseObject));
 
     cv::rectangle(frame, rect, cv::Scalar(0, 255, 0), 2);
-    cv::putText(frame, label, cv::Point(x1, y1 - 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
+    cv::putText(frame, colorLabel, cv::Point(x1, y1 - 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
     cv::circle(frame, cv::Point(cx, cy), 2, cv::Scalar(255, 0, 255), -1); // circle center
   }
 

@@ -16,7 +16,9 @@ public:
   [[nodiscard]] int x2() const;
   [[nodiscard]] int y2() const;
   [[nodiscard]] std::string name() const;
-  bool operator==(const CourseObject &other) const;
+  bool operator==(const CourseObject& other) const;
+
+  bool courseObjectWithinValidRange(const CourseObject* other) const;
 
   void shiftX(int x);
   void shiftY(int y);

@@ -6,9 +6,12 @@
 #define IMAGEPROCESSOR_H
 #include <opencv2/opencv.hpp>
 
+#include "BallProcessor.h"
+
 class ImageProcessor
 {
 public:
+  ImageProcessor();
   virtual ~ImageProcessor() = default;
 
   void processImage(const cv::Mat& frame);
@@ -26,6 +29,7 @@ protected:
   void findBallsInCorners(const cv::Mat& frame, const cv::Mat& mask);
 
   cv::Mat hsv_;
+  std::unique_ptr<BallProcessor> ballProcessor_;
 };
 
 #endif //IMAGEPROCESSOR_H

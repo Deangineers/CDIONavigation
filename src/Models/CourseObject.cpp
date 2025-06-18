@@ -6,6 +6,9 @@
 
 #include <utility>
 
+#include "../Controllers/MathUtil.h"
+#include "Utility/ConfigController.h"
+
 CourseObject::CourseObject(int x1, int y1, int x2, int y2, std::string name) : x1_(x1), y1_(y1), x2_(x2), y2_(y2),
                                                                                name_(std::move(name))
 {
@@ -38,10 +41,10 @@ std::string CourseObject::name() const
 
 bool CourseObject::operator==(const CourseObject& other) const
 {
-  if (this->x1() > other.x1() + 10 || this->x1() < other.x1() -10)
+  if (this->x1() > other.x1() + 10 || this->x1() < other.x1() - 10)
     return false;
 
-  if (this->x2() > other.x2() + 10 || this->x2() < other.x2() -10)
+  if (this->x2() > other.x2() + 10 || this->x2() < other.x2() - 10)
     return false;
 
   if (this->y1() > other.y1() + 10 || this->y1() > other.y1() - 10)
@@ -54,6 +57,12 @@ bool CourseObject::operator==(const CourseObject& other) const
     return false;
 
   return true;
+}
+
+bool CourseObject::courseObjectWithinValidRange(const CourseObject* other) const
+{
+  double distance = MathUtil::calculateVectorToObject(this, other).getLength();
+  return distance < ConfigController::getConfigInt("MaxDiffInSameCourseObject");
 }
 
 void CourseObject::shiftX(int x)
