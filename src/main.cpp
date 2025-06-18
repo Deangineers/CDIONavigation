@@ -10,11 +10,11 @@
 
 int main()
 {
-  MainController::init();
+  MainController::mockInit();
 
   cv::VideoCapture cap;
 #if __linux__
-  cap = cv::VideoCapture(2);
+  cap = cv::VideoCapture(0);
 #else
   cap = cv::VideoCapture(0);
 #endif
@@ -32,7 +32,7 @@ int main()
 
   while (cap.read(frame))
   {
-    //frame = cv::imread("../../TestImages/ballsInCorner.jpg", cv::IMREAD_COLOR_BGR);
+    frame = cv::imread("../../TestImages/ballsInCornerWhite.jpeg", cv::IMREAD_COLOR_BGR);
     processor->processImage(frame);
 
     MainController::navigateAndSendCommand(&frame);
