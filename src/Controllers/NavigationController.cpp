@@ -115,11 +115,13 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
 
   if (target_ != nullptr)
   {
+    /*
     if (not targetStillActual())
     {
       target_ = nullptr;
       return nullptr;
     }
+    */
     auto vectorToObject = handleObjectNextToBlocking(target_.get());
     cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},
                     {robotMiddle.x1() + vectorToObject.x, robotMiddle.y1() + vectorToObject.y},
@@ -182,7 +184,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
         return std::make_unique<JourneyModel>(0, -angleDiff, true);
       }
       target_ = nullptr;
-      return std::make_unique<JourneyModel>(-10, 0, false);
+      return std::make_unique<JourneyModel>(0, 0, false);
     }
     return makeJourneyModel(objectVector,true);
   }
@@ -258,7 +260,7 @@ void NavigationController::removeBallsOutsideCourse()
 
   auto deletionLambda = [minX,minY,maxX,maxY](const std::unique_ptr<CourseObject>& a) -> bool
   {
-    return not((a->x1() < minX || a->x2() > maxX) || a->y1() < minY ||
+    return ((a->x1() < minX || a->x2() > maxX) || a->y1() < minY ||
       maxY < a->y2());
   };
   for (const auto& ball : ballVector_)
