@@ -19,7 +19,7 @@
   "RobotWidth": 50,
   "TotalBalls": 5,
   "WallWidth": 40,
-  "RobotLengthInMM": 100,
+  "RobotLengthInMM": 85,
   "DistanceBeforeSmallBit": 50,
   "SmallBit": 40,
   "AmountOfCommandsToAverage": 2,
@@ -37,5 +37,7 @@
   "minRedSize": 50,
   "showVectorsToWall": true,
   "MinimumSizeOfBlockingObject": 50,
-  "DistanceBeforeToCloseToWall": 50
+  "DistanceBeforeToCloseToWall": 50,
+  "CrossWallWidth": 10,
+  "MaxCrossSize": 500000
 }

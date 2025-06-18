@@ -23,6 +23,7 @@ void ImageProcessor::redPixelHelperFunction(const cv::Mat& frame, cv::Mat& mask)
 
   std::vector<std::vector<cv::Point>> contours;
   cv::findContours(mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
   int label = 0;
   for (const auto& contour : contours)
   {
@@ -54,6 +55,45 @@ void ImageProcessor::redPixelHelperFunction(const cv::Mat& frame, cv::Mat& mask)
   }
 }
 
+void ImageProcessor::crossHelperFunction(const cv::Mat& frame, cv::Mat& mask)
+{
+  cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
+  cv::morphologyEx(mask, mask, cv::MORPH_OPEN, kernel);
+
+  std::vector<std::vector<cv::Point>> contours;
+  cv::findContours(mask, contours, cv::RETR_CCOMP, cv::CHAIN_APPROX_SIMPLE);
+
+  int label = 0;
+  for (const auto& contour : contours)
+  {
+    double area = cv::contourArea(contour);
+    if (area > ConfigController::getConfigInt("MaxCrossSize"))
+    {
+      continue;
+    }
+    // Approximate contour to get corners
+    std::vector<cv::Point> approx;
+    cv::approxPolyDP(contour, approx, 10, true); // epsilon=10 can be tuned
+
+    // Draw vectors between points
+    for (size_t i = 0; i < approx.size(); ++i)
+    {
+      cv::Point p1 = approx[i];
+      cv::Point p2 = approx[(i + 1) % approx.size()]; // Loop back to start if needed
+      Vector vector(p2.x - p1.x, p2.y - p1.y);
+      if (vector.getLength() < ConfigController::getConfigInt("MinimumSizeOfBlockingObject"))
+      {
+        continue;
+      }
+      // Draw line (vector)
+      cv::line(frame, p1, p2, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("CrossWallWidth"),
+               cv::LINE_AA, 0);
+      cv::putText(frame, std::to_string(label++), p1, cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
+      MainController::addBlockedObject(std::make_unique<VectorWithStartPos>(p1.x, p1.y, vector));
+    }
+  }
+}
+
 void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const cv::Mat& mask, const std::string& colorLabel)
 {
   cv::Mat blurred;
@@ -61,9 +101,9 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const cv::Mat& mas
 
   std::vector<cv::Vec3f> circles;
   cv::HoughCircles(blurred, circles, cv::HOUGH_GRADIENT, 1,
-                   20,     // minDist between centers
-                   150,    // param1: upper threshold for Canny
-                   25,     // param2: threshold for center detection
+                   20, // minDist between centers
+                   150, // param1: upper threshold for Canny
+                   25, // param2: threshold for center detection
                    10, 40); // minRadius, maxRadius
 
   for (const auto& circle : circles)
@@ -82,7 +122,8 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const cv::Mat& mas
     {
       continue;
     }
-    std::string label = "ball"; // at some point we might want to add the colorLabel here to separate white and orange balls
+    std::string label = "ball";
+    // at some point we might want to add the colorLabel here to separate white and orange balls
 
     int x1 = rect.x, y1 = rect.y;
     int x2 = x1 + rect.width, y2 = y1 + rect.height;

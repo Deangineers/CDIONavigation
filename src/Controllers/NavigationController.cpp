@@ -104,8 +104,27 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     Utility::appendToFile("log.txt", "No Robot\n");
     return nullptr;
   }
+
+  if (target_ != nullptr)
+  {
+    auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
+    auto vectorToObject = handleObjectNextToBlocking(target_.get());
+    if (vectorToObject.getLength() < ConfigController::getConfigInt("DistanceBeforeTargetReached"))
+    {
+      target_ = nullptr;
+    }
+    else
+    {
+      cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},
+                      {robotMiddle.x1() + vectorToObject.x, robotMiddle.y1() + vectorToObject.y},
+                      cv::Scalar(255, 0, 255), 1,
+                      cv::LINE_AA, 0, 0.01);
+
+      return makeJourneyModel(vectorToObject, toCollectBalls_);
+    }
+  }
+
   //MathUtil::correctCourseObjectForHeightOffset(robotBack_.get(), robotFront_.get());
-  bool toCollectBalls = true;
   auto objectVector = Vector(0, 0);
   if (frontIsToCloseToBlockingObject())
     return std::make_unique<JourneyModel>(-10, 0, true);
@@ -119,7 +138,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     goToGoalCount_ = 0;
   }
 
-  if (goToGoalCount_ == stableThreshold)
+  if (goToGoalCount_ >= stableThreshold)
   {
     objectVector = navigateToGoal();
     auto vectorToRobotBack = MathUtil::calculateVectorToObject(robotBack_.get(), robotFront_.get());
@@ -140,7 +159,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     removeBallsInsideRobot();
     removeBallsOutsideCourse();
     objectVector = findClosestBall();
-    toCollectBalls = true;
+    toCollectBalls_ = true;
   }
 
   if (objectVector.isNullVector())
@@ -160,7 +179,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
                   {robotMiddle.x1() + objectVector.x, robotMiddle.y1() + objectVector.y}, cv::Scalar(255, 0, 255), 1,
                   cv::LINE_AA, 0, 0.01);
 
-  return makeJourneyModel(objectVector, toCollectBalls);
+  return makeJourneyModel(objectVector, toCollectBalls_);
 }
 
 void NavigationController::setHasDeliveredOnce()
@@ -270,6 +289,7 @@ Vector NavigationController::navigateToGoal()
     targetX = goal.x + ConfigController::getConfigInt("distanceToGoal");
   }
 
+  target_ = std::make_unique<CourseObject>(targetX, goal.y, targetX, goal.y, "goal");
   goal_ = std::make_unique<CourseObject>(goal.x, goal.y, goal.x, goal.y, "goal");
   auto localGoal = CourseObject(targetX, goal.y, targetX, goal.y, "goal");
   Utility::appendToFile(
@@ -280,7 +300,7 @@ Vector NavigationController::navigateToGoal()
   return MathUtil::calculateVectorToObject(&robotMiddle, &localGoal);
 }
 
-Vector NavigationController::findClosestBall() const
+Vector NavigationController::findClosestBall()
 {
   if (ballVector_.empty())
   {
@@ -304,6 +324,8 @@ Vector NavigationController::findClosestBall() const
     Utility::appendToFile(
       "log.txt",
       "Navigating to Ball: " + std::to_string(closestBall->x1()) + ", " + std::to_string(closestBall->y1()) + "\n");
+    target_ = std::make_unique<CourseObject>(closestBall->x1(), closestBall->y1(), closestBall->x2(), closestBall->y2(),
+                                             "ball");
   }
   else
   {
@@ -480,29 +502,45 @@ Vector NavigationController::handleObjectNearWall(const CourseObject* courseObje
 }
 
 Vector NavigationController::handleObjectNearCorner(const CourseObject* courseObject,
-                                                    const std::pair<Vector, Vector>& closestVectors) const
+                                                    const std::pair<Vector, Vector>&) const
 {
   auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
-  double xAvg = (closestVectors.first.x + closestVectors.second.x) / 2.0;
-  double yAvg = (closestVectors.first.y + closestVectors.second.y) / 2.0;
 
-  xAvg = (closestVectors.first.x + xAvg) / 2.0;
-  yAvg = (closestVectors.first.y + yAvg) / 2.0;
+  const int ballCenterX = (courseObject->x1() + courseObject->x2()) / 2;
+  const int ballCenterY = (courseObject->y1() + courseObject->y2()) / 2;
 
-  auto offsetCourseObject = CourseObject(*courseObject);
+  int imageWidth = 1920;
+  int imageHeight = 1080;
 
-  int distanceBeforeTurning = ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning");
-  double offset = xAvg / yAvg * 4;
-  offsetCourseObject.shiftX(xAvg > 0 ? -distanceBeforeTurning * offset : distanceBeforeTurning * offset);
-  offsetCourseObject.shiftY(yAvg > 0 ? -distanceBeforeTurning : distanceBeforeTurning);
+  int shiftedX = (ballCenterX > imageWidth / 2) ? -1 : 1;
+  int shiftedY = (ballCenterY > imageHeight / 2) ? -1 : 1;
 
+  double angleDeg = 12;
+  double angleRad = angleDeg * CV_PI / 180.0;
+  int shiftDist = ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning") * 3;
 
-  auto vectorToDiffPoint = MathUtil::calculateVectorToObject(&robotMiddle, &offsetCourseObject);
-  if (vectorToDiffPoint.getLength() < ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning"))
+  double dx = std::tan(angleRad) * shiftDist;
+
+  CourseObject shiftedTarget(*courseObject);
+  shiftedTarget.shiftX(shiftedX * dx);
+  shiftedTarget.shiftY(shiftedY * shiftDist);
+
+  auto vectorToIntermediaryPoint = MathUtil::calculateVectorToObject(&robotMiddle, &shiftedTarget);
+
+  if (vectorToIntermediaryPoint.getLength() < shiftDist)
   {
-    return MathUtil::calculateVectorToObject(&robotMiddle, courseObject);
+    auto localObject = CourseObject(*courseObject);
+    if (courseObject->x1() > ConfigController::getConfigInt("middleXOnAxis"))
+    {
+        localObject.shiftX(-10);
+    }
+    else {
+      localObject.shiftX(10);
+    }
+    return MathUtil::calculateVectorToObject(&robotMiddle, &localObject);
   }
-  return MathUtil::calculateVectorToObject(&robotMiddle, &offsetCourseObject);
+
+  return vectorToIntermediaryPoint;
 }
 
 std::pair<Vector, Vector> NavigationController::getVectorsForClosestBlockingObjects(
