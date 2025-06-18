@@ -740,7 +740,7 @@ Vector NavigationController::navigateToSafeSpot()
   auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
   for (const auto& safeSpot : safeSpots_)
   {
-    CourseObject courseObject(safeSpot.first, safeSpot.second, safeSpot.first,safeSpot.second, "");
+    CourseObject courseObject(safeSpot.first, safeSpot.second, safeSpot.first, safeSpot.second, "");
     Vector vectorToObject = MathUtil::calculateVectorToObject(&robotMiddle, &courseObject);
     if (!checkCollisionOnRoute(vectorToObject))
     {
@@ -748,7 +748,7 @@ Vector NavigationController::navigateToSafeSpot()
     }
   }
 
-  return {0,0};
+  return {0, 0};
 }
 
 void NavigationController::findSafeSpots()
@@ -779,56 +779,7 @@ void NavigationController::findSafeSpots()
   {
     for (int j = 1; j < 2; j++)
     {
-      safeSpots_.emplace_back(minX + i*xOffset, minY + j*yOffset);
-    }
-  }
-}
-
-Vector NavigationController::navigateToSafeSpot()
-{
-  auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
-  for (const auto& safeSpot : safeSpots_)
-  {
-    CourseObject courseObject(safeSpot.first, safeSpot.second, safeSpot.first,safeSpot.second, "");
-    Vector vectorToObject = MathUtil::calculateVectorToObject(&robotMiddle, &courseObject);
-    if (!checkCollisionOnRoute(vectorToObject))
-    {
-      return {safeSpot.first, safeSpot.second};
-    }
-  }
-
-  return {0,0};
-}
-
-void NavigationController::findSafeSpots()
-{
-  int minY = INT_MAX;
-  int minX = INT_MAX;
-  int maxY = INT_MIN;
-  int maxX = INT_MIN;
-
-  for (const auto& object : blockingObjects_)
-  {
-    const int x0 = object->startX();
-    const int y0 = object->startY();
-
-    const int x1 = x0 + object->x;
-    const int y1 = y0 + object->y;
-
-    minX = std::min({minX, x0, x1});
-    minY = std::min({minY, y0, y1});
-    maxY = std::max({maxY, y0, y1});
-    maxX = std::max({maxX, x0, x1});
-  }
-
-  const int xOffset = (maxX - minX) / 3;
-  const int yOffset = (maxY - minY) / 3;
-
-  for (int i = 1; i < 2; i++)
-  {
-    for (int j = 1; j < 2; j++)
-    {
-      safeSpots_.emplace_back(minX + i*xOffset, minY + j*yOffset);
+      safeSpots_.emplace_back(minX + i * xOffset, minY + j * yOffset);
     }
   }
 }

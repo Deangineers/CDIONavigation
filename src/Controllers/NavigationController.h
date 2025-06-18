@@ -43,7 +43,7 @@ private:
   [[nodiscard]] bool checkCollisionOnRoute(const Vector& targetVector) const;
   [[nodiscard]] bool frontIsToCloseToBlockingObject() const;
   Vector navigateToSafeSpot();
-  void NavigationController::findSafeSpots();
+  void findSafeSpots();
 
   bool targetStillActual();
 
@@ -57,7 +57,7 @@ private:
   std::unique_ptr<CourseObject> potentialTarget_;
   int robotWidth_ = ConfigController::getConfigInt("RobotWidth");
 
-  std::vector<std::pair<int,int>> safeSpots_;
+  std::vector<std::pair<int, int>> safeSpots_;
 
   int totalBalls_ = ConfigController::getConfigInt("TotalBalls");
   int robotBallCapacity_ = 5;
