@@ -127,6 +127,19 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
       sameTargetCount_ = 0;
       return nullptr;
     }
+
+    if (checkCollisionOnRoute(vectorToObject))
+    {
+      vectorToObject = navigateToSafeSpot();
+      if (vectorToObject.isNullVector())
+      {
+        std::cout << "could not find a safe, safe spot" << std::endl;
+        return nullptr;
+      }
+
+      std::cout << "Navigating to safe spot: " << vectorToObject.x << " " << vectorToObject.y << std::endl;
+    }
+
     return makeJourneyModel(vectorToObject, toCollectBalls_);
   }
 
@@ -632,6 +645,7 @@ bool NavigationController::checkCollisionOnRoute(const Vector& targetVector) con
   {
     return false;
   }
+
   const CourseObject robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(),robotFront_.get());
   int startX = robotMiddle.x1();
   int startY = robotMiddle.y1();
@@ -690,6 +704,22 @@ bool NavigationController::frontIsToCloseToBlockingObject() const
     return true;
   }
   return false;
+}
+
+Vector NavigationController::navigateToSafeSpot()
+{
+  auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
+  for (const auto& safeSpot : safeSpots_)
+  {
+    CourseObject courseObject(safeSpot.first, safeSpot.second, safeSpot.first,safeSpot.second, "");
+    Vector vectorToObject = MathUtil::calculateVectorToObject(&robotMiddle, &courseObject);
+    if (!checkCollisionOnRoute(vectorToObject))
+    {
+      return {safeSpot.first, safeSpot.second};
+    }
+  }
+
+  return {0,0};
 }
 
 void NavigationController::findSafeSpots()
