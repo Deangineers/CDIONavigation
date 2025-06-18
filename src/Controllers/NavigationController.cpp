@@ -184,7 +184,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
                   cv::Scalar(255, 0, 255), 1,
                   cv::LINE_AA, 0, 0.01);
   cv::putText(*MainController::getFrame(), std::to_string(sameTargetCount_),
-              {robotMiddle.x1() + objectVector.x, robotMiddle.y1() + objectVector.y - 10}, cv::FONT_HERSHEY_SIMPLEX,
+              {robotMiddle.x1() + objectVector.x, robotMiddle.y1() + objectVector.y + 30}, cv::FONT_HERSHEY_SIMPLEX,
               0.5, cv::Scalar(0, 255, 0), 2);
 
   return nullptr;
@@ -337,15 +337,23 @@ Vector NavigationController::findClosestBall()
       int allowedDiff = ConfigController::getConfigInt("AllowedDifferenceBetweenNewTargetAndPotential");
       if (x1Diff < allowedDiff && y1Diff < allowedDiff && x2Diff < allowedDiff && y2Diff < allowedDiff)
       {
-        Utility::appendToFile("log.txt", "Same target count incremented\n");
+        Utility::appendToFile("log.txt", "Same target count incremented to " + std::to_string(sameTargetCount_) + "\n");
         sameTargetCount_++;
       }
       else
       {
+        Utility::appendToFile("log.txt", "New Potential Target (\"Ball\")\n");
         potentialTarget_ = std::make_unique<CourseObject>(closestBall->x1(), closestBall->y1(), closestBall->x2(),
                                                           closestBall->y2(),
                                                           "ball");
       }
+    }
+    else
+    {
+      Utility::appendToFile("log.txt", "New Potential Target (\"Ball\")\n");
+      potentialTarget_ = std::make_unique<CourseObject>(closestBall->x1(), closestBall->y1(), closestBall->x2(),
+                                                        closestBall->y2(),
+                                                        "ball");
     }
     Utility::appendToFile(
       "log.txt",
@@ -631,7 +639,7 @@ bool NavigationController::checkCollisionOnRoute(const Vector& targetVector) con
   {
     return false;
   }
-  const CourseObject robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(),robotFront_.get());
+  const CourseObject robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
   int startX = robotMiddle.x1();
   int startY = robotMiddle.y1();
   int endX = startX + targetVector.x;
