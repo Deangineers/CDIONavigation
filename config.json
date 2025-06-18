@@ -39,5 +39,6 @@
   "MinimumSizeOfBlockingObject": 50,
   "DistanceBeforeToCloseToWall": 50,
   "CrossWallWidth": 10,
-  "MaxCrossSize": 500000
+  "MaxCrossSize": 500000,
+  "ToAverageCommandsInClientController": false
 }
