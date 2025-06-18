@@ -16,12 +16,13 @@ public:
   [[nodiscard]] int x2() const;
   [[nodiscard]] int y2() const;
   [[nodiscard]] std::string name() const;
+  bool operator==(const CourseObject &other) const;
 
   void shiftX(int x);
   void shiftY(int y);
 
 private:
-  int x1_, y1_, x2_, y2_;
+  int x1_{}, y1_{}, x2_{}, y2_{};
   std::string name_;
 };
 

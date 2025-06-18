@@ -36,6 +36,26 @@ std::string CourseObject::name() const
   return name_;
 }
 
+bool CourseObject::operator==(const CourseObject& other) const
+{
+  if (this->x1() > other.x1() + 10 || this->x1() < other.x1() -10)
+    return false;
+
+  if (this->x2() > other.x2() + 10 || this->x2() < other.x2() -10)
+    return false;
+
+  if (this->y1() > other.y1() + 10 || this->y1() > other.y1() - 10)
+    return false;
+
+  if (this->y2() > other.y2() + 10 || this->y2() > other.y2() - 10)
+    return false;
+
+  if (this->name() != other.name())
+    return false;
+
+  return true;
+}
+
 void CourseObject::shiftX(int x)
 {
   x1_ += x;

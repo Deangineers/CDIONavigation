@@ -105,7 +105,10 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     return nullptr;
   }
 
-  if (target_ != nullptr)
+  if (frontIsToCloseToBlockingObject())
+    return std::make_unique<JourneyModel>(-10, 0, true);
+
+  if (target_ != nullptr && sameTargetCount_ == ConfigController::getConfigInt("AmountOfCommandsToAverage"))
   {
     auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
     auto vectorToObject = handleObjectNextToBlocking(target_.get());
@@ -120,14 +123,17 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
                       cv::Scalar(255, 0, 255), 1,
                       cv::LINE_AA, 0, 0.01);
 
+      std::cout << "Navigating to target number one" << std::endl;
       return makeJourneyModel(vectorToObject, toCollectBalls_);
     }
   }
 
+  std::optional<CourseObject> target;
+  if (target_ != nullptr)
+    target = *target_;
+
   //MathUtil::correctCourseObjectForHeightOffset(robotBack_.get(), robotFront_.get());
   auto objectVector = Vector(0, 0);
-  if (frontIsToCloseToBlockingObject())
-    return std::make_unique<JourneyModel>(-10, 0, true);
 
   if (ballVector_.empty() || (ballVector_.size() == 5 && not hasDeliveredBallsOnce_))
   {
@@ -174,12 +180,28 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     Utility::appendToFile("log.txt", "objectVector = {0,0}, secondCheck\n");
   }
 
-  auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
-  cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},
-                  {robotMiddle.x1() + objectVector.x, robotMiddle.y1() + objectVector.y}, cv::Scalar(255, 0, 255), 1,
-                  cv::LINE_AA, 0, 0.01);
+  if (sameTargetCount_ == ConfigController::getConfigInt("AmountOfCommandsToAverage"))
+  {
+    auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
+    cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},
+                    {robotMiddle.x1() + objectVector.x, robotMiddle.y1() + objectVector.y}, cv::Scalar(255, 0, 255), 1,
+                    cv::LINE_AA, 0, 0.01);
 
-  return makeJourneyModel(objectVector, toCollectBalls_);
+    std::cout << "Navigating to target" << std::endl;
+    return makeJourneyModel(objectVector, toCollectBalls_);
+  }
+
+  if (!target.has_value() || !target_ || *target != *target_)
+  {
+    sameTargetCount_ = 1;
+  }
+  else
+  {
+    std::cout << sameTargetCount_ << std::endl;
+    sameTargetCount_++;
+  }
+
+  return nullptr;
 }
 
 void NavigationController::setHasDeliveredOnce()

@@ -63,6 +63,8 @@ private:
 
   bool hasDeliveredBallsOnce_ = false;
   bool toCollectBalls_ = true;
+
+  int sameTargetCount_ = 0;
 };
 
 
