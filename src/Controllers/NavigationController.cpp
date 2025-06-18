@@ -106,6 +106,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     Utility::appendToFile("log.txt", "No Robot\n");
     return nullptr;
   }
+  findSafeSpots();
   auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
 
   if (frontIsToCloseToBlockingObject() && target_ == nullptr)
@@ -131,9 +132,10 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     if (directVectorToObject.getLength() < ConfigController::getConfigInt("DistanceBeforeTargetReached"))
     {
       Utility::appendToFile("log.txt", "target_ is now null\n");
+      if (
       target_ = nullptr;
       sameTargetCount_ = 0;
-      return nullptr;
+      return std::make_unique<JourneyModel>(-10, 0, true);
     }
 
     if (checkCollisionOnRoute(vectorToObject))
@@ -738,17 +740,22 @@ bool NavigationController::targetStillActual()
 Vector NavigationController::navigateToSafeSpot()
 {
   auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
-  for (const auto& safeSpot : safeSpots_)
+  std::pair<int, int> safeSpot = safeSpots_[currentSafePointIndex_];
+  CourseObject courseObject(safeSpot.first, safeSpot.second, safeSpot.first,safeSpot.second, "");
+  Vector vectorToObject = MathUtil::calculateVectorToObject(&robotMiddle, &courseObject);
+  int counter = 0;
+  while (checkCollisionOnRoute(vectorToObject))
   {
-    CourseObject courseObject(safeSpot.first, safeSpot.second, safeSpot.first,safeSpot.second, "");
-    Vector vectorToObject = MathUtil::calculateVectorToObject(&robotMiddle, &courseObject);
-    if (!checkCollisionOnRoute(vectorToObject))
-    {
-      return {safeSpot.first, safeSpot.second};
-    }
+    currentSafePointIndex_++;
+    currentSafePointIndex_ %= 4;
+    safeSpot = safeSpots_[currentSafePointIndex_];
+    courseObject = CourseObject(safeSpot.first, safeSpot.second, safeSpot.first,safeSpot.second, "");
+    vectorToObject = MathUtil::calculateVectorToObject(&robotMiddle, &courseObject);
+    counter++;
+    if (safeSpots_.size() == 4)
+      return {0,0};
   }
-
-  return {0,0};
+  return vectorToObject;
 }
 
 void NavigationController::findSafeSpots()
@@ -775,9 +782,9 @@ void NavigationController::findSafeSpots()
   const int xOffset = (maxX - minX) / 3;
   const int yOffset = (maxY - minY) / 3;
 
-  for (int i = 1; i < 2; i++)
+  for (int i = 1; i <= 2; i++)
   {
-    for (int j = 1; j < 2; j++)
+    for (int j = 1; j <= 2; j++)
     {
       safeSpots_.emplace_back(minX + i*xOffset, minY + j*yOffset);
     }

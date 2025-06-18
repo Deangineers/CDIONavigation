@@ -72,6 +72,8 @@ private:
   bool toCollectBalls_ = true;
 
   int sameTargetCount_ = 0;
+
+  int currentSafePointIndex_ = 0;
 };
 
 
