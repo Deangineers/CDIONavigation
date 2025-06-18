@@ -178,7 +178,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     Utility::appendToFile("log.txt", "objectVector = {0,0}, firstCheck\n");
     return nullptr;
   }
-  //objectVector = handleCollision(objectVector);
+  objectVector = handleCollision(objectVector);
 
   if (objectVector.isNullVector())
   {
@@ -630,13 +630,13 @@ bool segmentsIntersect(int x1, int y1, int x2, int y2,
 
 bool NavigationController::checkCollisionOnRoute(const Vector& targetVector) const
 {
-  if (!robotFront_)
+  if (!robotFront_ || !robotBack_)
   {
     return false;
   }
-
-  int startX = (robotFront_->x1() + robotFront_->x2()) / 2;
-  int startY = (robotFront_->y1() + robotFront_->y2()) / 2;
+  const CourseObject robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(),robotFront_.get());
+  int startX = robotMiddle.x1();
+  int startY = robotMiddle.y1();
   int endX = startX + targetVector.x;
   int endY = startY + targetVector.y;
 
