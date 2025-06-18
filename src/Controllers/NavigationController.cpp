@@ -106,7 +106,9 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   }
 
   if (frontIsToCloseToBlockingObject())
+  {
     return std::make_unique<JourneyModel>(-10, 0, true);
+  }
 
   if (target_ != nullptr && sameTargetCount_ == ConfigController::getConfigInt("AmountOfCommandsToAverage"))
   {
@@ -115,6 +117,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     if (vectorToObject.getLength() < ConfigController::getConfigInt("DistanceBeforeTargetReached"))
     {
       target_ = nullptr;
+      sameTargetCount_ = 0;
     }
     else
     {
@@ -130,7 +133,9 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
 
   std::optional<CourseObject> target;
   if (target_ != nullptr)
+  {
     target = *target_;
+  }
 
   //MathUtil::correctCourseObjectForHeightOffset(robotBack_.get(), robotFront_.get());
   auto objectVector = Vector(0, 0);
@@ -187,17 +192,17 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
                     {robotMiddle.x1() + objectVector.x, robotMiddle.y1() + objectVector.y}, cv::Scalar(255, 0, 255), 1,
                     cv::LINE_AA, 0, 0.01);
 
-    std::cout << "Navigating to target" << std::endl;
     return makeJourneyModel(objectVector, toCollectBalls_);
   }
 
   if (!target.has_value() || !target_ || *target != *target_)
   {
+    Utility::appendToFile("log.txt", "Target changed\n");
     sameTargetCount_ = 1;
   }
   else
   {
-    std::cout << sameTargetCount_ << std::endl;
+    Utility::appendToFile("log.txt", "Same target count" + std::to_string(sameTargetCount_) + "\n");
     sameTargetCount_++;
   }
 
@@ -554,9 +559,10 @@ Vector NavigationController::handleObjectNearCorner(const CourseObject* courseOb
     auto localObject = CourseObject(*courseObject);
     if (courseObject->x1() > ConfigController::getConfigInt("middleXOnAxis"))
     {
-        localObject.shiftX(-10);
+      localObject.shiftX(-10);
     }
-    else {
+    else
+    {
       localObject.shiftX(10);
     }
     return MathUtil::calculateVectorToObject(&robotMiddle, &localObject);
