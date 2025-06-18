@@ -117,6 +117,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     if (vectorToObject.getLength() < ConfigController::getConfigInt("DistanceBeforeTargetReached"))
     {
       target_ = nullptr;
+      sameTargetCount_ = 0;
     }
     else
     {
