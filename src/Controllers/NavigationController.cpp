@@ -192,7 +192,6 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
                     {robotMiddle.x1() + objectVector.x, robotMiddle.y1() + objectVector.y}, cv::Scalar(255, 0, 255), 1,
                     cv::LINE_AA, 0, 0.01);
 
-    std::cout << "Navigating to target" << std::endl;
     return makeJourneyModel(objectVector, toCollectBalls_);
   }
 
@@ -202,7 +201,6 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   }
   else
   {
-    std::cout << sameTargetCount_ << std::endl;
     sameTargetCount_++;
   }
 
