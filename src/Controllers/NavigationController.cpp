@@ -784,6 +784,22 @@ void NavigationController::findSafeSpots()
   }
 }
 
+Vector NavigationController::navigateToSafeSpot()
+{
+  auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
+  for (const auto& safeSpot : safeSpots_)
+  {
+    CourseObject courseObject(safeSpot.first, safeSpot.second, safeSpot.first,safeSpot.second, "");
+    Vector vectorToObject = MathUtil::calculateVectorToObject(&robotMiddle, &courseObject);
+    if (!checkCollisionOnRoute(vectorToObject))
+    {
+      return {safeSpot.first, safeSpot.second};
+    }
+  }
+
+  return {0,0};
+}
+
 void NavigationController::findSafeSpots()
 {
   int minY = INT_MAX;
