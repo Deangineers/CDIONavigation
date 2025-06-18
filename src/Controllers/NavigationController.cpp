@@ -106,6 +106,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     Utility::appendToFile("log.txt", "No Robot\n");
     return nullptr;
   }
+  findSafeSpots();
   auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
 
   if (frontIsToCloseToBlockingObject() && target_ == nullptr)
@@ -775,11 +776,13 @@ void NavigationController::findSafeSpots()
   const int xOffset = (maxX - minX) / 3;
   const int yOffset = (maxY - minY) / 3;
 
-  for (int i = 1; i < 2; i++)
+  for (int i = 1; i < 3; i++)
   {
-    for (int j = 1; j < 2; j++)
+    for (int j = 1; j < 3; j++)
     {
       safeSpots_.emplace_back(minX + i * xOffset, minY + j * yOffset);
+      cv::drawMarker(*MainController::getFrame(), {minX + i * xOffset, minY + j * yOffset}, cv::Scalar(0, 0, 255),
+                     cv::MARKER_CROSS, 10, 2);
     }
   }
 }
