@@ -156,9 +156,9 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     auto goalVector = MathUtil::calculateVectorToObject(&robotMiddle, goal_.get());
     double angleDiff = MathUtil::calculateAngleDifferenceBetweenVectors(goalVector, vectorToRobotBack);
     cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},
-                  {robotMiddle.x1() + objectVector.x, robotMiddle.y1() + objectVector.y},
-                  cv::Scalar(255, 0, 255), 1,
-                  cv::LINE_AA, 0, 0.01);
+                    {robotMiddle.x1() + objectVector.x, robotMiddle.y1() + objectVector.y},
+                    cv::Scalar(255, 0, 255), 1,
+                    cv::LINE_AA, 0, 0.01);
     cv::putText(*MainController::getFrame(), "VA FANGOOL",
                 {robotMiddle.x1() + objectVector.x, robotMiddle.y1() + objectVector.y + 30}, cv::FONT_HERSHEY_SIMPLEX,
                 0.5, cv::Scalar(0, 255, 0), 2);
@@ -172,7 +172,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
       target_ = nullptr;
       return std::make_unique<JourneyModel>(0, 0, false);
     }
-    return makeJourneyModel(objectVector,true);
+    return makeJourneyModel(objectVector, true);
   }
   else
   {
@@ -238,10 +238,10 @@ void NavigationController::removeBallsOutsideCourse()
 
   for (const auto& blockingObject : blockingObjects_)
   {
-    minX = std::min(minX,blockingObject->getLowestX());
-    minY = std::min(minY,blockingObject->getLowestY());
-    maxX = std::max(maxX,blockingObject->getMaxX());
-    maxY = std::max(maxY,blockingObject->getMaxY());
+    minX = std::min(minX, blockingObject->getLowestX());
+    minY = std::min(minY, blockingObject->getLowestY());
+    maxX = std::max(maxX, blockingObject->getMaxX());
+    maxY = std::max(maxY, blockingObject->getMaxY());
   }
 
   auto deletionLambda = [minX,minY,maxX,maxY](const std::unique_ptr<CourseObject>& a) -> bool
@@ -253,7 +253,8 @@ void NavigationController::removeBallsOutsideCourse()
   {
     if (deletionLambda(ball))
     {
-      cv::circle(*MainController::getFrame(), {(ball->x2()+ball->x1())/2, (ball->y2()+ball->y1())/2},10,cv::Scalar(0,0,255),5);
+      cv::circle(*MainController::getFrame(), {(ball->x2() + ball->x1()) / 2, (ball->y2() + ball->y1()) / 2}, 10,
+                 cv::Scalar(0, 0, 255), 5);
     }
   }
 
@@ -337,13 +338,7 @@ Vector NavigationController::findClosestBall()
   {
     if (potentialTarget_ != nullptr)
     {
-      int x1Diff = std::abs(potentialTarget_->x1() - closestBall->x1());
-      int y1Diff = std::abs(potentialTarget_->y1() - closestBall->y1());
-      int x2Diff = std::abs(potentialTarget_->x2() - closestBall->x2());
-      int y2Diff = std::abs(potentialTarget_->y2() - closestBall->y2());
-
-      int allowedDiff = ConfigController::getConfigInt("AllowedDifferenceBetweenNewTargetAndPotential");
-      if (x1Diff < allowedDiff && y1Diff < allowedDiff && x2Diff < allowedDiff && y2Diff < allowedDiff)
+      if (potentialTarget_->courseObjectWithinValidRange(closestBall))
       {
         Utility::appendToFile("log.txt", "Same target count incremented to " + std::to_string(sameTargetCount_) + "\n");
         sameTargetCount_++;
@@ -712,7 +707,7 @@ bool NavigationController::targetStillActual()
 {
   for (const auto& ball : ballVector_)
   {
-    int x1Diff = std::abs(ball->x1()-target_->x1());
+    int x1Diff = std::abs(ball->x1() - target_->x1());
     int x2Diff = std::abs(ball->x2() - target_->x2());
     int y1Diff = std::abs(ball->y1() - target_->y1());
     int y2Diff = std::abs(ball->y2() - target_->y2());
