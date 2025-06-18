@@ -106,7 +106,9 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   }
 
   if (frontIsToCloseToBlockingObject())
+  {
     return std::make_unique<JourneyModel>(-10, 0, true);
+  }
 
   if (target_ != nullptr && sameTargetCount_ == ConfigController::getConfigInt("AmountOfCommandsToAverage"))
   {
@@ -130,7 +132,9 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
 
   std::optional<CourseObject> target;
   if (target_ != nullptr)
+  {
     target = *target_;
+  }
 
   //MathUtil::correctCourseObjectForHeightOffset(robotBack_.get(), robotFront_.get());
   auto objectVector = Vector(0, 0);
@@ -554,9 +558,10 @@ Vector NavigationController::handleObjectNearCorner(const CourseObject* courseOb
     auto localObject = CourseObject(*courseObject);
     if (courseObject->x1() > ConfigController::getConfigInt("middleXOnAxis"))
     {
-        localObject.shiftX(-10);
+      localObject.shiftX(-10);
     }
-    else {
+    else
+    {
       localObject.shiftX(10);
     }
     return MathUtil::calculateVectorToObject(&robotMiddle, &localObject);
