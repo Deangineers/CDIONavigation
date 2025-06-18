@@ -36,6 +36,12 @@ add_executable(CDIONavigationFull
         Controllers/ImageProcessing/ImageProcessor.h
         Controllers/ImageProcessing/CloudyImageProcessor.cpp
         Controllers/ImageProcessing/CloudyImageProcessor.h
+        Controllers/ImageProcessing/BallProcessor.cpp
+        Controllers/ImageProcessing/BallProcessor.h
+        Controllers/ImageProcessing/BallProcessor.cpp
+        Controllers/ImageProcessing/BallProcessor.h
+        Controllers/ImageProcessing/BallProcessor.cpp
+        Controllers/ImageProcessing/BallProcessor.h
 )
 
 target_link_libraries(CDIONavigationFull PUBLIC Utility)

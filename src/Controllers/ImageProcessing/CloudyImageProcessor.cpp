@@ -27,8 +27,8 @@ void CloudyImageProcessor::detectRedPixels(const cv::Mat& frame)
 void CloudyImageProcessor::detectBalls(const cv::Mat& frame)
 {
   cv::Mat orangeMask, whiteMask;
-  cv::inRange(hsv_, cv::Scalar(5, 50, 50), cv::Scalar(30, 255, 255), orangeMask);
-  cv::inRange(hsv_, cv::Scalar(0, 0, 190), cv::Scalar(179, 65, 255), whiteMask);
+  cv::inRange(hsv_, cv::Scalar(5, 25, 25), cv::Scalar(30, 255, 255), orangeMask);
+  cv::inRange(hsv_, cv::Scalar(30, 0, 150), cv::Scalar(179, 65, 255), whiteMask);
 
   ballHelperFunction(frame, orangeMask, "orange");
   ballHelperFunction(frame, whiteMask, "white");
