@@ -42,5 +42,6 @@
   "CrossWallWidth": 10,
   "MaxCrossSize": 500000,
   "ToAverageCommandsInClientController": false,
-  "AllowedDifferenceBetweenNewTargetAndPotential": 20
+  "AllowedDifferenceBetweenNewTargetAndPotential": 20,
+  "ShiftDistanceOnCornerBall": 7
 }
