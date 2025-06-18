@@ -40,5 +40,6 @@
   "DistanceBeforeToCloseToWall": 50,
   "CrossWallWidth": 10,
   "MaxCrossSize": 500000,
-  "ToAverageCommandsInClientController": false
+  "ToAverageCommandsInClientController": false,
+  "AllowedDifferenceBetweenNewTargetAndPotential": 20
 }

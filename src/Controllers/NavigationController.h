@@ -50,6 +50,7 @@ private:
   std::unique_ptr<CourseObject> robotBack_;
   std::vector<std::unique_ptr<VectorWithStartPos>> blockingObjects_;
   std::unique_ptr<CourseObject> target_;
+  std::unique_ptr<CourseObject> potentialTarget_;
   int robotWidth_ = ConfigController::getConfigInt("RobotWidth");
 
   int totalBalls_ = ConfigController::getConfigInt("TotalBalls");
