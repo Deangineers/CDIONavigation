@@ -21,7 +21,7 @@ void CloudyImageProcessor::detectRedPixels(const cv::Mat& frame)
   cv::bitwise_or(crossMask1, crossMask2, crossMask);
 
   redPixelHelperFunction(frame, redMask);
-  crossHelperFunction(frame, crossMask);
+  //crossHelperFunction(frame, crossMask);
 }
 
 void CloudyImageProcessor::detectBalls(const cv::Mat& frame)
