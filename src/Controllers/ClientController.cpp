@@ -14,7 +14,7 @@ ClientController::ClientController(std::unique_ptr<IClient> client) : client_(st
 
 void ClientController::sendCommand(Command command)
 {
-  if (ConfigController::getConfigBool("ToAverageCommandsInClientController"))
+  if (not ConfigController::getConfigBool("ToAverageCommandsInClientController"))
   {
     client_->sendCommandAndAddNewLine(command.formatToSend());
     return;
