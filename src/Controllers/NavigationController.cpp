@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <ranges>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/core/matx.hpp>
 
@@ -104,37 +105,28 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     Utility::appendToFile("log.txt", "No Robot\n");
     return nullptr;
   }
+  auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
 
   if (frontIsToCloseToBlockingObject())
   {
     return std::make_unique<JourneyModel>(-10, 0, true);
   }
 
-  if (target_ != nullptr && sameTargetCount_ == ConfigController::getConfigInt("AmountOfCommandsToAverage"))
-  {
-    auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
-    auto vectorToObject = handleObjectNextToBlocking(target_.get());
-    if (vectorToObject.getLength() < ConfigController::getConfigInt("DistanceBeforeTargetReached"))
-    {
-      target_ = nullptr;
-      sameTargetCount_ = 0;
-    }
-    else
-    {
-      cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},
-                      {robotMiddle.x1() + vectorToObject.x, robotMiddle.y1() + vectorToObject.y},
-                      cv::Scalar(255, 0, 255), 1,
-                      cv::LINE_AA, 0, 0.01);
-
-      std::cout << "Navigating to target number one" << std::endl;
-      return makeJourneyModel(vectorToObject, toCollectBalls_);
-    }
-  }
-
-  std::optional<CourseObject> target;
   if (target_ != nullptr)
   {
-    target = *target_;
+    auto vectorToObject = handleObjectNextToBlocking(target_.get());
+    cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},
+                    {robotMiddle.x1() + vectorToObject.x, robotMiddle.y1() + vectorToObject.y},
+                    cv::Scalar(255, 0, 255), 1,
+                    cv::LINE_AA, 0, 0.01);
+    if (vectorToObject.getLength() < ConfigController::getConfigInt("DistanceBeforeTargetReached"))
+    {
+      Utility::appendToFile("log.txt", "target_ is now null\n");
+      target_ = nullptr;
+      sameTargetCount_ = 0;
+      return nullptr;
+    }
+    return makeJourneyModel(vectorToObject, toCollectBalls_);
   }
 
   //MathUtil::correctCourseObjectForHeightOffset(robotBack_.get(), robotFront_.get());
@@ -153,15 +145,16 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   {
     objectVector = navigateToGoal();
     auto vectorToRobotBack = MathUtil::calculateVectorToObject(robotBack_.get(), robotFront_.get());
-    auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
     auto goalVector = MathUtil::calculateVectorToObject(&robotMiddle, goal_.get());
     double angleDiff = MathUtil::calculateAngleDifferenceBetweenVectors(goalVector, vectorToRobotBack);
     if (objectVector.getLength() < ConfigController::getConfigInt("DistanceBeforeTargetReached"))
     {
       if (std::abs(angleDiff) > ConfigController::getConfigInt("AllowedAngleDifference"))
       {
+        target_ = nullptr;
         return std::make_unique<JourneyModel>(0, -angleDiff, true);
       }
+      target_ = nullptr;
       return std::make_unique<JourneyModel>(-10, 0, false);
     }
   }
@@ -178,33 +171,21 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     Utility::appendToFile("log.txt", "objectVector = {0,0}, firstCheck\n");
     return nullptr;
   }
-  objectVector = handleCollision(objectVector);
-
-  if (objectVector.isNullVector())
-  {
-    Utility::appendToFile("log.txt", "objectVector = {0,0}, secondCheck\n");
-  }
 
   if (sameTargetCount_ == ConfigController::getConfigInt("AmountOfCommandsToAverage"))
   {
-    auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
-    cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},
-                    {robotMiddle.x1() + objectVector.x, robotMiddle.y1() + objectVector.y}, cv::Scalar(255, 0, 255), 1,
-                    cv::LINE_AA, 0, 0.01);
-
-    return makeJourneyModel(objectVector, toCollectBalls_);
+    target_ = std::move(potentialTarget_);
+    potentialTarget_ = nullptr;
   }
 
-  if (!target.has_value() || !target_ || *target != *target_)
-  {
-    Utility::appendToFile("log.txt", "Target changed\n");
-    sameTargetCount_ = 1;
-  }
-  else
-  {
-    Utility::appendToFile("log.txt", "Same target count" + std::to_string(sameTargetCount_) + "\n");
-    sameTargetCount_++;
-  }
+
+  cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},
+                  {robotMiddle.x1() + objectVector.x, robotMiddle.y1() + objectVector.y},
+                  cv::Scalar(255, 0, 255), 1,
+                  cv::LINE_AA, 0, 0.01);
+  cv::putText(*MainController::getFrame(), std::to_string(sameTargetCount_),
+              {robotMiddle.x1() + objectVector.x, robotMiddle.y1() + objectVector.y - 10}, cv::FONT_HERSHEY_SIMPLEX,
+              0.5, cv::Scalar(0, 255, 0), 2);
 
   return nullptr;
 }
@@ -315,8 +296,6 @@ Vector NavigationController::navigateToGoal()
   {
     targetX = goal.x + ConfigController::getConfigInt("distanceToGoal");
   }
-
-  target_ = std::make_unique<CourseObject>(targetX, goal.y, targetX, goal.y, "goal");
   goal_ = std::make_unique<CourseObject>(goal.x, goal.y, goal.x, goal.y, "goal");
   auto localGoal = CourseObject(targetX, goal.y, targetX, goal.y, "goal");
   Utility::appendToFile(
@@ -348,11 +327,29 @@ Vector NavigationController::findClosestBall()
   }
   if (closestBall != nullptr)
   {
+    if (potentialTarget_ != nullptr)
+    {
+      int x1Diff = std::abs(potentialTarget_->x1() - closestBall->x1());
+      int y1Diff = std::abs(potentialTarget_->y1() - closestBall->y1());
+      int x2Diff = std::abs(potentialTarget_->x2() - closestBall->x2());
+      int y2Diff = std::abs(potentialTarget_->y2() - closestBall->y2());
+
+      int allowedDiff = ConfigController::getConfigInt("AllowedDifferenceBetweenNewTargetAndPotential");
+      if (x1Diff < allowedDiff && y1Diff < allowedDiff && x2Diff < allowedDiff && y2Diff < allowedDiff)
+      {
+        Utility::appendToFile("log.txt", "Same target count incremented\n");
+        sameTargetCount_++;
+      }
+      else
+      {
+        potentialTarget_ = std::make_unique<CourseObject>(closestBall->x1(), closestBall->y1(), closestBall->x2(),
+                                                          closestBall->y2(),
+                                                          "ball");
+      }
+    }
     Utility::appendToFile(
       "log.txt",
       "Navigating to Ball: " + std::to_string(closestBall->x1()) + ", " + std::to_string(closestBall->y1()) + "\n");
-    target_ = std::make_unique<CourseObject>(closestBall->x1(), closestBall->y1(), closestBall->x2(), closestBall->y2(),
-                                             "ball");
   }
   else
   {
