@@ -43,6 +43,8 @@ private:
   [[nodiscard]] bool checkCollisionOnRoute(const Vector& targetVector) const;
   [[nodiscard]] bool frontIsToCloseToBlockingObject() const;
 
+  bool targetStillActual();
+
 
   std::vector<std::unique_ptr<CourseObject>> ballVector_;
   std::unique_ptr<CourseObject> goal_;
@@ -50,6 +52,7 @@ private:
   std::unique_ptr<CourseObject> robotBack_;
   std::vector<std::unique_ptr<VectorWithStartPos>> blockingObjects_;
   std::unique_ptr<CourseObject> target_;
+  std::unique_ptr<CourseObject> potentialTarget_;
   int robotWidth_ = ConfigController::getConfigInt("RobotWidth");
 
   int totalBalls_ = ConfigController::getConfigInt("TotalBalls");
@@ -63,6 +66,8 @@ private:
 
   bool hasDeliveredBallsOnce_ = false;
   bool toCollectBalls_ = true;
+
+  int sameTargetCount_ = 0;
 };
 
 

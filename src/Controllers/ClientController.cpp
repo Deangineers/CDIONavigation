@@ -14,6 +14,11 @@ ClientController::ClientController(std::unique_ptr<IClient> client) : client_(st
 
 void ClientController::sendCommand(Command command)
 {
+  if (not ConfigController::getConfigBool("ToAverageCommandsInClientController"))
+  {
+    client_->sendCommandAndAddNewLine(command.formatToSend());
+    return;
+  }
   commands_.emplace_back(command);
   if (commands_.size() == ConfigController::getConfigInt("AmountOfCommandsToAverage"))
   {

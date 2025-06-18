@@ -20,11 +20,11 @@ public:
   int startX_;
   int startY_;
 
-protected:
   [[nodiscard]] int getLowestX() const;
   [[nodiscard]] int getLowestY() const;
   [[nodiscard]] int getMaxX() const;
   [[nodiscard]] int getMaxY() const;
+protected:
 };
 
 

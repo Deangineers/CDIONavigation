@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <ranges>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/core/matx.hpp>
 
@@ -104,30 +105,40 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     Utility::appendToFile("log.txt", "No Robot\n");
     return nullptr;
   }
+  auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
+
+  if (frontIsToCloseToBlockingObject() && target_ == nullptr)
+  {
+    return std::make_unique<JourneyModel>(-10, 0, true);
+  }
 
   if (target_ != nullptr)
   {
-    auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
-    auto vectorToObject = handleObjectNextToBlocking(target_.get());
-    if (vectorToObject.getLength() < ConfigController::getConfigInt("DistanceBeforeTargetReached"))
+    /*
+    if (not targetStillActual())
     {
       target_ = nullptr;
+      return nullptr;
     }
-    else
+    */
+    auto vectorToObject = handleObjectNextToBlocking(target_.get());
+    cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},
+                    {robotMiddle.x1() + vectorToObject.x, robotMiddle.y1() + vectorToObject.y},
+                    cv::Scalar(255, 0, 255), 1,
+                    cv::LINE_AA, 0, 0.01);
+    auto directVectorToObject = MathUtil::calculateVectorToObject(robotFront_.get(), target_.get());
+    if (directVectorToObject.getLength() < ConfigController::getConfigInt("DistanceBeforeTargetReached"))
     {
-      cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},
-                      {robotMiddle.x1() + vectorToObject.x, robotMiddle.y1() + vectorToObject.y},
-                      cv::Scalar(255, 0, 255), 1,
-                      cv::LINE_AA, 0, 0.01);
-
-      return makeJourneyModel(vectorToObject, toCollectBalls_);
+      Utility::appendToFile("log.txt", "target_ is now null\n");
+      target_ = nullptr;
+      sameTargetCount_ = 0;
+      return nullptr;
     }
+    return makeJourneyModel(vectorToObject, toCollectBalls_);
   }
 
   //MathUtil::correctCourseObjectForHeightOffset(robotBack_.get(), robotFront_.get());
   auto objectVector = Vector(0, 0);
-  if (frontIsToCloseToBlockingObject())
-    return std::make_unique<JourneyModel>(-10, 0, true);
 
   if (ballVector_.empty() || (ballVector_.size() == 5 && not hasDeliveredBallsOnce_))
   {
@@ -142,17 +153,26 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   {
     objectVector = navigateToGoal();
     auto vectorToRobotBack = MathUtil::calculateVectorToObject(robotBack_.get(), robotFront_.get());
-    auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
     auto goalVector = MathUtil::calculateVectorToObject(&robotMiddle, goal_.get());
     double angleDiff = MathUtil::calculateAngleDifferenceBetweenVectors(goalVector, vectorToRobotBack);
+    cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},
+                  {robotMiddle.x1() + objectVector.x, robotMiddle.y1() + objectVector.y},
+                  cv::Scalar(255, 0, 255), 1,
+                  cv::LINE_AA, 0, 0.01);
+    cv::putText(*MainController::getFrame(), "VA FANGOOL",
+                {robotMiddle.x1() + objectVector.x, robotMiddle.y1() + objectVector.y + 30}, cv::FONT_HERSHEY_SIMPLEX,
+                0.5, cv::Scalar(0, 255, 0), 2);
     if (objectVector.getLength() < ConfigController::getConfigInt("DistanceBeforeTargetReached"))
     {
       if (std::abs(angleDiff) > ConfigController::getConfigInt("AllowedAngleDifference"))
       {
+        target_ = nullptr;
         return std::make_unique<JourneyModel>(0, -angleDiff, true);
       }
-      return std::make_unique<JourneyModel>(-10, 0, false);
+      target_ = nullptr;
+      return std::make_unique<JourneyModel>(0, 0, false);
     }
+    return makeJourneyModel(objectVector,true);
   }
   else
   {
@@ -167,19 +187,23 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     Utility::appendToFile("log.txt", "objectVector = {0,0}, firstCheck\n");
     return nullptr;
   }
-  //objectVector = handleCollision(objectVector);
 
-  if (objectVector.isNullVector())
+  if (sameTargetCount_ == ConfigController::getConfigInt("AmountOfCommandsToAverage"))
   {
-    Utility::appendToFile("log.txt", "objectVector = {0,0}, secondCheck\n");
+    target_ = std::move(potentialTarget_);
+    potentialTarget_ = nullptr;
   }
 
-  auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
-  cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},
-                  {robotMiddle.x1() + objectVector.x, robotMiddle.y1() + objectVector.y}, cv::Scalar(255, 0, 255), 1,
-                  cv::LINE_AA, 0, 0.01);
 
-  return makeJourneyModel(objectVector, toCollectBalls_);
+  cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},
+                  {robotMiddle.x1() + objectVector.x, robotMiddle.y1() + objectVector.y},
+                  cv::Scalar(255, 0, 255), 1,
+                  cv::LINE_AA, 0, 0.01);
+  cv::putText(*MainController::getFrame(), std::to_string(sameTargetCount_),
+              {robotMiddle.x1() + objectVector.x, robotMiddle.y1() + objectVector.y + 30}, cv::FONT_HERSHEY_SIMPLEX,
+              0.5, cv::Scalar(0, 255, 0), 2);
+
+  return nullptr;
 }
 
 void NavigationController::setHasDeliveredOnce()
@@ -209,39 +233,31 @@ void NavigationController::removeBallsOutsideCourse()
 
   int minX = INT_MAX;
   int minY = INT_MAX;
-  int highX = INT_MIN;
-  int highY = INT_MIN;
+  int maxX = INT_MIN;
+  int maxY = INT_MIN;
 
   for (const auto& blockingObject : blockingObjects_)
   {
-    auto max = blockingObject->maxPoints();
-    auto min = blockingObject->minimalPoints();
+    minX = std::min(minX,blockingObject->getLowestX());
+    minY = std::min(minY,blockingObject->getLowestY());
+    maxX = std::max(maxX,blockingObject->getMaxX());
+    maxY = std::max(maxY,blockingObject->getMaxY());
+  }
 
-    if (min.x < minX)
+  auto deletionLambda = [minX,minY,maxX,maxY](const std::unique_ptr<CourseObject>& a) -> bool
+  {
+    return ((a->x1() < minX || a->x2() > maxX) || a->y1() < minY ||
+      maxY < a->y2());
+  };
+  for (const auto& ball : ballVector_)
+  {
+    if (deletionLambda(ball))
     {
-      minX = min.x;
-    }
-    if (min.y < minY)
-    {
-      minY = min.y;
-    }
-    if (highX < max.x)
-    {
-      highX = max.x;
-    }
-    if (highY < max.y)
-    {
-      highY = max.y;
+      cv::circle(*MainController::getFrame(), {(ball->x2()+ball->x1())/2, (ball->y2()+ball->y1())/2},10,cv::Scalar(0,0,255),5);
     }
   }
 
-  auto deletionLambda = [minX,minY,highX,highY](const std::unique_ptr<CourseObject>& a) -> bool
-  {
-    return not(a->x1() < minX || highX > a->x2() || a->y1() < minY ||
-      highY > a->y2());
-  };
-
-  std::erase_if(ballVector_, deletionLambda);
+  //std::erase_if(ballVector_, deletionLambda);
 }
 
 void NavigationController::removeBallsInsideRobot()
@@ -288,8 +304,6 @@ Vector NavigationController::navigateToGoal()
   {
     targetX = goal.x + ConfigController::getConfigInt("distanceToGoal");
   }
-
-  target_ = std::make_unique<CourseObject>(targetX, goal.y, targetX, goal.y, "goal");
   goal_ = std::make_unique<CourseObject>(goal.x, goal.y, goal.x, goal.y, "goal");
   auto localGoal = CourseObject(targetX, goal.y, targetX, goal.y, "goal");
   Utility::appendToFile(
@@ -321,11 +335,37 @@ Vector NavigationController::findClosestBall()
   }
   if (closestBall != nullptr)
   {
+    if (potentialTarget_ != nullptr)
+    {
+      int x1Diff = std::abs(potentialTarget_->x1() - closestBall->x1());
+      int y1Diff = std::abs(potentialTarget_->y1() - closestBall->y1());
+      int x2Diff = std::abs(potentialTarget_->x2() - closestBall->x2());
+      int y2Diff = std::abs(potentialTarget_->y2() - closestBall->y2());
+
+      int allowedDiff = ConfigController::getConfigInt("AllowedDifferenceBetweenNewTargetAndPotential");
+      if (x1Diff < allowedDiff && y1Diff < allowedDiff && x2Diff < allowedDiff && y2Diff < allowedDiff)
+      {
+        Utility::appendToFile("log.txt", "Same target count incremented to " + std::to_string(sameTargetCount_) + "\n");
+        sameTargetCount_++;
+      }
+      else
+      {
+        Utility::appendToFile("log.txt", "New Potential Target (\"Ball\")\n");
+        potentialTarget_ = std::make_unique<CourseObject>(closestBall->x1(), closestBall->y1(), closestBall->x2(),
+                                                          closestBall->y2(),
+                                                          "ball");
+      }
+    }
+    else
+    {
+      Utility::appendToFile("log.txt", "New Potential Target (\"Ball\")\n");
+      potentialTarget_ = std::make_unique<CourseObject>(closestBall->x1(), closestBall->y1(), closestBall->x2(),
+                                                        closestBall->y2(),
+                                                        "ball");
+    }
     Utility::appendToFile(
       "log.txt",
       "Navigating to Ball: " + std::to_string(closestBall->x1()) + ", " + std::to_string(closestBall->y1()) + "\n");
-    target_ = std::make_unique<CourseObject>(closestBall->x1(), closestBall->y1(), closestBall->x2(), closestBall->y2(),
-                                             "ball");
   }
   else
   {
@@ -515,9 +555,9 @@ Vector NavigationController::handleObjectNearCorner(const CourseObject* courseOb
   int shiftedX = (ballCenterX > imageWidth / 2) ? -1 : 1;
   int shiftedY = (ballCenterY > imageHeight / 2) ? -1 : 1;
 
-  double angleDeg = 12;
+  double angleDeg = 10;
   double angleRad = angleDeg * CV_PI / 180.0;
-  int shiftDist = ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning") * 3;
+  int shiftDist = ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning") * 5;
 
   double dx = std::tan(angleRad) * shiftDist;
 
@@ -527,15 +567,17 @@ Vector NavigationController::handleObjectNearCorner(const CourseObject* courseOb
 
   auto vectorToIntermediaryPoint = MathUtil::calculateVectorToObject(&robotMiddle, &shiftedTarget);
 
-  if (vectorToIntermediaryPoint.getLength() < shiftDist)
+  if (vectorToIntermediaryPoint.getLength() < ConfigController::getConfigInt("DistanceBeforeTargetReached"))
   {
     auto localObject = CourseObject(*courseObject);
+    int shiftDistanceOnCornerBall = ConfigController::getConfigInt("ShiftDistanceOnCornerBall");
     if (courseObject->x1() > ConfigController::getConfigInt("middleXOnAxis"))
     {
-        localObject.shiftX(-10);
+      localObject.shiftX(-shiftDistanceOnCornerBall);
     }
-    else {
-      localObject.shiftX(10);
+    else
+    {
+      localObject.shiftX(shiftDistanceOnCornerBall);
     }
     return MathUtil::calculateVectorToObject(&robotMiddle, &localObject);
   }
@@ -602,13 +644,13 @@ bool segmentsIntersect(int x1, int y1, int x2, int y2,
 
 bool NavigationController::checkCollisionOnRoute(const Vector& targetVector) const
 {
-  if (!robotFront_)
+  if (!robotFront_ || !robotBack_)
   {
     return false;
   }
-
-  int startX = (robotFront_->x1() + robotFront_->x2()) / 2;
-  int startY = (robotFront_->y1() + robotFront_->y2()) / 2;
+  const CourseObject robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
+  int startX = robotMiddle.x1();
+  int startY = robotMiddle.y1();
   int endX = startX + targetVector.x;
   int endY = startY + targetVector.y;
 
@@ -662,6 +704,24 @@ bool NavigationController::frontIsToCloseToBlockingObject() const
   if (vectorsToBlockingObjects.first.getLength() < ConfigController::getConfigInt("DistanceBeforeToCloseToWall"))
   {
     return true;
+  }
+  return false;
+}
+
+bool NavigationController::targetStillActual()
+{
+  for (const auto& ball : ballVector_)
+  {
+    int x1Diff = std::abs(ball->x1()-target_->x1());
+    int x2Diff = std::abs(ball->x2() - target_->x2());
+    int y1Diff = std::abs(ball->y1() - target_->y1());
+    int y2Diff = std::abs(ball->y2() - target_->y2());
+
+    int allowedDiff = ConfigController::getConfigInt("AllowedDifferenceBetweenNewTargetAndPotential");
+    if (x1Diff < allowedDiff && y1Diff < allowedDiff && x2Diff < allowedDiff && y2Diff < allowedDiff)
+    {
+      return true;
+    }
   }
   return false;
 }

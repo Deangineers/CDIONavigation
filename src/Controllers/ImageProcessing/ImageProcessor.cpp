@@ -135,7 +135,7 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const cv::Mat& mas
     cv::circle(frame, cv::Point(cx, cy), 2, cv::Scalar(255, 0, 255), -1); // circle center
   }
 
-  findBallsInCorners(frame, mask);
+  //findBallsInCorners(frame, mask);
 }
 
 void ImageProcessor::eggHelperFunction(const cv::Mat& frame, const cv::Mat& mask)
@@ -151,8 +151,9 @@ void ImageProcessor::eggHelperFunction(const cv::Mat& frame, const cv::Mat& mask
     double perimeter = cv::arcLength(cnt, true);
 
     int eggMinSize = ConfigController::getConfigInt("EggBallDiffVal");
+    int eggMaxSize = ConfigController::getConfigInt("EggMaxSize");
 
-    if (area < eggMinSize || perimeter == 0)
+    if (area < eggMinSize || perimeter == 0 || area > eggMaxSize)
       continue;
 
     std::string label = "egg";
@@ -199,7 +200,7 @@ void ImageProcessor::frontAndBackHelperFunction(const cv::Mat& frame, cv::Mat& m
     std::vector<cv::Point> approx;
     cv::approxPolyDP(cnt, approx, epsilon, true);
 
-    if (approx.size() == 4 && cv::isContourConvex(approx) && cv::contourArea(cnt) > 100)
+    if (approx.size() == 4 && cv::isContourConvex(approx) && cv::contourArea(cnt) > 1000)
     {
       cv::Rect rect = cv::boundingRect(approx);
       int x1 = rect.x, y1 = rect.y;
