@@ -19,6 +19,8 @@ public:
     MainController::testInit();
     ballProcessor = std::make_shared<TestBallProcessor>();
     imageProcessor = std::make_shared<CloudyImageProcessor>(ballProcessor);
+    ConfigController::TESTsetConfigInt("ImagesToAverage", 1);
+    ConfigController::TESTsetConfigInt("AmountOfSeenBeforeCreate", 0);
   }
 
   std::shared_ptr<CloudyImageProcessor> imageProcessor;
@@ -27,8 +29,8 @@ public:
 
 TEST_F(BallDetectionTests, ballDetectionTest1)
 {
-  cv::Mat frame = cv::imread("../../TestImages/testImage1.jpg");
+  cv::Mat frame = cv::imread("../../TestImages/ballsInCorner.jpg");
   imageProcessor->processImage(frame);
 
-  EXPECT_EQ(ballProcessor->getBallCounter(), 0);
+  EXPECT_EQ(ballProcessor->getBallCounter(), 5);
 }

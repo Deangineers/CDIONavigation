@@ -15,22 +15,27 @@ void TestBallProcessor::begin()
 {
   ballCounter_ = 0;
   eggCounter_ = 0;
+  ballProcessor_->begin();
 }
 
 bool TestBallProcessor::isBallValid(CourseObject* courseObject)
 {
-  if (ballProcessor_->isBallValid(courseObject))
+  bool result = ballProcessor_->isBallValid(courseObject);
+  if (result)
   {
     ballCounter_++;
   }
+  return result;
 }
 
 bool TestBallProcessor::isEggValid(const CourseObject* courseObject)
 {
-  if (ballProcessor_->isEggValid(courseObject))
+  bool result = ballProcessor_->isEggValid(courseObject);
+  if (result)
   {
     eggCounter_++;
   }
+  return result;
 }
 
 int TestBallProcessor::getBallCounter()
