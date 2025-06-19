@@ -161,6 +161,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
         atGoalTime_ = std::chrono::high_resolution_clock::now();
         atGoal_ = true;
         target_ = nullptr;
+        Utility::appendToFile("log.txt","Shooting with angle: " + std::to_string(angleDiff) + "\n");
         return std::make_unique<JourneyModel>(0, 0, false);
       }
         return makeJourneyModel(goalVector,true);
@@ -195,6 +196,11 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     if (directVectorToObject.getLength() < ConfigController::getConfigInt("DistanceBeforeTargetReached"))
     {
       Utility::appendToFile("log.txt", "target_ is now null\n");
+      auto closestVector =getVectorsForClosestBlockingObjects(target_.get()).first;
+      if (closestVector.getLength() < ConfigController::getConfigInt("DistanceBeforeToCloseToWall"))
+      {
+        return std::make_unique<JourneyModel>(-10, 0, true);
+      }
       target_ = nullptr;
       sameTargetCount_ = 0;
       return nullptr;
