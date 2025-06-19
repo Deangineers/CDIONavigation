@@ -47,7 +47,7 @@
   "ShiftDistanceOnCornerBall": 5,
   "ImagesToAverage": 30,
   "AmountOfSeenBeforeCreate": 5,
-  "WallSeenBeforeCreate": 10,
+  "WallSeenBeforeCreate": 1,
   "MinAreaOfRobotFrontAndBack": 5000,
   "maxEggHeight": 250,
   "maxEggWidth": 250,

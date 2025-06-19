@@ -7,8 +7,7 @@
 #include "../../Models/Vector.h"
 #include "Utility/ConfigController.h"
 
-ImageProcessor::ImageProcessor() : ballProcessor_(std::make_unique<BallProcessor>()),
-                                   wallProcessor_(std::make_unique<WallProcessor>())
+ImageProcessor::ImageProcessor() : ballProcessor_(std::make_unique<BallProcessor>()), wallProcessor_(std::make_unique<WallProcessor>())
 {
 }
 
@@ -107,6 +106,7 @@ void ImageProcessor::crossHelperFunction(const cv::Mat& frame, cv::Mat& mask)
       cv::line(frame, p1, p2, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("CrossWallWidth"),
                cv::LINE_AA, 0);
       cv::putText(frame, std::to_string(label++), p1, cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
+      MainController::addCrossObject(std::move(vectorToCreate));
       MainController::addCrossObject(std::make_unique<VectorWithStartPos>(p1.x, p1.y, vector));
     }
   }
@@ -114,63 +114,65 @@ void ImageProcessor::crossHelperFunction(const cv::Mat& frame, cv::Mat& mask)
 
 void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const cv::Mat& mask, const std::string& colorLabel)
 {
-  cv::Mat cleanMask;
-  cv::morphologyEx(mask, cleanMask, cv::MORPH_OPEN, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)));
-  cv::morphologyEx(cleanMask, cleanMask, cv::MORPH_CLOSE, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)));
+  cv::Mat grey, hsv;
+  cv::cvtColor(frame, hsv, cv::COLOR_BGR2HSV);
 
-  cv::Mat filteredMask, sharpened;
-  cv::bilateralFilter(cleanMask, filteredMask, 9, 75, 75);
+  cv::cvtColor(frame, grey, cv::COLOR_BGR2GRAY);
+  std::vector<cv::Vec3f> circles;
+  cv::HoughCircles(grey, circles, cv::HOUGH_GRADIENT, 1,
+                   20, // minDist between centers
+                   150, // param1: upper threshold for Canny
+                   25, // param2: threshold for center detection
+                   10, 40); // minRadius, maxRadius
 
-  cv::Mat kernel = (cv::Mat_<float>(3,3) <<
-                                         0, -1,  0,
-          -1,  5, -1,
-          0, -1,  0);
-
-  cv::filter2D(filteredMask, sharpened, filteredMask.depth(), kernel);
-
-  std::vector<std::vector<cv::Point>> contours;
-  cv::findContours(filteredMask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-
-  for (const auto& contour : contours)
+  for (const auto& circle : circles)
   {
-    double area = cv::contourArea(contour);
-    if (area < ConfigController::getConfigInt("MinimumSizeOfBlockingObject") ||
-        area > ConfigController::getConfigInt("EggBallDiffVal"))
-      continue;
+    int cx = cvRound(circle[0]);
+    int cy = cvRound(circle[1]);
+    int r = cvRound(circle[2]);
 
-    float radius;
-    cv::Point2f center;
-    cv::minEnclosingCircle(contour, center, radius);
+    cv::Vec3b hsvPixel = hsv.at<cv::Vec3b>(cy, cx);
+    int h = hsvPixel[0];
+    int s = hsvPixel[1];
+    int v = hsvPixel[2];
 
-    // Check circularity
-    double perimeter = cv::arcLength(contour, true);
-    if (perimeter == 0) continue;
-    double circularity = 4 * CV_PI * area / (perimeter * perimeter);
-    if (circularity < 0.7) // adjust threshold as needed
-      continue;
+    std::string detectedColor;
+    if (s < 40 && v > 200) {
+      detectedColor = "white";
+    } else if (h >= 5 && h <= 25 && s > 100 && v > 100) {
+      detectedColor = "orange";
+    } else {
+      detectedColor = "unknown";
+    }
 
-    // Optional: mean color inside circle
-    cv::Mat maskCircle = cv::Mat::zeros(mask.size(), CV_8U);
-    cv::circle(maskCircle, center, static_cast<int>(radius), 255, -1);
-    cv::Scalar meanColorHSV = cv::mean(hsv_, maskCircle);
-
-    // Validate ball color based on meanColorHSV (add thresholds per colorLabel)
-
-    // Create bounding rect
-    cv::Rect rect(center.x - radius, center.y - radius, 2 * radius, 2 * radius);
+    cv::Rect rect(cx - r, cy - r, 2 * r, 2 * r);
     if ((rect & cv::Rect(0, 0, frame.cols, frame.rows)) != rect)
       continue;
 
-    auto courseObject = std::make_unique<CourseObject>(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height, "ball");
-    if (!ballProcessor_->isBallValid(courseObject.get()))
+    double area = CV_PI * r * r;
+    if (area < ConfigController::getConfigInt("MinimumSizeOfBlockingObject")
+      || area > ConfigController::getConfigInt("EggBallDiffVal"))
+    {
       continue;
+    }
+    std::string label = "ball";
+    // at some point we might want to add the colorLabel here to separate white and orange balls
+
+    int x1 = rect.x, y1 = rect.y;
+    int x2 = x1 + rect.width, y2 = y1 + rect.height;
+
+    auto courseObject = std::make_unique<CourseObject>(x1, y1, x2, y2, label);
+
+    if (not ballProcessor_->isBallValid(courseObject.get()))
+    {
+      continue;
+    }
 
     MainController::addCourseObject(std::move(courseObject));
 
-    // Draw result
     cv::rectangle(frame, rect, cv::Scalar(0, 255, 0), 2);
-    cv::putText(frame, colorLabel, cv::Point(rect.x, rect.y - 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
-    cv::circle(frame, center, 2, cv::Scalar(255, 0, 255), -1);
+    cv::putText(frame, detectedColor, cv::Point(x1, y1 - 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
+    cv::circle(frame, cv::Point(cx, cy), 2, cv::Scalar(255, 0, 255), -1); // circle center
   }
 }
 
@@ -247,8 +249,7 @@ void ImageProcessor::frontAndBackHelperFunction(const cv::Mat& frame, cv::Mat& m
     std::vector<cv::Point> approx;
     cv::approxPolyDP(cnt, approx, epsilon, true);
 
-    if (approx.size() == 4 && cv::isContourConvex(approx) && cv::contourArea(cnt) > ConfigController::getConfigInt(
-      "MinAreaOfRobotFrontAndBack"))
+    if (approx.size() == 4 && cv::isContourConvex(approx) && cv::contourArea(cnt) > ConfigController::getConfigInt("MinAreaOfRobotFrontAndBack"))
     {
       cv::Rect rect = cv::boundingRect(approx);
       int x1 = rect.x, y1 = rect.y;
