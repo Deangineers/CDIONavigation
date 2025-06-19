@@ -85,11 +85,14 @@ void NavigationController::addCourseObject(std::unique_ptr<CourseObject>&& cours
 
 void NavigationController::addBlockingObject(std::unique_ptr<VectorWithStartPos>&& blockingObject)
 {
+  amountOfWalls_++;
   blockingObjects_.push_back(std::move(blockingObject));
 }
 
 void NavigationController::addCrossObject(std::unique_ptr<VectorWithStartPos>&& blockingObject)
 {
+  auto thing = std::make_unique<VectorWithStartPos>(*blockingObject);
+  blockingObjects_.push_back(std::move(thing));
   crossObjects_.push_back(std::move(blockingObject));
 }
 
@@ -102,6 +105,7 @@ void NavigationController::clearObjects()
   goal_ = nullptr;
   robotFront_ = nullptr;
   robotBack_ = nullptr;
+  amountOfWalls_ = 0;
 }
 
 std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceToObject()
@@ -109,6 +113,11 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   if (robotFront_ == nullptr || robotBack_ == nullptr)
   {
     Utility::appendToFile("log.txt", "No Robot\n");
+    return nullptr;
+  }
+  if (amountOfWalls_ != 4)
+  {
+    Utility::appendToFile("log.txt", "Not 4 walls\n");
     return nullptr;
   }
   auto objectVector = Vector(0, 0);
@@ -139,27 +148,34 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     objectVector = navigateToGoal();
     auto vectorToRobotBack = MathUtil::calculateVectorToObject(robotBack_.get(), robotFront_.get());
     auto goalVector = MathUtil::calculateVectorToObject(&robotMiddle, goal_.get());
+    auto shootingCourseObject = CourseObject(*goal_.get());
+    int shootingDistance = ConfigController::getConfigInt("GoalShootingDistance");
+    bool goalIsLeft = goal_->x1() > ConfigController::getConfigInt("middleXOnAxis");
+
+    int shiftDistance = goalIsLeft ? -shootingDistance : shootingDistance;
+
+    shootingCourseObject.shiftX(shiftDistance);
+    auto shootingVector = MathUtil::calculateVectorToObject(&robotMiddle, &shootingCourseObject);
     double angleDiff = MathUtil::calculateAngleDifferenceBetweenVectors(goalVector, vectorToRobotBack);
 
     if (objectVector.getLength() < ConfigController::getConfigInt("DistanceBeforeTargetReached") ||
       navigatedToGoalIntermediate_)
     {
       navigatedToGoalIntermediate_ = true;
-      if (std::abs(angleDiff) > ConfigController::getConfigInt("AllowedAngleDifference"))
+      if (shootingVector.getLength() < ConfigController::getConfigInt("DistanceBeforeTargetReached"))
       {
-        target_ = nullptr;
-        cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},
-                        {robotMiddle.x1() + objectVector.x, robotMiddle.y1() + objectVector.y},
-                        cv::Scalar(255, 0, 255), 1,
-                        cv::LINE_AA, 0, 0.01);
-        cv::putText(*MainController::getFrame(), "Timmy Turner",
-                    {robotMiddle.x1() + objectVector.x, robotMiddle.y1() + objectVector.y + 30},
-                    cv::FONT_HERSHEY_SIMPLEX,
-                    0.5, cv::Scalar(0, 255, 0), 2);
-        return std::make_unique<JourneyModel>(0, -angleDiff, true);
-      }
-      if (goalVector.getLength() < ConfigController::getConfigInt("DistanceBeforeTargetReached"))
-      {
+        if (std::abs(angleDiff) > ConfigController::getConfigInt("AllowedAngleDifference"))
+        {
+          cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},
+                          {robotMiddle.x1() + goalVector.x, robotMiddle.y1() + goalVector.y},
+                          cv::Scalar(255, 0, 255), 1,
+                          cv::LINE_AA, 0, 0.01);
+          cv::putText(*MainController::getFrame(), "Timmy Turner: " + std::to_string(-angleDiff),
+                      {robotMiddle.x1() + goalVector.x, robotMiddle.y1() + goalVector.y + 30}, cv::FONT_HERSHEY_SIMPLEX,
+                      0.5, cv::Scalar(0, 255, 0), 2);
+          return std::make_unique<JourneyModel>(0, -angleDiff, true);
+        }
+
         atGoalTime_ = std::chrono::high_resolution_clock::now();
         atGoal_ = true;
         target_ = nullptr;
@@ -167,13 +183,14 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
         return std::make_unique<JourneyModel>(0, 0, false);
       }
       cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},
-                      {robotMiddle.x1() + goalVector.x, robotMiddle.y1() + goalVector.y},
+                      {robotMiddle.x1() + shootingVector.x, robotMiddle.y1() + shootingVector.y},
                       cv::Scalar(255, 0, 255), 1,
                       cv::LINE_AA, 0, 0.01);
       cv::putText(*MainController::getFrame(), "VA FANGOOL",
-                  {robotMiddle.x1() + goalVector.x, robotMiddle.y1() + goalVector.y + 30}, cv::FONT_HERSHEY_SIMPLEX,
+                  {robotMiddle.x1() + shootingVector.x, robotMiddle.y1() + shootingVector.y + 30},
+                  cv::FONT_HERSHEY_SIMPLEX,
                   0.5, cv::Scalar(0, 255, 0), 2);
-      return makeJourneyModel(goalVector, true);
+      return makeJourneyModel(shootingVector, true);
     }
 
     if (checkCollisionOnRoute(objectVector))
@@ -213,12 +230,12 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     {
       Utility::appendToFile("log.txt", "target_ is now null\n");
       auto closestVector = getVectorsForClosestBlockingObjects(target_.get()).first;
+      target_ = nullptr;
+      sameTargetCount_ = 0;
       if (closestVector.getLength() < ConfigController::getConfigInt("DistanceBeforeToCloseToWall"))
       {
         return std::make_unique<JourneyModel>(-10, 0, true);
       }
-      target_ = nullptr;
-      sameTargetCount_ = 0;
       return nullptr;
     }
 
@@ -362,18 +379,15 @@ Vector NavigationController::navigateToGoal()
   }
 
   int targetX;
-  int otherTargetX;
   if (goal.x > ConfigController::getConfigInt("middleXOnAxis"))
   {
     targetX = goal.x - ConfigController::getConfigInt("GoalIntermediatePointDistance");
-    otherTargetX = goal.x - ConfigController::getConfigInt("GoalShootingDistance");
   }
   else
   {
     targetX = goal.x + ConfigController::getConfigInt("GoalIntermediatePointDistance");
-    otherTargetX = goal.x + ConfigController::getConfigInt("GoalShootingDistance");
   }
-  goal_ = std::make_unique<CourseObject>(otherTargetX, goal.y, otherTargetX, goal.y, "goal");
+  goal_ = std::make_unique<CourseObject>(goal.x, goal.y, goal.x, goal.y, "goal");
   auto localGoal = CourseObject(targetX, goal.y, targetX, goal.y, "goal");
   Utility::appendToFile(
     "log.txt",
@@ -730,7 +744,10 @@ bool NavigationController::checkCollisionOnRoute(const Vector& targetVector) con
 
   struct Segment
   {
-    Segment(double startX, double startY, double endX, double endY) : x1(startX), y1(startY) ,x2(endX), y2(endY){}
+    Segment(double startX, double startY, double endX, double endY) : x1(startX), y1(startY), x2(endX), y2(endY)
+    {
+    }
+
     double x1, y1, x2, y2;
   };
 

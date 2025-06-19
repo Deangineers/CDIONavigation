@@ -7,7 +7,8 @@
 #include "../../Models/Vector.h"
 #include "Utility/ConfigController.h"
 
-ImageProcessor::ImageProcessor() : ballProcessor_(std::make_unique<BallProcessor>()), wallProcessor_(std::make_unique<WallProcessor>())
+ImageProcessor::ImageProcessor() : ballProcessor_(std::make_unique<BallProcessor>()),
+                                   wallProcessor_(std::make_unique<WallProcessor>())
 {
 }
 
@@ -106,7 +107,6 @@ void ImageProcessor::crossHelperFunction(const cv::Mat& frame, cv::Mat& mask)
       cv::line(frame, p1, p2, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("CrossWallWidth"),
                cv::LINE_AA, 0);
       cv::putText(frame, std::to_string(label++), p1, cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
-      MainController::addCrossObject(std::move(vectorToCreate));
       MainController::addCrossObject(std::make_unique<VectorWithStartPos>(p1.x, p1.y, vector));
     }
   }
@@ -247,7 +247,8 @@ void ImageProcessor::frontAndBackHelperFunction(const cv::Mat& frame, cv::Mat& m
     std::vector<cv::Point> approx;
     cv::approxPolyDP(cnt, approx, epsilon, true);
 
-    if (approx.size() == 4 && cv::isContourConvex(approx) && cv::contourArea(cnt) > ConfigController::getConfigInt("MinAreaOfRobotFrontAndBack"))
+    if (approx.size() == 4 && cv::isContourConvex(approx) && cv::contourArea(cnt) > ConfigController::getConfigInt(
+      "MinAreaOfRobotFrontAndBack"))
     {
       cv::Rect rect = cv::boundingRect(approx);
       int x1 = rect.x, y1 = rect.y;
