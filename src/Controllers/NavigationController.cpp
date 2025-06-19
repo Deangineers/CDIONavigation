@@ -155,7 +155,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   //MathUtil::correctCourseObjectForHeightOffset(robotBack_.get(), robotFront_.get());
   auto objectVector = Vector(0, 0);
 
-  if (ballVector_.empty() || (ballVector_.size() == 5 && not hasDeliveredBallsOnce_))
+  if (ballVector_.empty() || (ballVector_.size() <= 5 && not hasDeliveredBallsOnce_))
   {
     goToGoalCount_++;
   }
@@ -745,7 +745,7 @@ Vector NavigationController::navigateToSafeSpot()
     Vector vectorToObject = MathUtil::calculateVectorToObject(&robotMiddle, &courseObject);
     if (!checkCollisionOnRoute(vectorToObject))
     {
-      return {safeSpot.first, safeSpot.second};
+      return vectorToObject;
     }
   }
 
