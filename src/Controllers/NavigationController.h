@@ -79,6 +79,8 @@ private:
   bool navigatedToGoalIntermediate_ = false;
 
   int sameTargetCount_ = 0;
+
+  int amountOfWalls_ = 0;
 };
 
 

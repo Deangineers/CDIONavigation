@@ -32,14 +32,25 @@ int main()
 
   while (cap.read(frame))
   {
-    //frame = cv::imread("../../TestImages/ballsInCornerWhite.jpeg", cv::IMREAD_COLOR_BGR);
+    auto start = std::chrono::high_resolution_clock::now();
+
+    // frame = cv::imread("../../TestImages/ballsInCornerWhite.jpeg", cv::IMREAD_COLOR);
     processor->processImage(frame);
 
+
     MainController::navigateAndSendCommand(&frame);
+
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    cv::putText(frame, "FPS: " + std::to_string(1000 / duration.count()),
+                {1700, 1000}, cv::FONT_HERSHEY_SIMPLEX,
+                1, cv::Scalar(255, 255, 0), 2);
+
     cv::imshow("EngineBase", frame);
-    if (cv::waitKey(33) == 27) // Wait for 1 ms and break on 'Esc' key
+
+    if (cv::waitKey(1) == 27) // Wait for 1 ms and break on 'Esc' key
     {
-      break;
+      return 0;
     }
   }
 

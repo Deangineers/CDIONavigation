@@ -85,6 +85,7 @@ void NavigationController::addCourseObject(std::unique_ptr<CourseObject>&& cours
 
 void NavigationController::addBlockingObject(std::unique_ptr<VectorWithStartPos>&& blockingObject)
 {
+  amountOfWalls_++;
   blockingObjects_.push_back(std::move(blockingObject));
 }
 
@@ -102,6 +103,7 @@ void NavigationController::clearObjects()
   goal_ = nullptr;
   robotFront_ = nullptr;
   robotBack_ = nullptr;
+  amountOfWalls_ = 0;
 }
 
 std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceToObject()
@@ -109,6 +111,11 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   if (robotFront_ == nullptr || robotBack_ == nullptr)
   {
     Utility::appendToFile("log.txt", "No Robot\n");
+    return nullptr;
+  }
+  if (amountOfWalls_ != 4)
+  {
+    Utility::appendToFile("log.txt", "Not 4 walls\n");
     return nullptr;
   }
   auto objectVector = Vector(0, 0);
