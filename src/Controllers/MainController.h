@@ -18,6 +18,7 @@ class MainController
 public:
   static void init();
   static void mockInit();
+  static void testInit();
   static void addCourseObject(std::unique_ptr<CourseObject>&& courseObject);
   static void addBlockedObject(std::unique_ptr<VectorWithStartPos> blockingObject);
   static void addCrossObject(std::unique_ptr<VectorWithStartPos> blockingObject);

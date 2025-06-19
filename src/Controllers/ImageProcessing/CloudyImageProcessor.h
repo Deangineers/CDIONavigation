@@ -10,7 +10,7 @@
 class CloudyImageProcessor : public ImageProcessor
 {
 public:
-  CloudyImageProcessor() = default;
+  explicit CloudyImageProcessor(const std::shared_ptr<IBallProcessor>& ballProcessor);
   ~CloudyImageProcessor() override = default;
 
 protected:

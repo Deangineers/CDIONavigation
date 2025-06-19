@@ -24,7 +24,7 @@ bool BallProcessor::isBallValid(CourseObject* courseObject)
   return toAdd;
 }
 
-bool BallProcessor::isEggValid(const CourseObject* courseObject) const
+bool BallProcessor::isEggValid(const CourseObject* courseObject)
 {
   return toAddEgg(courseObject);
 }

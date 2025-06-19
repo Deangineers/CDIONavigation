@@ -2,11 +2,11 @@
 // Created by Elias Aggergaard Larsen on 12/06/2025.
 //
 
-#include "Controllers/MainController.h"
+#include "src/Controllers/MainController.h"
 #include <opencv2/opencv.hpp>
 
-#include "Controllers/ImageProcessing/CloudyImageProcessor.h"
-#include "Controllers/ImageProcessing/ImageProcessor.h"
+#include "src/Controllers/ImageProcessing/CloudyImageProcessor.h"
+#include "src/Controllers/ImageProcessing/ImageProcessor.h"
 
 int main()
 {
@@ -28,7 +28,8 @@ int main()
   cap.set(cv::CAP_PROP_FRAME_HEIGHT, 1080);
 
   cv::Mat frame;
-  std::unique_ptr<ImageProcessor> processor = std::make_unique<CloudyImageProcessor>();
+  auto ballProcessor = std::make_shared<BallProcessor>();
+  const auto processor = std::make_unique<CloudyImageProcessor>(ballProcessor);
 
   while (cap.read(frame))
   {

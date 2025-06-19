@@ -7,8 +7,9 @@
 #include "../../Models/Vector.h"
 #include "Utility/ConfigController.h"
 
-ImageProcessor::ImageProcessor() : ballProcessor_(std::make_unique<BallProcessor>()),
-                                   wallProcessor_(std::make_unique<WallProcessor>())
+ImageProcessor::ImageProcessor(const std::shared_ptr<IBallProcessor>& ballProcessor) :
+  ballProcessor_(ballProcessor),
+  wallProcessor_(std::make_unique<WallProcessor>())
 {
 }
 

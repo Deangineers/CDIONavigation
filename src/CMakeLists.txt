@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.25)
-project(CDIONavigationFull)
+project(CDIONavigationLib)
 
 set(CMAKE_CXX_STANDARD 23)
 
 find_package(OpenCV REQUIRED)
 
-add_executable(CDIONavigationFull
+add_library(CDIONavigationLib STATIC
         PythonBinding.cpp
         Controllers/NavigationController.cpp
         Controllers/NavigationController.h
@@ -27,7 +27,6 @@ add_executable(CDIONavigationFull
         Controllers/ClientController.h
         Models/Vector.cpp
         Models/Vector.h
-        main.cpp
         Models/VectorWithStartPos.cpp
         Models/VectorWithStartPos.h
         Models/Egg.cpp
@@ -40,8 +39,9 @@ add_executable(CDIONavigationFull
         Controllers/ImageProcessing/BallProcessor.h
         Controllers/ImageProcessing/WallProcessor.cpp
         Controllers/ImageProcessing/WallProcessor.h
+        Controllers/ImageProcessing/IBallProcessor.h
 )
 
-target_link_libraries(CDIONavigationFull PUBLIC Utility)
-target_include_directories(CDIONavigationFull PRIVATE ${OpenCV_INCLUDE_DIRS})
-target_link_libraries(CDIONavigationFull PRIVATE ${OpenCV_LIBS})
+target_link_libraries(CDIONavigationLib PUBLIC Utility)
+target_include_directories(CDIONavigationLib PRIVATE ${OpenCV_INCLUDE_DIRS})
+target_link_libraries(CDIONavigationLib PRIVATE ${OpenCV_LIBS})
