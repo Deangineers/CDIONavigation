@@ -27,13 +27,40 @@ void CloudyImageProcessor::detectRedPixels(const cv::Mat& frame)
 
 void CloudyImageProcessor::detectBalls(const cv::Mat& frame)
 {
-  cv::Mat orangeMask, whiteMask, totalMask;
-  cv::inRange(hsv_, cv::Scalar(5, 25, 25), cv::Scalar(30, 255, 255), orangeMask);
-  cv::inRange(hsv_, cv::Scalar(0, 0, 100), cv::Scalar(179, 65, 255), whiteMask);
-  cv::bitwise_or(orangeMask,whiteMask, totalMask);
+  cv::Mat totalMask;
 
-  ballHelperFunction(frame, totalMask, "ball");
+  cv::Mat darkestOrangeMask, darkOrangeMask, orangeMask, lightOrangeMask, lightestOrangeMask;
+  cv::Mat darkestWhiteMask, darkWhiteMask, whiteMask, lightWhiteMask, lightestWhiteMask;
+
+  cv::inRange(hsv_, cv::Scalar(5, 25, 25), cv::Scalar(30, 255, 255), orangeMask);
+  cv::inRange(hsv_, cv::Scalar(5, 25, 25), cv::Scalar(30, 255, 255), darkOrangeMask);
+  cv::inRange(hsv_, cv::Scalar(5, 25, 25), cv::Scalar(30, 255, 255), darkestOrangeMask);
+  cv::inRange(hsv_, cv::Scalar(5, 25, 25), cv::Scalar(30, 255, 255), lightOrangeMask);
+  cv::inRange(hsv_, cv::Scalar(5, 25, 25), cv::Scalar(30, 255, 255), lightestOrangeMask);
+
+  cv::inRange(hsv_, cv::Scalar(0, 0, 100), cv::Scalar(179, 65, 255), darkestWhiteMask);
+  cv::inRange(hsv_, cv::Scalar(0, 0, 100), cv::Scalar(179, 65, 255), darkWhiteMask);
+  cv::inRange(hsv_, cv::Scalar(0, 0, 100), cv::Scalar(179, 65, 255), whiteMask);
+  cv::inRange(hsv_, cv::Scalar(0, 0, 100), cv::Scalar(179, 65, 255), lightWhiteMask);
+  cv::inRange(hsv_, cv::Scalar(0, 0, 100), cv::Scalar(179, 65, 255), lightestWhiteMask);
+
+  //cv::bitwise_or(orangeMask,whiteMask, totalMask);
+
+  //ballHelperFunction(frame, totalMask, "ball");
   //ballHelperFunction(frame, whiteMask, "white");
+
+  ballHelperFunction(frame, orangeMask, "orange");
+  ballHelperFunction(frame, darkOrangeMask, "darkorange");
+  ballHelperFunction(frame, darkestOrangeMask, "darkestoÓrange");
+  ballHelperFunction(frame, lightOrangeMask, "lightOrange");
+  ballHelperFunction(frame, lightestOrangeMask, "lightestOrange");
+
+  ballHelperFunction(frame, darkestWhiteMask, "darkestWhite");
+  ballHelperFunction(frame, darkWhiteMask, "darkWhite");
+  ballHelperFunction(frame, whiteMask, "white");
+  ballHelperFunction(frame, lightWhiteMask, "lightWhite");
+  ballHelperFunction(frame, lightestWhiteMask, "lightestWhite");
+
 }
 
 void CloudyImageProcessor::detectEgg(const cv::Mat& frame)
