@@ -15,9 +15,11 @@ public:
   BallProcessor();
   void begin();
   bool isBallValid(CourseObject* courseObject);
+  bool isEggValid(const CourseObject* courseObject) const;
 
 private:
   bool toAddBall(const CourseObject* courseObject) const;
+  bool toAddEgg(const CourseObject* courseObject) const;
   int currentIndex_ = 0;
   std::vector<std::vector<CourseObject>> ballsFromImages_;
 };

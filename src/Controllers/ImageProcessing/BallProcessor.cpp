@@ -24,6 +24,11 @@ bool BallProcessor::isBallValid(CourseObject* courseObject)
   return toAdd;
 }
 
+bool BallProcessor::isEggValid(const CourseObject* courseObject) const
+{
+  return toAddEgg(courseObject);
+}
+
 bool BallProcessor::toAddBall(const CourseObject* courseObject) const
 {
   int timesSeen = 0;
@@ -38,5 +43,22 @@ bool BallProcessor::toAddBall(const CourseObject* courseObject) const
     }
   }
   return timesSeen >= ConfigController::getConfigInt("AmountOfSeenBeforeCreate");
+}
+
+bool BallProcessor::toAddEgg(const CourseObject* courseObject) const
+{
+  int timesSeen = 0;
+  for (const auto& outerVector : ballsFromImages_)
+  {
+    for (const auto& ball : outerVector)
+    {
+      if (courseObject->courseObjectWithinValidRange(&ball))
+      {
+        timesSeen++;
+      }
+    }
+  }
+
+  return timesSeen < 2;
 }
 

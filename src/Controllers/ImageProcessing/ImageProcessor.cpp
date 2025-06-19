@@ -7,13 +7,15 @@
 #include "../../Models/Vector.h"
 #include "Utility/ConfigController.h"
 
-ImageProcessor::ImageProcessor() : ballProcessor_(std::make_unique<BallProcessor>()), wallProcessor_(std::make_unique<WallProcessor>())
+ImageProcessor::ImageProcessor() : ballProcessor_(std::make_unique<BallProcessor>()),
+                                   wallProcessor_(std::make_unique<WallProcessor>())
 {
 }
 
 void ImageProcessor::processImage(const cv::Mat& frame)
 {
   cv::cvtColor(frame, hsv_, cv::COLOR_BGR2HSV);
+  ballProcessor_->begin();
   detectRedPixels(frame);
   detectBalls(frame);
   detectEgg(frame);
@@ -137,11 +139,16 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const cv::Mat& mas
     int v = hsvPixel[2];
 
     std::string detectedColor;
-    if (s < 40 && v > 200) {
+    if (s < 40 && v > 200)
+    {
       detectedColor = "white";
-    } else if (h >= 5 && h <= 25 && s > 100 && v > 100) {
+    }
+    else if (h >= 5 && h <= 25 && s > 100 && v > 100)
+    {
       detectedColor = "orange";
-    } else {
+    }
+    else
+    {
       detectedColor = "unknown";
     }
 
@@ -214,8 +221,14 @@ void ImageProcessor::eggHelperFunction(const cv::Mat& frame, const cv::Mat& mask
     {
       continue;
     }
+    auto courseObject = std::make_unique<CourseObject>(x1, y1, x2, y2, label);
 
-    MainController::addCourseObject(std::make_unique<CourseObject>(x1, y1, x2, y2, label));
+    if (not ballProcessor_->isEggValid(courseObject.get()))
+    {
+      continue;
+    }
+
+    MainController::addCourseObject(std::move(courseObject));
     cv::rectangle(frame, rect, cv::Scalar(0, 255, 0), 2);
     cv::putText(frame, label, cv::Point(x1, y1 - 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
 
@@ -249,7 +262,8 @@ void ImageProcessor::frontAndBackHelperFunction(const cv::Mat& frame, cv::Mat& m
     std::vector<cv::Point> approx;
     cv::approxPolyDP(cnt, approx, epsilon, true);
 
-    if (approx.size() == 4 && cv::isContourConvex(approx) && cv::contourArea(cnt) > ConfigController::getConfigInt("MinAreaOfRobotFrontAndBack"))
+    if (approx.size() == 4 && cv::isContourConvex(approx) && cv::contourArea(cnt) > ConfigController::getConfigInt(
+      "MinAreaOfRobotFrontAndBack"))
     {
       cv::Rect rect = cv::boundingRect(approx);
       int x1 = rect.x, y1 = rect.y;
