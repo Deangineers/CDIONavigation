@@ -6,6 +6,8 @@
 #define TRAVELMODEL_H
 
 struct JourneyModel {
+  JourneyModel(double dist, double angl, bool collectB) : distance(dist), angle(angl), collectBalls(collectB)
+  {}
   double distance;
   double angle;
   bool collectBalls;
