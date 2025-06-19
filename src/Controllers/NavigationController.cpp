@@ -126,6 +126,12 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   }
   if (atGoal_)
   {
+    auto now = std::chrono::high_resolution_clock::now();
+    if (now - atGoalTime_ > std::chrono::milliseconds(ConfigController::getConfigInt("GoalSleepInMilli")))
+    {
+      atGoal_ = false;
+      navigatedToGoalIntermediate_ = false;
+    }
     return nullptr;
   }
 
@@ -142,16 +148,22 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     cv::putText(*MainController::getFrame(), "VA FANGOOL",
                 {robotMiddle.x1() + objectVector.x, robotMiddle.y1() + objectVector.y + 30}, cv::FONT_HERSHEY_SIMPLEX,
                 0.5, cv::Scalar(0, 255, 0), 2);
-    if (objectVector.getLength() < ConfigController::getConfigInt("DistanceBeforeTargetReached"))
+    if (objectVector.getLength() < ConfigController::getConfigInt("DistanceBeforeTargetReached") || navigatedToGoalIntermediate_)
     {
+      navigatedToGoalIntermediate_ = true;
       if (std::abs(angleDiff) > ConfigController::getConfigInt("AllowedAngleDifference"))
       {
         target_ = nullptr;
         return std::make_unique<JourneyModel>(0, -angleDiff, true);
       }
-      atGoal_ = false;
-      target_ = nullptr;
-      return std::make_unique<JourneyModel>(0, 0, false);
+      if (goalVector.getLength() < ConfigController::getConfigInt("DistanceBeforeTargetReached"))
+      {
+        atGoalTime_ = std::chrono::high_resolution_clock::now();
+        atGoal_ = true;
+        target_ = nullptr;
+        return std::make_unique<JourneyModel>(0, 0, false);
+      }
+        return makeJourneyModel(goalVector,true);
     }
 
     if (checkCollisionOnRoute(objectVector))
@@ -237,7 +249,6 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
 void NavigationController::setHasDeliveredOnce()
 {
   hasDeliveredBallsOnce_ = true;
-  atGoal_ = false;
 }
 
 std::unique_ptr<JourneyModel> NavigationController::makeJourneyModel(const Vector& objectVector,
@@ -275,8 +286,11 @@ void NavigationController::removeBallsOutsideCourse()
 
   auto deletionLambda = [minX,minY,maxX,maxY](const std::unique_ptr<CourseObject>& a) -> bool
   {
-    return ((a->x1() < minX || a->x2() > maxX) || a->y1() < minY ||
-      maxY < a->y2());
+    int middleX = (a->x1() + a->x2()) / 2;
+    int middleY = (a->y1() + a->y2()) / 2;
+
+    return ((middleX < minX || middleX > maxX) || middleY < minY ||
+      maxY < middleY);
   };
   for (const auto& ball : ballVector_)
   {
@@ -326,15 +340,18 @@ Vector NavigationController::navigateToGoal()
   }
 
   int targetX;
+  int otherTargetX;
   if (goal.x > ConfigController::getConfigInt("middleXOnAxis"))
   {
-    targetX = goal.x - ConfigController::getConfigInt("distanceToGoal");
+    targetX = goal.x - ConfigController::getConfigInt("GoalIntermediatePointDistance");
+    otherTargetX = goal.x - ConfigController::getConfigInt("GoalShootingDistance");
   }
   else
   {
-    targetX = goal.x + ConfigController::getConfigInt("distanceToGoal");
+    targetX = goal.x + ConfigController::getConfigInt("GoalIntermediatePointDistance");
+    otherTargetX = goal.x + ConfigController::getConfigInt("GoalShootingDistance");
   }
-  goal_ = std::make_unique<CourseObject>(goal.x, goal.y, goal.x, goal.y, "goal");
+  goal_ = std::make_unique<CourseObject>(otherTargetX, goal.y, otherTargetX, goal.y, "goal");
   auto localGoal = CourseObject(targetX, goal.y, targetX, goal.y, "goal");
   Utility::appendToFile(
     "log.txt",
