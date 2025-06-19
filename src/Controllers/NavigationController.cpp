@@ -115,6 +115,20 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   auto objectVector = Vector(0, 0);
   findSafeSpots();
   auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
+
+  if (ballVector_.empty() || (ballVector_.size() <= 5 && not hasDeliveredBallsOnce_))
+  {
+    goToGoalCount_++;
+  }
+  else
+  {
+    goToGoalCount_ = 0;
+  }
+  if (atGoal_)
+  {
+    return nullptr;
+  }
+
   if (goToGoalCount_ >= stableThreshold)
   {
     objectVector = navigateToGoal();
@@ -135,6 +149,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
         target_ = nullptr;
         return std::make_unique<JourneyModel>(0, -angleDiff, true);
       }
+      atGoal_ = false;
       target_ = nullptr;
       return std::make_unique<JourneyModel>(0, 0, false);
     }
@@ -159,13 +174,6 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
 
   if (target_ != nullptr)
   {
-    /*
-    if (not targetStillActual())
-    {
-      target_ = nullptr;
-      return nullptr;
-    }
-    */
     auto vectorToObject = handleObjectNextToBlocking(target_.get());
     cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},
                     {robotMiddle.x1() + vectorToObject.x, robotMiddle.y1() + vectorToObject.y},
@@ -197,14 +205,6 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
 
   //MathUtil::correctCourseObjectForHeightOffset(robotBack_.get(), robotFront_.get());
 
-  if (ballVector_.empty() || (ballVector_.size() <= 5 && not hasDeliveredBallsOnce_))
-  {
-    goToGoalCount_++;
-  }
-  else
-  {
-    goToGoalCount_ = 0;
-  }
   removeBallsInsideRobot();
   removeBallsOutsideCourse();
   objectVector = findClosestBall();
@@ -237,6 +237,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
 void NavigationController::setHasDeliveredOnce()
 {
   hasDeliveredBallsOnce_ = true;
+  atGoal_ = false;
 }
 
 std::unique_ptr<JourneyModel> NavigationController::makeJourneyModel(const Vector& objectVector,
@@ -724,9 +725,12 @@ bool NavigationController::checkCollisionOnRoute(const Vector& targetVector) con
 bool NavigationController::frontIsToCloseToBlockingObject() const
 {
   auto vectorsToBlockingObjects = getVectorsForClosestBlockingObjects(robotFront_.get());
+  auto vectorFromRobotBack = MathUtil::calculateVectorToObject(robotBack_.get(),robotFront_.get());
+  int allowedAngleDiff = ConfigController::getConfigInt("AllowedAngleDiffForWallInFrontOfRobotDetection");
+  int angleDiff = MathUtil::calculateAngleDifferenceBetweenVectors(vectorsToBlockingObjects.first,vectorFromRobotBack);
   if (vectorsToBlockingObjects.first.getLength() < ConfigController::getConfigInt("DistanceBeforeToCloseToWall"))
   {
-    return true;
+    return std::abs(angleDiff) < allowedAngleDiff;
   }
   return false;
 }

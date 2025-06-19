@@ -4,7 +4,7 @@
   "safeYTop": 50,
   "safeYBot": 650,
   "middleXOnAxis": 500,
-  "distanceToGoal": 65,
+  "distanceToGoal": 75,
   "RobotIP": "192.168.0.1",
   "RobotPort": 1234,
   "DistanceBeforeBallCollection": 30,
@@ -16,7 +16,7 @@
   "ForwardFastSpeed": 500,
   "ForwardSlowSpeed": 150,
   "DistanceBeforeTargetReached": 75,
-  "RobotWidth": 120,
+  "RobotWidth": 130,
   "TotalBalls": 5,
   "WallWidth": 40,
   "RobotLengthInMM": 95,
@@ -49,5 +49,6 @@
   "WallSeenBeforeCreate": 10,
   "MinAreaOfRobotFrontAndBack": 5000,
   "maxEggHeight": 250,
-  "maxEggWidth": 250
+  "maxEggWidth": 250,
+  "AllowedAngleDiffForWallInFrontOfRobotDetection": 60
 }

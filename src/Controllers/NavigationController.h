@@ -73,7 +73,7 @@ private:
 
   bool hasDeliveredBallsOnce_ = false;
   bool toCollectBalls_ = true;
-  std::atomic_bool atGoal = false;
+  std::atomic_bool atGoal_ = false;
 
   int sameTargetCount_ = 0;
 };
