@@ -45,7 +45,7 @@ bool BallProcessor::toAddBall(const CourseObject* courseObject) const
 
   for (const auto& ball : ballsFromImages_[currentIndex_])
   {
-    if (ball.courseObjectWithinValidRange(&ball))
+    if (ball.courseObjectWithinValidRange(courseObject))
     {
       return false;
     }

@@ -150,6 +150,7 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const cv::Mat& mas
     else
     {
       detectedColor = "unknown";
+      continue;
     }
 
     cv::Rect rect(cx - r, cy - r, 2 * r, 2 * r);

@@ -49,23 +49,6 @@ void CloudyImageProcessor::detectBalls(const cv::Mat& frame)
 
   //cv::bitwise_or(orangeTotalMask,whiteTotalMask, totalMask);
   ballHelperFunction(frame, orangeTotalMask, "orange");
-  ballHelperFunction(frame, whiteTotalMask, "white");
-
-  //ballHelperFunction(frame, totalMask, "ball");
-  //ballHelperFunction(frame, whiteMask, "white");
-
-  //ballHelperFunction(frame, orangeMask, "o1");
-  //ballHelperFunction(frame, darkOrangeMask, "o2");
-  //ballHelperFunction(frame, darkestOrangeMask, "o3");
-  //ballHelperFunction(frame, lightOrangeMask, "o4");
-  //ballHelperFunction(frame, lightestOrangeMask, "o5");
-
-  //ballHelperFunction(frame, darkestWhiteMask, "w1");
-  //ballHelperFunction(frame, darkWhiteMask, "w2");
-  //ballHelperFunction(frame, whiteMask, "w3");
-  //ballHelperFunction(frame, lightWhiteMask, "w4");
-  //ballHelperFunction(frame, lightestWhiteMask, "w5");
-
 }
 
 void CloudyImageProcessor::detectEgg(const cv::Mat& frame)
