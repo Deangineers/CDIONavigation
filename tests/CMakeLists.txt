@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD 20)
 set(SOURCES
         NavigationControllerTests.cpp
         NavigationControllerTests.h
+        ../src/Controllers/ImageProcessing/WallProcessor.cpp
+        ../src/Controllers/ImageProcessing/WallProcessor.h
 )
 add_executable(CDIONavigation_Tests ${SOURCES})
 

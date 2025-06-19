@@ -4,6 +4,7 @@
 
 #ifndef NAVIGATIONCONTROLLER_H
 #define NAVIGATIONCONTROLLER_H
+#include <atomic>
 #include <memory>
 #include <string>
 #include <vector>
@@ -19,6 +20,7 @@ public:
   NavigationController() = default;
   void addCourseObject(std::unique_ptr<CourseObject>&& courseObject);
   void addBlockingObject(std::unique_ptr<VectorWithStartPos>&& blockingObject);
+  void addCrossObject(std::unique_ptr<VectorWithStartPos>&& blockingObject);
   void clearObjects();
   std::unique_ptr<JourneyModel> calculateDegreesAndDistanceToObject();
 
@@ -53,6 +55,7 @@ private:
   std::unique_ptr<CourseObject> robotFront_;
   std::unique_ptr<CourseObject> robotBack_;
   std::vector<std::unique_ptr<VectorWithStartPos>> blockingObjects_;
+  std::vector<std::unique_ptr<VectorWithStartPos>> crossObjects_;
   std::unique_ptr<CourseObject> target_;
   std::unique_ptr<CourseObject> potentialTarget_;
   int robotWidth_ = ConfigController::getConfigInt("RobotWidth");
@@ -70,6 +73,7 @@ private:
 
   bool hasDeliveredBallsOnce_ = false;
   bool toCollectBalls_ = true;
+  std::atomic_bool atGoal = false;
 
   int sameTargetCount_ = 0;
 };

@@ -20,6 +20,7 @@ public:
   static void mockInit();
   static void addCourseObject(std::unique_ptr<CourseObject>&& courseObject);
   static void addBlockedObject(std::unique_ptr<VectorWithStartPos> blockingObject);
+  static void addCrossObject(std::unique_ptr<VectorWithStartPos> blockingObject);
   static void navigateAndSendCommand(cv::Mat* frame);
   static Command journeyToCommand(const JourneyModel* journey);
   static cv::Mat* getFrame();

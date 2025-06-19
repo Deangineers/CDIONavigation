@@ -7,7 +7,7 @@
 #include "../../Models/Vector.h"
 #include "Utility/ConfigController.h"
 
-ImageProcessor::ImageProcessor() : ballProcessor_(std::make_unique<BallProcessor>())
+ImageProcessor::ImageProcessor() : ballProcessor_(std::make_unique<BallProcessor>()), wallProcessor_(std::make_unique<WallProcessor>())
 {
 }
 
@@ -50,11 +50,18 @@ void ImageProcessor::redPixelHelperFunction(const cv::Mat& frame, cv::Mat& mask)
       {
         continue;
       }
+
+      auto vectorToCreate = std::make_unique<VectorWithStartPos>(p1.x, p1.y, vector);
+      if (not wallProcessor_->isWallValid(vectorToCreate.get()))
+      {
+        continue;
+      }
+
       // Draw line (vector)
       cv::line(frame, p1, p2, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("WallWidth"),
                cv::LINE_AA, 0);
       cv::putText(frame, std::to_string(label++), p1, cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
-      MainController::addBlockedObject(std::make_unique<VectorWithStartPos>(p1.x, p1.y, vector));
+      MainController::addBlockedObject(std::move(vectorToCreate));
     }
   }
 }
@@ -89,11 +96,18 @@ void ImageProcessor::crossHelperFunction(const cv::Mat& frame, cv::Mat& mask)
       {
         continue;
       }
+
+      auto vectorToCreate = std::make_unique<VectorWithStartPos>(p1.x, p1.y, vector);
+      if (not wallProcessor_->isWallValid(vectorToCreate.get()))
+      {
+        continue;
+      }
       // Draw line (vector)
       cv::line(frame, p1, p2, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("CrossWallWidth"),
                cv::LINE_AA, 0);
       cv::putText(frame, std::to_string(label++), p1, cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
-      MainController::addBlockedObject(std::make_unique<VectorWithStartPos>(p1.x, p1.y, vector));
+      MainController::addCrossObject(std::move(vectorToCreate));
+      MainController::addCrossObject(std::make_unique<VectorWithStartPos>(p1.x, p1.y, vector));
     }
   }
 }
@@ -144,8 +158,6 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const cv::Mat& mas
     cv::putText(frame, colorLabel, cv::Point(x1, y1 - 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
     cv::circle(frame, cv::Point(cx, cy), 2, cv::Scalar(255, 0, 255), -1); // circle center
   }
-
-  //findBallsInCorners(frame, mask);
 }
 
 void ImageProcessor::eggHelperFunction(const cv::Mat& frame, const cv::Mat& mask)
@@ -163,18 +175,29 @@ void ImageProcessor::eggHelperFunction(const cv::Mat& frame, const cv::Mat& mask
     int eggMinSize = ConfigController::getConfigInt("EggBallDiffVal");
     int eggMaxSize = ConfigController::getConfigInt("EggMaxSize");
 
+    int maxWidth = ConfigController::getConfigInt("maxEggWidth");
+    int maxHeight = ConfigController::getConfigInt("maxEggHeight");
+
     if (area < eggMinSize || perimeter == 0 || area > eggMaxSize)
+    {
       continue;
+    }
 
     std::string label = "egg";
 
     double circularity = 4 * CV_PI * area / (perimeter * perimeter);
     if (circularity < 0.2)
+    {
       continue;
+    }
 
     cv::Rect rect = cv::boundingRect(cnt);
     int x1 = rect.x, y1 = rect.y;
     int x2 = x1 + rect.width, y2 = y1 + rect.height;
+    if (rect.width > maxWidth || rect.height > maxHeight)
+    {
+      continue;
+    }
 
     MainController::addCourseObject(std::make_unique<CourseObject>(x1, y1, x2, y2, label));
     cv::rectangle(frame, rect, cv::Scalar(0, 255, 0), 2);
@@ -210,7 +233,7 @@ void ImageProcessor::frontAndBackHelperFunction(const cv::Mat& frame, cv::Mat& m
     std::vector<cv::Point> approx;
     cv::approxPolyDP(cnt, approx, epsilon, true);
 
-    if (approx.size() == 4 && cv::isContourConvex(approx) && cv::contourArea(cnt) > 1000)
+    if (approx.size() == 4 && cv::isContourConvex(approx) && cv::contourArea(cnt) > ConfigController::getConfigInt("MinAreaOfRobotFrontAndBack"))
     {
       cv::Rect rect = cv::boundingRect(approx);
       int x1 = rect.x, y1 = rect.y;
@@ -236,48 +259,4 @@ void ImageProcessor::frontAndBackHelperFunction(const cv::Mat& frame, cv::Mat& m
   }
 }
 
-void ImageProcessor::findBallsInCorners(const cv::Mat& frame, const cv::Mat& mask)
-{
-  cv::morphologyEx(mask, mask, cv::MORPH_OPEN, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(3, 3)));
 
-  std::vector<std::vector<cv::Point>> contours;
-  cv::findContours(mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-
-  for (const auto& cnt : contours)
-  {
-    double area = cv::contourArea(cnt);
-    double perimeter = cv::arcLength(cnt, true);
-
-    int minBallSize = ConfigController::getConfigInt("MinimumBallSize");
-    int eggMinSize = ConfigController::getConfigInt("EggBallDiffVal");
-
-    if (area < minBallSize || perimeter == 0 || area > eggMinSize)
-      continue;
-
-    std::string label = "ball";
-
-    double circularity = 4 * CV_PI * area / (perimeter * perimeter);
-    if (circularity < 0.2)
-      continue;
-
-    cv::Rect rect = cv::boundingRect(cnt);
-    int x1 = rect.x, y1 = rect.y;
-    int x2 = x1 + rect.width, y2 = y1 + rect.height;
-
-    MainController::addCourseObject(std::make_unique<CourseObject>(x1, y1, x2, y2, label));
-    cv::rectangle(frame, rect, cv::Scalar(0, 255, 0), 2);
-    cv::putText(frame, label, cv::Point(x1, y1 - 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
-
-    cv::Mat roi_mask = mask(rect);
-    cv::GaussianBlur(roi_mask, roi_mask, cv::Size(5, 5), 0);
-    cv::Mat edges;
-    cv::Canny(roi_mask, edges, 50, 150);
-
-    std::vector<cv::Point> edge_points;
-    cv::findNonZero(edges, edge_points);
-    for (const auto& pt : edge_points)
-    {
-      cv::circle(frame, pt + rect.tl(), 1, cv::Scalar(0, 0, 255), -1);
-    }
-  }
-}

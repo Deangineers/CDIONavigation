@@ -12,6 +12,7 @@ class VectorWithStartPos : public Vector
 {
 public:
   VectorWithStartPos(int x, int y, const Vector& vector);
+  bool isSameVector(const VectorWithStartPos &other) const;
   [[nodiscard]] int startX() const;
   [[nodiscard]] int startY() const;
   [[nodiscard]] Vector minimalPoints() const;

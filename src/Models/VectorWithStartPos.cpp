@@ -4,8 +4,36 @@
 
 #include "VectorWithStartPos.h"
 
+#include "Utility/ConfigController.h"
+
 VectorWithStartPos::VectorWithStartPos(int x, int y, const Vector& vector) : Vector(vector), startX_(x), startY_(y)
 {
+}
+
+bool VectorWithStartPos::isSameVector(const VectorWithStartPos &other) const
+{
+  int startXDiff = std::abs(startX_ - other.startX_);
+  int startYDiff = std::abs(startY_ - other.startY_);
+  int xDiff = std::abs(x - other.x);
+  int yDiff = std::abs(y - other.y);
+
+  if (startXDiff > ConfigController::getConfigInt("MaxDiffInSameCourseObject"))
+  {
+    return false;
+  }
+  if (startYDiff > ConfigController::getConfigInt("MaxDiffInSameCourseObject"))
+  {
+    return false;
+  }
+  if (xDiff > ConfigController::getConfigInt("MaxDiffInSameCourseObject"))
+  {
+    return false;
+  }
+  if (yDiff > ConfigController::getConfigInt("MaxDiffInSameCourseObject"))
+  {
+    return false;
+  }
+  return true;
 }
 
 int VectorWithStartPos::startX() const

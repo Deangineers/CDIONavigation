@@ -89,10 +89,16 @@ void NavigationController::addBlockingObject(std::unique_ptr<VectorWithStartPos>
   blockingObjects_.push_back(std::move(blockingObject));
 }
 
+void NavigationController::addCrossObject(std::unique_ptr<VectorWithStartPos>&& blockingObject)
+{
+  crossObjects_.push_back(std::move(blockingObject));
+}
+
 void NavigationController::clearObjects()
 {
   ballVector_.clear();
   blockingObjects_.clear();
+  crossObjects_.clear();
   safeSpots_.clear();
   goal_ = nullptr;
   robotFront_ = nullptr;
@@ -106,9 +112,46 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     Utility::appendToFile("log.txt", "No Robot\n");
     return nullptr;
   }
+  auto objectVector = Vector(0, 0);
   findSafeSpots();
   auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
+  if (goToGoalCount_ >= stableThreshold)
+  {
+    objectVector = navigateToGoal();
+    auto vectorToRobotBack = MathUtil::calculateVectorToObject(robotBack_.get(), robotFront_.get());
+    auto goalVector = MathUtil::calculateVectorToObject(&robotMiddle, goal_.get());
+    double angleDiff = MathUtil::calculateAngleDifferenceBetweenVectors(goalVector, vectorToRobotBack);
+    cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},
+                    {robotMiddle.x1() + objectVector.x, robotMiddle.y1() + objectVector.y},
+                    cv::Scalar(255, 0, 255), 1,
+                    cv::LINE_AA, 0, 0.01);
+    cv::putText(*MainController::getFrame(), "VA FANGOOL",
+                {robotMiddle.x1() + objectVector.x, robotMiddle.y1() + objectVector.y + 30}, cv::FONT_HERSHEY_SIMPLEX,
+                0.5, cv::Scalar(0, 255, 0), 2);
+    if (objectVector.getLength() < ConfigController::getConfigInt("DistanceBeforeTargetReached"))
+    {
+      if (std::abs(angleDiff) > ConfigController::getConfigInt("AllowedAngleDifference"))
+      {
+        target_ = nullptr;
+        return std::make_unique<JourneyModel>(0, -angleDiff, true);
+      }
+      target_ = nullptr;
+      return std::make_unique<JourneyModel>(0, 0, false);
+    }
 
+    if (checkCollisionOnRoute(objectVector))
+    {
+      objectVector = navigateToSafeSpot();
+      if (objectVector.isNullVector())
+      {
+        std::cout << "could not find a safe, safe spot" << std::endl;
+        return nullptr;
+      }
+
+      std::cout << "Navigating to safe spot: " << objectVector.x << " " << objectVector.y << std::endl;
+    }
+    return makeJourneyModel(objectVector, true);
+  }
   if (frontIsToCloseToBlockingObject() && target_ == nullptr)
   {
     return std::make_unique<JourneyModel>(-10, 0, true);
@@ -153,7 +196,6 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   }
 
   //MathUtil::correctCourseObjectForHeightOffset(robotBack_.get(), robotFront_.get());
-  auto objectVector = Vector(0, 0);
 
   if (ballVector_.empty() || (ballVector_.size() <= 5 && not hasDeliveredBallsOnce_))
   {
@@ -163,39 +205,10 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   {
     goToGoalCount_ = 0;
   }
-
-  if (goToGoalCount_ >= stableThreshold)
-  {
-    objectVector = navigateToGoal();
-    auto vectorToRobotBack = MathUtil::calculateVectorToObject(robotBack_.get(), robotFront_.get());
-    auto goalVector = MathUtil::calculateVectorToObject(&robotMiddle, goal_.get());
-    double angleDiff = MathUtil::calculateAngleDifferenceBetweenVectors(goalVector, vectorToRobotBack);
-    cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},
-                    {robotMiddle.x1() + objectVector.x, robotMiddle.y1() + objectVector.y},
-                    cv::Scalar(255, 0, 255), 1,
-                    cv::LINE_AA, 0, 0.01);
-    cv::putText(*MainController::getFrame(), "VA FANGOOL",
-                {robotMiddle.x1() + objectVector.x, robotMiddle.y1() + objectVector.y + 30}, cv::FONT_HERSHEY_SIMPLEX,
-                0.5, cv::Scalar(0, 255, 0), 2);
-    if (objectVector.getLength() < ConfigController::getConfigInt("DistanceBeforeTargetReached"))
-    {
-      if (std::abs(angleDiff) > ConfigController::getConfigInt("AllowedAngleDifference"))
-      {
-        target_ = nullptr;
-        return std::make_unique<JourneyModel>(0, -angleDiff, true);
-      }
-      target_ = nullptr;
-      return std::make_unique<JourneyModel>(0, 0, false);
-    }
-    return makeJourneyModel(objectVector, true);
-  }
-  else
-  {
-    removeBallsInsideRobot();
-    removeBallsOutsideCourse();
-    objectVector = findClosestBall();
-    toCollectBalls_ = true;
-  }
+  removeBallsInsideRobot();
+  removeBallsOutsideCourse();
+  objectVector = findClosestBall();
+  toCollectBalls_ = true;
 
   if (objectVector.isNullVector())
   {
@@ -690,7 +703,7 @@ bool NavigationController::checkCollisionOnRoute(const Vector& targetVector) con
     endX - offsetX, endY - offsetY
   };
 
-  for (const auto& blocker : blockingObjects_)
+  for (const auto& blocker : crossObjects_)
   {
     int bx1 = blocker->startX();
     int by1 = blocker->startY();
