@@ -230,12 +230,12 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     {
       Utility::appendToFile("log.txt", "target_ is now null\n");
       auto closestVector = getVectorsForClosestBlockingObjects(target_.get()).first;
+      target_ = nullptr;
+      sameTargetCount_ = 0;
       if (closestVector.getLength() < ConfigController::getConfigInt("DistanceBeforeToCloseToWall"))
       {
         return std::make_unique<JourneyModel>(-10, 0, true);
       }
-      target_ = nullptr;
-      sameTargetCount_ = 0;
       return nullptr;
     }
 
