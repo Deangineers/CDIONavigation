@@ -32,8 +32,12 @@ int main()
 
   while (cap.read(frame))
   {
+    //cv::imwrite("../../TestImages/newTestImages0.jpeg", frame);
+    //frame = cv::imread("../../TestImages/ballsInCorner.jpg", cv::IMREAD_COLOR_BGR);
+
     std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
-    // frame = cv::imread("../../TestImages/ballsInCornerWhite.jpeg", cv::IMREAD_COLOR);
+    frame = cv::imread("../../TestImages/ballsInCornerWhite.jpeg", cv::IMREAD_COLOR);
+
     processor->processImage(frame);
 
     MainController::navigateAndSendCommand(&frame);

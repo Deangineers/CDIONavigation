@@ -114,49 +114,63 @@ void ImageProcessor::crossHelperFunction(const cv::Mat& frame, cv::Mat& mask)
 
 void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const cv::Mat& mask, const std::string& colorLabel)
 {
-  cv::Mat blurred;
-  cv::GaussianBlur(mask, blurred, cv::Size(9, 9), 2);
+  cv::Mat cleanMask;
+  cv::morphologyEx(mask, cleanMask, cv::MORPH_OPEN, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)));
+  cv::morphologyEx(cleanMask, cleanMask, cv::MORPH_CLOSE, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)));
 
-  std::vector<cv::Vec3f> circles;
-  cv::HoughCircles(blurred, circles, cv::HOUGH_GRADIENT, 1,
-                   20, // minDist between centers
-                   150, // param1: upper threshold for Canny
-                   25, // param2: threshold for center detection
-                   10, 40); // minRadius, maxRadius
-  for (const auto& circle : circles)
+  cv::Mat filteredMask, sharpened;
+  cv::bilateralFilter(cleanMask, filteredMask, 9, 75, 75);
+
+  cv::Mat kernel = (cv::Mat_<float>(3,3) <<
+                                         0, -1,  0,
+          -1,  5, -1,
+          0, -1,  0);
+
+  cv::filter2D(filteredMask, sharpened, filteredMask.depth(), kernel);
+
+  std::vector<std::vector<cv::Point>> contours;
+  cv::findContours(filteredMask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+  for (const auto& contour : contours)
   {
-    int cx = cvRound(circle[0]);
-    int cy = cvRound(circle[1]);
-    int r = cvRound(circle[2]);
+    double area = cv::contourArea(contour);
+    if (area < ConfigController::getConfigInt("MinimumSizeOfBlockingObject") ||
+        area > ConfigController::getConfigInt("EggBallDiffVal"))
+      continue;
 
-    cv::Rect rect(cx - r, cy - r, 2 * r, 2 * r);
+    float radius;
+    cv::Point2f center;
+    cv::minEnclosingCircle(contour, center, radius);
+
+    // Check circularity
+    double perimeter = cv::arcLength(contour, true);
+    if (perimeter == 0) continue;
+    double circularity = 4 * CV_PI * area / (perimeter * perimeter);
+    if (circularity < 0.7) // adjust threshold as needed
+      continue;
+
+    // Optional: mean color inside circle
+    cv::Mat maskCircle = cv::Mat::zeros(mask.size(), CV_8U);
+    cv::circle(maskCircle, center, static_cast<int>(radius), 255, -1);
+    cv::Scalar meanColorHSV = cv::mean(hsv_, maskCircle);
+
+    // Validate ball color based on meanColorHSV (add thresholds per colorLabel)
+
+    // Create bounding rect
+    cv::Rect rect(center.x - radius, center.y - radius, 2 * radius, 2 * radius);
     if ((rect & cv::Rect(0, 0, frame.cols, frame.rows)) != rect)
       continue;
 
-    double area = CV_PI * r * r;
-    if (area < ConfigController::getConfigInt("MinimumSizeOfBlockingObject")
-      || area > ConfigController::getConfigInt("EggBallDiffVal"))
-    {
+    auto courseObject = std::make_unique<CourseObject>(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height, "ball");
+    if (!ballProcessor_->isBallValid(courseObject.get()))
       continue;
-    }
-    std::string label = "ball";
-    // at some point we might want to add the colorLabel here to separate white and orange balls
-
-    int x1 = rect.x, y1 = rect.y;
-    int x2 = x1 + rect.width, y2 = y1 + rect.height;
-
-    auto courseObject = std::make_unique<CourseObject>(x1, y1, x2, y2, label);
-
-    if (not ballProcessor_->isBallValid(courseObject.get()))
-    {
-      continue;
-    }
 
     MainController::addCourseObject(std::move(courseObject));
 
+    // Draw result
     cv::rectangle(frame, rect, cv::Scalar(0, 255, 0), 2);
-    cv::putText(frame, colorLabel, cv::Point(x1, y1 - 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
-    cv::circle(frame, cv::Point(cx, cy), 2, cv::Scalar(255, 0, 255), -1); // circle center
+    cv::putText(frame, colorLabel, cv::Point(rect.x, rect.y - 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
+    cv::circle(frame, center, 2, cv::Scalar(255, 0, 255), -1);
   }
 }
 
