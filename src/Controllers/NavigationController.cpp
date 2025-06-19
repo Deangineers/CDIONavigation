@@ -142,12 +142,21 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     auto goalVector = MathUtil::calculateVectorToObject(&robotMiddle, goal_.get());
     double angleDiff = MathUtil::calculateAngleDifferenceBetweenVectors(goalVector, vectorToRobotBack);
 
-    if (objectVector.getLength() < ConfigController::getConfigInt("DistanceBeforeTargetReached") || navigatedToGoalIntermediate_)
+    if (objectVector.getLength() < ConfigController::getConfigInt("DistanceBeforeTargetReached") ||
+      navigatedToGoalIntermediate_)
     {
       navigatedToGoalIntermediate_ = true;
       if (std::abs(angleDiff) > ConfigController::getConfigInt("AllowedAngleDifference"))
       {
         target_ = nullptr;
+        cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},
+                        {robotMiddle.x1() + objectVector.x, robotMiddle.y1() + objectVector.y},
+                        cv::Scalar(255, 0, 255), 1,
+                        cv::LINE_AA, 0, 0.01);
+        cv::putText(*MainController::getFrame(), "Timmy Turner",
+                    {robotMiddle.x1() + objectVector.x, robotMiddle.y1() + objectVector.y + 30},
+                    cv::FONT_HERSHEY_SIMPLEX,
+                    0.5, cv::Scalar(0, 255, 0), 2);
         return std::make_unique<JourneyModel>(0, -angleDiff, true);
       }
       if (goalVector.getLength() < ConfigController::getConfigInt("DistanceBeforeTargetReached"))
@@ -155,17 +164,17 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
         atGoalTime_ = std::chrono::high_resolution_clock::now();
         atGoal_ = true;
         target_ = nullptr;
-        Utility::appendToFile("log.txt","Shooting with angle: " + std::to_string(angleDiff) + "\n");
+        Utility::appendToFile("log.txt", "Shooting with angle: " + std::to_string(angleDiff) + "\n");
         return std::make_unique<JourneyModel>(0, 0, false);
       }
       cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},
-                  {robotMiddle.x1() + objectVector.x, robotMiddle.y1() + objectVector.y},
-                  cv::Scalar(255, 0, 255), 1,
-                  cv::LINE_AA, 0, 0.01);
+                      {robotMiddle.x1() + goalVector.x, robotMiddle.y1() + goalVector.y},
+                      cv::Scalar(255, 0, 255), 1,
+                      cv::LINE_AA, 0, 0.01);
       cv::putText(*MainController::getFrame(), "VA FANGOOL",
                   {robotMiddle.x1() + goalVector.x, robotMiddle.y1() + goalVector.y + 30}, cv::FONT_HERSHEY_SIMPLEX,
                   0.5, cv::Scalar(0, 255, 0), 2);
-      return makeJourneyModel(goalVector,true);
+      return makeJourneyModel(goalVector, true);
     }
 
     if (checkCollisionOnRoute(objectVector))
@@ -179,6 +188,13 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
 
       std::cout << "Navigating to safe spot: " << objectVector.x << " " << objectVector.y << std::endl;
     }
+    cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},
+                    {robotMiddle.x1() + objectVector.x, robotMiddle.y1() + objectVector.y},
+                    cv::Scalar(255, 0, 255), 1,
+                    cv::LINE_AA, 0, 0.01);
+    cv::putText(*MainController::getFrame(), "VA FANGOOL",
+                {robotMiddle.x1() + objectVector.x, robotMiddle.y1() + objectVector.y + 30}, cv::FONT_HERSHEY_SIMPLEX,
+                0.5, cv::Scalar(0, 255, 0), 2);
     return makeJourneyModel(objectVector, true);
   }
   if (frontIsToCloseToBlockingObject() && target_ == nullptr)
@@ -197,7 +213,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     if (directVectorToObject.getLength() < ConfigController::getConfigInt("DistanceBeforeTargetReached"))
     {
       Utility::appendToFile("log.txt", "target_ is now null\n");
-      auto closestVector =getVectorsForClosestBlockingObjects(target_.get()).first;
+      auto closestVector = getVectorsForClosestBlockingObjects(target_.get()).first;
       if (closestVector.getLength() < ConfigController::getConfigInt("DistanceBeforeToCloseToWall"))
       {
         return std::make_unique<JourneyModel>(-10, 0, true);
@@ -749,9 +765,9 @@ bool NavigationController::checkCollisionOnRoute(const Vector& targetVector) con
 bool NavigationController::frontIsToCloseToBlockingObject() const
 {
   auto vectorsToBlockingObjects = getVectorsForClosestBlockingObjects(robotFront_.get());
-  auto vectorFromRobotBack = MathUtil::calculateVectorToObject(robotBack_.get(),robotFront_.get());
+  auto vectorFromRobotBack = MathUtil::calculateVectorToObject(robotBack_.get(), robotFront_.get());
   int allowedAngleDiff = ConfigController::getConfigInt("AllowedAngleDiffForWallInFrontOfRobotDetection");
-  int angleDiff = MathUtil::calculateAngleDifferenceBetweenVectors(vectorsToBlockingObjects.first,vectorFromRobotBack);
+  int angleDiff = MathUtil::calculateAngleDifferenceBetweenVectors(vectorsToBlockingObjects.first, vectorFromRobotBack);
   if (vectorsToBlockingObjects.first.getLength() < ConfigController::getConfigInt("DistanceBeforeToCloseToWall"))
   {
     return std::abs(angleDiff) < allowedAngleDiff;
@@ -792,7 +808,7 @@ Vector NavigationController::navigateToSafeSpot()
     currentSafeSpotIndex_++;
     if (startIndex == currentSafeSpotIndex_)
     {
-      return {0,0};
+      return {0, 0};
     }
   }
 
@@ -829,14 +845,14 @@ void NavigationController::findSafeSpots()
   safeSpots_.emplace_back(minX + xOffset, maxY - yOffset);
 
   cv::drawMarker(*MainController::getFrame(), {minX + xOffset, minY + yOffset}, cv::Scalar(0, 0, 255),
-                     cv::MARKER_CROSS, 10, 2);
+                 cv::MARKER_CROSS, 10, 2);
 
   cv::drawMarker(*MainController::getFrame(), {maxX - xOffset, minY + yOffset}, cv::Scalar(0, 0, 255),
-                     cv::MARKER_CROSS, 10, 2);
+                 cv::MARKER_CROSS, 10, 2);
 
   cv::drawMarker(*MainController::getFrame(), {maxX - xOffset, maxY - yOffset}, cv::Scalar(0, 0, 255),
-                     cv::MARKER_CROSS, 10, 2);
+                 cv::MARKER_CROSS, 10, 2);
 
   cv::drawMarker(*MainController::getFrame(), {minX + xOffset, maxY - yOffset}, cv::Scalar(0, 0, 255),
-                     cv::MARKER_CROSS, 10, 2);
+                 cv::MARKER_CROSS, 10, 2);
 }
