@@ -32,34 +32,39 @@ void CloudyImageProcessor::detectBalls(const cv::Mat& frame)
   cv::Mat darkestOrangeMask, darkOrangeMask, orangeMask, lightOrangeMask, lightestOrangeMask;
   cv::Mat darkestWhiteMask, darkWhiteMask, whiteMask, lightWhiteMask, lightestWhiteMask;
 
-  cv::inRange(hsv_, cv::Scalar(5, 25, 25), cv::Scalar(30, 255, 255), orangeMask);
-  cv::inRange(hsv_, cv::Scalar(5, 25, 25), cv::Scalar(30, 255, 255), darkOrangeMask);
-  cv::inRange(hsv_, cv::Scalar(5, 25, 25), cv::Scalar(30, 255, 255), darkestOrangeMask);
-  cv::inRange(hsv_, cv::Scalar(5, 25, 25), cv::Scalar(30, 255, 255), lightOrangeMask);
-  cv::inRange(hsv_, cv::Scalar(5, 25, 25), cv::Scalar(30, 255, 255), lightestOrangeMask);
+  cv::inRange(hsv_, cv::Scalar(5, 150, 30),   cv::Scalar(10, 255, 130),  darkestOrangeMask);
+  cv::inRange(hsv_, cv::Scalar(5, 150, 80),   cv::Scalar(15, 255, 180),  darkOrangeMask);
+  cv::inRange(hsv_, cv::Scalar(10, 100, 150), cv::Scalar(20, 255, 255),  orangeMask);
+  cv::inRange(hsv_, cv::Scalar(10, 80, 180),  cv::Scalar(25, 200, 255),  lightOrangeMask);
+  cv::inRange(hsv_, cv::Scalar(10, 50, 200),  cv::Scalar(30, 150, 255),  lightestOrangeMask);
 
-  cv::inRange(hsv_, cv::Scalar(0, 0, 100), cv::Scalar(179, 65, 255), darkestWhiteMask);
-  cv::inRange(hsv_, cv::Scalar(0, 0, 100), cv::Scalar(179, 65, 255), darkWhiteMask);
-  cv::inRange(hsv_, cv::Scalar(0, 0, 100), cv::Scalar(179, 65, 255), whiteMask);
-  cv::inRange(hsv_, cv::Scalar(0, 0, 100), cv::Scalar(179, 65, 255), lightWhiteMask);
-  cv::inRange(hsv_, cv::Scalar(0, 0, 100), cv::Scalar(179, 65, 255), lightestWhiteMask);
+  cv::inRange(hsv_, cv::Scalar(0, 0, 80), cv::Scalar(179, 40, 140),  darkestWhiteMask);
+  cv::inRange(hsv_, cv::Scalar(0, 0, 150),  cv::Scalar(179, 30, 180),  darkWhiteMask);
+  cv::inRange(hsv_, cv::Scalar(0, 0, 180),  cv::Scalar(179, 25, 220),  whiteMask);
+  cv::inRange(hsv_, cv::Scalar(0, 0, 220),  cv::Scalar(179, 20, 240),  lightWhiteMask);
+  cv::inRange(hsv_, cv::Scalar(0, 0, 240),  cv::Scalar(179, 20, 255),  lightestWhiteMask);
 
-  //cv::bitwise_or(orangeMask,whiteMask, totalMask);
+  cv::Mat orangeTotalMask = darkestOrangeMask | darkOrangeMask | orangeMask | lightOrangeMask | lightestOrangeMask;
+  cv::Mat whiteTotalMask = darkestWhiteMask | darkWhiteMask | whiteMask | lightWhiteMask | lightestWhiteMask;
+
+  //cv::bitwise_or(orangeTotalMask,whiteTotalMask, totalMask);
+  ballHelperFunction(frame, orangeTotalMask, "orange");
+  ballHelperFunction(frame, whiteTotalMask, "white");
 
   //ballHelperFunction(frame, totalMask, "ball");
   //ballHelperFunction(frame, whiteMask, "white");
 
-  ballHelperFunction(frame, orangeMask, "orange");
-  ballHelperFunction(frame, darkOrangeMask, "darkorange");
-  ballHelperFunction(frame, darkestOrangeMask, "darkestoÓrange");
-  ballHelperFunction(frame, lightOrangeMask, "lightOrange");
-  ballHelperFunction(frame, lightestOrangeMask, "lightestOrange");
+  //ballHelperFunction(frame, orangeMask, "o1");
+  //ballHelperFunction(frame, darkOrangeMask, "o2");
+  //ballHelperFunction(frame, darkestOrangeMask, "o3");
+  //ballHelperFunction(frame, lightOrangeMask, "o4");
+  //ballHelperFunction(frame, lightestOrangeMask, "o5");
 
-  ballHelperFunction(frame, darkestWhiteMask, "darkestWhite");
-  ballHelperFunction(frame, darkWhiteMask, "darkWhite");
-  ballHelperFunction(frame, whiteMask, "white");
-  ballHelperFunction(frame, lightWhiteMask, "lightWhite");
-  ballHelperFunction(frame, lightestWhiteMask, "lightestWhite");
+  //ballHelperFunction(frame, darkestWhiteMask, "w1");
+  //ballHelperFunction(frame, darkWhiteMask, "w2");
+  //ballHelperFunction(frame, whiteMask, "w3");
+  //ballHelperFunction(frame, lightWhiteMask, "w4");
+  //ballHelperFunction(frame, lightestWhiteMask, "w5");
 
 }
 
