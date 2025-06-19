@@ -118,8 +118,15 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const cv::Mat& mas
   cv::morphologyEx(mask, cleanMask, cv::MORPH_OPEN, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)));
   cv::morphologyEx(cleanMask, cleanMask, cv::MORPH_CLOSE, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)));
 
-  cv::Mat filteredMask;
+  cv::Mat filteredMask, sharpened;
   cv::bilateralFilter(cleanMask, filteredMask, 9, 75, 75);
+
+  cv::Mat kernel = (cv::Mat_<float>(3,3) <<
+                                         0, -1,  0,
+          -1,  5, -1,
+          0, -1,  0);
+
+  cv::filter2D(filteredMask, sharpened, filteredMask.depth(), kernel);
 
   std::vector<std::vector<cv::Point>> contours;
   cv::findContours(filteredMask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
@@ -135,16 +142,21 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const cv::Mat& mas
     cv::Point2f center;
     cv::minEnclosingCircle(contour, center, radius);
 
+    // Check circularity
     double perimeter = cv::arcLength(contour, true);
     if (perimeter == 0) continue;
     double circularity = 4 * CV_PI * area / (perimeter * perimeter);
     if (circularity < 0.7) // adjust threshold as needed
       continue;
 
+    // Optional: mean color inside circle
     cv::Mat maskCircle = cv::Mat::zeros(mask.size(), CV_8U);
     cv::circle(maskCircle, center, static_cast<int>(radius), 255, -1);
     cv::Scalar meanColorHSV = cv::mean(hsv_, maskCircle);
 
+    // Validate ball color based on meanColorHSV (add thresholds per colorLabel)
+
+    // Create bounding rect
     cv::Rect rect(center.x - radius, center.y - radius, 2 * radius, 2 * radius);
     if ((rect & cv::Rect(0, 0, frame.cols, frame.rows)) != rect)
       continue;
@@ -155,6 +167,7 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const cv::Mat& mas
 
     MainController::addCourseObject(std::move(courseObject));
 
+    // Draw result
     cv::rectangle(frame, rect, cv::Scalar(0, 255, 0), 2);
     cv::putText(frame, colorLabel, cv::Point(rect.x, rect.y - 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
     cv::circle(frame, center, 2, cv::Scalar(255, 0, 255), -1);
