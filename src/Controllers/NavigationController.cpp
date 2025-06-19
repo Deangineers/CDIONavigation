@@ -9,7 +9,6 @@
 #include <ranges>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/core/matx.hpp>
-
 #include "../Models/JourneyModel.h"
 #include "Utility/ConfigController.h"
 #include "cmath"
@@ -715,6 +714,7 @@ bool NavigationController::checkCollisionOnRoute(const Vector& targetVector) con
 
   struct Segment
   {
+    Segment(double startX, double startY, double endX, double endY) : x1(startX), y1(startY) ,x2(endX), y2(endY){}
     double x1, y1, x2, y2;
   };
 
