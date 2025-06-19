@@ -32,7 +32,7 @@ void CloudyImageProcessor::detectBalls(const cv::Mat& frame)
   cv::inRange(hsv_, cv::Scalar(0, 0, 100), cv::Scalar(179, 65, 255), whiteMask);
   cv::bitwise_or(orangeMask,whiteMask, totalMask);
 
-  ballHelperFunction(frame, totalMask, "orange");
+  ballHelperFunction(frame, totalMask, "ball");
   //ballHelperFunction(frame, whiteMask, "white");
 }
 

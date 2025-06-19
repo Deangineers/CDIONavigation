@@ -158,7 +158,14 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
         Utility::appendToFile("log.txt","Shooting with angle: " + std::to_string(angleDiff) + "\n");
         return std::make_unique<JourneyModel>(0, 0, false);
       }
-        return makeJourneyModel(goalVector,true);
+      cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},
+                  {robotMiddle.x1() + objectVector.x, robotMiddle.y1() + objectVector.y},
+                  cv::Scalar(255, 0, 255), 1,
+                  cv::LINE_AA, 0, 0.01);
+      cv::putText(*MainController::getFrame(), "VA FANGOOL",
+                  {robotMiddle.x1() + goalVector.x, robotMiddle.y1() + goalVector.y + 30}, cv::FONT_HERSHEY_SIMPLEX,
+                  0.5, cv::Scalar(0, 255, 0), 2);
+      return makeJourneyModel(goalVector,true);
     }
 
     if (checkCollisionOnRoute(objectVector))
