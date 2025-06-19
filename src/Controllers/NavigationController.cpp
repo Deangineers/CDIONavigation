@@ -91,6 +91,8 @@ void NavigationController::addBlockingObject(std::unique_ptr<VectorWithStartPos>
 
 void NavigationController::addCrossObject(std::unique_ptr<VectorWithStartPos>&& blockingObject)
 {
+  auto thing = std::make_unique<VectorWithStartPos>(*blockingObject);
+  blockingObjects_.push_back(std::move(thing));
   crossObjects_.push_back(std::move(blockingObject));
 }
 
