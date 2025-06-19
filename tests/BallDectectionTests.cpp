@@ -27,10 +27,20 @@ public:
   std::shared_ptr<TestBallProcessor> ballProcessor;
 };
 
-TEST_F(BallDetectionTests, ballDetectionTest1)
+TEST_F(BallDetectionTests, ballsInCorner)
 {
   cv::Mat frame = cv::imread("../../TestImages/ballsInCorner.jpg");
   imageProcessor->processImage(frame);
 
-  EXPECT_EQ(ballProcessor->getBallCounter(), 5);
+  int expectedBalls = 5;
+  EXPECT_EQ(ballProcessor->getBallCounter(), expectedBalls);
+}
+
+TEST_F(BallDetectionTests, ballsInCornerWhite)
+{
+  cv::Mat frame = cv::imread("../../TestImages/ballsInCornerWhite.jpg");
+  imageProcessor->processImage(frame);
+
+  int expectedBalls = 7;
+  EXPECT_EQ(ballProcessor->getBallCounter(), expectedBalls);
 }
