@@ -27,12 +27,13 @@ void CloudyImageProcessor::detectRedPixels(const cv::Mat& frame)
 
 void CloudyImageProcessor::detectBalls(const cv::Mat& frame)
 {
-  cv::Mat orangeMask, whiteMask;
+  cv::Mat orangeMask, whiteMask, totalMask;
   cv::inRange(hsv_, cv::Scalar(5, 25, 25), cv::Scalar(30, 255, 255), orangeMask);
   cv::inRange(hsv_, cv::Scalar(0, 0, 100), cv::Scalar(179, 65, 255), whiteMask);
+  cv::bitwise_or(orangeMask,whiteMask, totalMask);
 
-  ballHelperFunction(frame, orangeMask, "orange");
-  ballHelperFunction(frame, whiteMask, "white");
+  ballHelperFunction(frame, totalMask, "orange");
+  //ballHelperFunction(frame, whiteMask, "white");
 }
 
 void CloudyImageProcessor::detectEgg(const cv::Mat& frame)

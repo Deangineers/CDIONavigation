@@ -141,13 +141,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     auto vectorToRobotBack = MathUtil::calculateVectorToObject(robotBack_.get(), robotFront_.get());
     auto goalVector = MathUtil::calculateVectorToObject(&robotMiddle, goal_.get());
     double angleDiff = MathUtil::calculateAngleDifferenceBetweenVectors(goalVector, vectorToRobotBack);
-    cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},
-                    {robotMiddle.x1() + objectVector.x, robotMiddle.y1() + objectVector.y},
-                    cv::Scalar(255, 0, 255), 1,
-                    cv::LINE_AA, 0, 0.01);
-    cv::putText(*MainController::getFrame(), "VA FANGOOL",
-                {robotMiddle.x1() + objectVector.x, robotMiddle.y1() + objectVector.y + 30}, cv::FONT_HERSHEY_SIMPLEX,
-                0.5, cv::Scalar(0, 255, 0), 2);
+
     if (objectVector.getLength() < ConfigController::getConfigInt("DistanceBeforeTargetReached") || navigatedToGoalIntermediate_)
     {
       navigatedToGoalIntermediate_ = true;
@@ -779,17 +773,23 @@ bool NavigationController::targetStillActual()
 Vector NavigationController::navigateToSafeSpot()
 {
   auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
-  for (const auto& safeSpot : safeSpots_)
+  auto safeSpot = safeSpots_[currentSafeSpotIndex_];
+  int startIndex = currentSafeSpotIndex_;
+  CourseObject courseObject(safeSpot.first, safeSpot.second, safeSpot.first, safeSpot.second, "safeSpot");
+  Vector vectorToObject = MathUtil::calculateVectorToObject(&robotMiddle, &courseObject);
+  while (checkCollisionOnRoute(vectorToObject))
   {
-    CourseObject courseObject(safeSpot.first, safeSpot.second, safeSpot.first, safeSpot.second, "");
-    Vector vectorToObject = MathUtil::calculateVectorToObject(&robotMiddle, &courseObject);
-    if (!checkCollisionOnRoute(vectorToObject))
+    safeSpot = safeSpots_[currentSafeSpotIndex_];
+    courseObject = CourseObject(safeSpot.first, safeSpot.second, safeSpot.first, safeSpot.second, "safeSpot");
+    vectorToObject = MathUtil::calculateVectorToObject(&robotMiddle, &courseObject);
+    currentSafeSpotIndex_++;
+    if (startIndex == currentSafeSpotIndex_)
     {
-      return vectorToObject;
+      return {0,0};
     }
   }
 
-  return {0, 0};
+  return vectorToObject;
 }
 
 void NavigationController::findSafeSpots()

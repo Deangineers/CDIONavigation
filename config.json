@@ -44,7 +44,7 @@
   "MaxCrossSize": 500000,
   "ToAverageCommandsInClientController": false,
   "MaxDiffInSameCourseObject": 20,
-  "ShiftDistanceOnCornerBall": 7,
+  "ShiftDistanceOnCornerBall": 5,
   "ImagesToAverage": 30,
   "AmountOfSeenBeforeCreate": 5,
   "WallSeenBeforeCreate": 10,

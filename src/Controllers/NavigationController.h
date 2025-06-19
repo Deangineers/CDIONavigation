@@ -61,6 +61,7 @@ private:
   int robotWidth_ = ConfigController::getConfigInt("RobotWidth");
 
   std::vector<std::pair<int, int>> safeSpots_;
+  int currentSafeSpotIndex_ = 0;
 
   int totalBalls_ = ConfigController::getConfigInt("TotalBalls");
   int robotBallCapacity_ = 5;
