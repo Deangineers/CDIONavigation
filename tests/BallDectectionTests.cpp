@@ -27,6 +27,8 @@ public:
   std::shared_ptr<TestBallProcessor> ballProcessor;
 };
 
+int totalDiff = 0;
+
 TEST_F(BallDetectionTests, ballsInCorner)
 {
   cv::Mat frame = cv::imread("../../TestImages/ballsInCorner.jpg");
@@ -42,5 +44,68 @@ TEST_F(BallDetectionTests, ballsInCornerWhite)
   imageProcessor->processImage(frame);
 
   int expectedBalls = 7;
-  EXPECT_EQ(ballProcessor->getBallCounter(), expectedBalls);
+  int seenBalls = ballProcessor->getBallCounter();
+  totalDiff += std::abs(expectedBalls - seenBalls);
+  EXPECT_EQ(seenBalls, expectedBalls);
+}
+
+
+TEST_F(BallDetectionTests, testImage1)
+{
+  cv::Mat frame = cv::imread("../../TestImages/testImage1.jpg");
+  imageProcessor->processImage(frame);
+
+  int expectedBalls = 8;
+  int seenBalls = ballProcessor->getBallCounter();
+  totalDiff += std::abs(expectedBalls - seenBalls);
+  EXPECT_EQ(seenBalls, expectedBalls);
+}
+
+TEST_F(BallDetectionTests, testImage2)
+{
+  cv::Mat frame = cv::imread("../../TestImages/testImage2.jpg");
+  imageProcessor->processImage(frame);
+
+  int expectedBalls = 11;
+  int seenBalls = ballProcessor->getBallCounter();
+  totalDiff += std::abs(expectedBalls - seenBalls);
+  EXPECT_EQ(seenBalls, expectedBalls);
+}
+
+TEST_F(BallDetectionTests, testImage3)
+{
+  cv::Mat frame = cv::imread("../../TestImages/testImage3.jpg");
+  imageProcessor->processImage(frame);
+
+  int expectedBalls = 10;
+  int seenBalls = ballProcessor->getBallCounter();
+  totalDiff += std::abs(expectedBalls - seenBalls);
+  EXPECT_EQ(seenBalls, expectedBalls);
+}
+
+TEST_F(BallDetectionTests, testImage4)
+{
+  cv::Mat frame = cv::imread("../../TestImages/testImage4.jpg");
+  imageProcessor->processImage(frame);
+
+  int expectedBalls = 11;
+  int seenBalls = ballProcessor->getBallCounter();
+  totalDiff += std::abs(expectedBalls - seenBalls);
+  EXPECT_EQ(seenBalls, expectedBalls);
+}
+
+TEST_F(BallDetectionTests, testImage5)
+{
+  cv::Mat frame = cv::imread("../../TestImages/testImage5.jpg");
+  imageProcessor->processImage(frame);
+
+  int expectedBalls = 10;
+  int seenBalls = ballProcessor->getBallCounter();
+  totalDiff += std::abs(expectedBalls - seenBalls);
+  EXPECT_EQ(seenBalls, expectedBalls);
+}
+
+TEST_F(BallDetectionTests, totalDiff)
+{
+  EXPECT_EQ(totalDiff, 0);
 }
