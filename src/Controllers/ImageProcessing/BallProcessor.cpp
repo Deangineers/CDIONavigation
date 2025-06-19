@@ -42,6 +42,15 @@ bool BallProcessor::toAddBall(const CourseObject* courseObject) const
       }
     }
   }
+
+  for (const auto& ball : ballsFromImages_[currentIndex_])
+  {
+    if (ball.courseObjectWithinValidRange(&ball))
+    {
+      return false;
+    }
+  }
+
   return timesSeen >= ConfigController::getConfigInt("AmountOfSeenBeforeCreate");
 }
 
