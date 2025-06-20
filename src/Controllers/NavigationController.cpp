@@ -127,7 +127,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   {
     goToGoalCount_ = 0;
   }
-  if (atGoal_)
+  if (atGoal_ && (hasDeliveredBallsOnce_ || ballVector_.empty()))
   {
     auto now = std::chrono::high_resolution_clock::now();
     if (now - atGoalTime_ > std::chrono::milliseconds(ConfigController::getConfigInt("GoalSleepInMilli")))

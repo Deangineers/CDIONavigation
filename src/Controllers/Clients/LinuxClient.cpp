@@ -111,14 +111,10 @@ void LinuxClient::sendCommand()
     {
       lock.lock();
       first = true;
-
+      commandToSend_ = "";
       if (atGoal)
       {
         MainController::completedGoalDelivery();
-      }
-      else
-      {
-        commandToSend_ = "";
       }
       Utility::appendToFile("log.txt", "Received Response\n");
     }
