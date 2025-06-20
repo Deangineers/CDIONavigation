@@ -33,8 +33,8 @@ int main()
 
   while (cap.read(frame))
   {
-    //cv::imwrite("../../TestImages/newTestImages0.jpeg", frame);
-    //frame = cv::imread("../../TestImages/ballsInCorner.jpg", cv::IMREAD_COLOR_BGR);
+    //cv::imwrite("../TestImages/newTestImages0.jpeg", frame);
+    frame = cv::imread("../TestImages/testImage5.jpg", cv::IMREAD_COLOR_BGR);
 
     std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
 
