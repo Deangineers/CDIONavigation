@@ -115,11 +115,6 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     Utility::appendToFile("log.txt", "No Robot\n");
     return nullptr;
   }
-  if (amountOfWalls_ != 4)
-  {
-    Utility::appendToFile("log.txt", "Not 4 walls\n");
-    return nullptr;
-  }
   auto objectVector = Vector(0, 0);
   findSafeSpots();
   auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
@@ -148,7 +143,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     objectVector = navigateToGoal();
     auto vectorToRobotBack = MathUtil::calculateVectorToObject(robotBack_.get(), robotFront_.get());
     auto goalVector = MathUtil::calculateVectorToObject(&robotMiddle, goal_.get());
-    auto shootingCourseObject = CourseObject(*goal_.get());
+    auto shootingCourseObject = CourseObject(*goal_);
     int shootingDistance = ConfigController::getConfigInt("GoalShootingDistance");
     bool goalIsLeft = goal_->x1() > ConfigController::getConfigInt("middleXOnAxis");
 
@@ -816,6 +811,11 @@ bool NavigationController::targetStillActual()
 
 Vector NavigationController::navigateToSafeSpot()
 {
+  if (amountOfWalls_ != 4)
+  {
+    Utility::appendToFile("log.txt", "Not 4 walls\n");
+    return {0, 0};
+  }
   auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
   auto safeSpot = safeSpots_[currentSafeSpotIndex_];
   int startIndex = currentSafeSpotIndex_;
