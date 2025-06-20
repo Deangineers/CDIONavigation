@@ -115,6 +115,11 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     Utility::appendToFile("log.txt", "No Robot\n");
     return nullptr;
   }
+  if (not lastSentCommandWasCompleted_)
+  {
+    Utility::appendToFile("log.txt", "Waiting for command Completion\n");
+    return nullptr;
+  }
 
   MathUtil::correctCourseObjectForPerspective(robotBack_.get(), robotFront_.get());
   auto objectVector = Vector(0, 0);
@@ -297,6 +302,16 @@ void NavigationController::setHasDeliveredOnce()
   {
     sentShootAt0Balls_ = true;
   }
+}
+
+void NavigationController::lastSentCommandWasCompleted()
+{
+  lastSentCommandWasCompleted_ = true;
+}
+
+void NavigationController::newCommandSent()
+{
+  lastSentCommandWasCompleted_ = false;
 }
 
 std::unique_ptr<JourneyModel> NavigationController::makeJourneyModel(const Vector& objectVector,

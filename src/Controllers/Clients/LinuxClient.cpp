@@ -87,7 +87,7 @@ void LinuxClient::sendCommand()
     if (commandToSend_.empty())
     {
       lock.unlock();
-      std::this_thread::sleep_for(std::chrono::milliseconds(50));
+      std::this_thread::sleep_for(std::chrono::milliseconds(30));
       continue;
     }
 
@@ -116,6 +116,7 @@ void LinuxClient::sendCommand()
       {
         MainController::completedGoalDelivery();
       }
+      MainController::completedCommand();
       Utility::appendToFile("log.txt", "Received Response\n");
     }
     Utility::appendToFile("log.txt", "Done with sending\n");

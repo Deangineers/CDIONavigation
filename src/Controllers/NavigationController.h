@@ -25,6 +25,8 @@ public:
   std::unique_ptr<JourneyModel> calculateDegreesAndDistanceToObject();
 
   void setHasDeliveredOnce();
+  void lastSentCommandWasCompleted();
+  void newCommandSent();
 
 private:
   void removeBallsOutsideCourse();
@@ -69,8 +71,8 @@ private:
   int goToGoalCount_ = 0;
   const int stableThreshold = 3;
 
-  bool hasDeliveredBallsOnce_ = false;
-  bool sentShootAt0Balls_ = false;
+  std::atomic_bool hasDeliveredBallsOnce_ = false;
+  std::atomic_bool sentShootAt0Balls_ = false;
   bool toCollectBalls_ = true;
   std::atomic_bool atGoal_ = false;
   std::chrono::high_resolution_clock::time_point atGoalTime_;
@@ -78,6 +80,7 @@ private:
 
   int sameTargetCount_ = 0;
   bool backUpAfterBallPickup_ = false;
+  std::atomic_bool lastSentCommandWasCompleted_ = false;
 
   int amountOfWalls_ = 0;
 };

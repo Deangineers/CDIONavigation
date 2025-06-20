@@ -70,6 +70,7 @@ void MainController::navigateAndSendCommand(cv::Mat* frame)
     "Journey: " + std::to_string(std::abs(journey->angle)) + ", " + std::to_string(journey->distance) + "\n");
 
   clientController_->sendCommand(journeyToCommand(journey.get()));
+  navigationController_->newCommandSent();
 }
 
 Command MainController::journeyToCommand(const JourneyModel* journey)
@@ -143,6 +144,11 @@ cv::Mat* MainController::getFrame()
 void MainController::completedGoalDelivery()
 {
   navigationController_->setHasDeliveredOnce();
+}
+
+void MainController::completedCommand()
+{
+  navigationController_->lastSentCommandWasCompleted();
 }
 
 int MainController::findMaxValue(const int* cords, const int size, int maxValueAllowed)
