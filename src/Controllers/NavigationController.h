@@ -70,6 +70,7 @@ private:
   const int stableThreshold = 3;
 
   bool hasDeliveredBallsOnce_ = false;
+  bool sentShootAt0Balls_ = false;
   bool toCollectBalls_ = true;
   std::atomic_bool atGoal_ = false;
   std::chrono::high_resolution_clock::time_point atGoalTime_;
