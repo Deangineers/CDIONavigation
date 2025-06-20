@@ -4,6 +4,8 @@
 
 #include "Command.h"
 
+#include "../../Simulator/TextureLocations.h"
+
 Command::Command() : speed_(0), distanceOrAngle_(0), ballCollectionGrabsBalls_(true)
 {
 }
@@ -37,6 +39,10 @@ void Command::setBallCollection(const bool ballCollectionStatus)
 
 std::string Command::formatToSend() const
 {
+  if (not ballCollectionGrabsBalls_)
+  {
+    return "out";
+  }
   std::string sendString = action_;
   sendString += " " + std::to_string(speed_);
   sendString += " " + std::to_string(distanceOrAngle_);

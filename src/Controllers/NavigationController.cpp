@@ -788,14 +788,24 @@ Vector NavigationController::navigateToSafeSpot()
   auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
   auto safeSpot = safeSpots_[currentSafeSpotIndex_];
   int startIndex = currentSafeSpotIndex_;
+  int allowedDistance = ConfigController::getConfigInt("DistanceBeforeTargetReached");
   CourseObject courseObject(safeSpot.first, safeSpot.second, safeSpot.first, safeSpot.second, "safeSpot");
   Vector vectorToObject = MathUtil::calculateVectorToObject(&robotMiddle, &courseObject);
+  if (vectorToObject.getLength() < allowedDistance)
+  {
+    safeSpot = safeSpots_[currentSafeSpotIndex_];
+    courseObject = CourseObject(safeSpot.first, safeSpot.second, safeSpot.first, safeSpot.second, "safeSpot");
+    vectorToObject = MathUtil::calculateVectorToObject(&robotMiddle, &courseObject);
+    currentSafeSpotIndex_++;
+    currentSafeSpotIndex_ %= 4;
+  }
   while (checkCollisionOnRoute(vectorToObject))
   {
     safeSpot = safeSpots_[currentSafeSpotIndex_];
     courseObject = CourseObject(safeSpot.first, safeSpot.second, safeSpot.first, safeSpot.second, "safeSpot");
     vectorToObject = MathUtil::calculateVectorToObject(&robotMiddle, &courseObject);
     currentSafeSpotIndex_++;
+    currentSafeSpotIndex_ %= 4;
     if (startIndex == currentSafeSpotIndex_)
     {
       return {0, 0};
