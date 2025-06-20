@@ -50,7 +50,6 @@ void ImageProcessor::redPixelHelperFunction(const cv::Mat& frame, cv::Mat& mask)
   cv::circle(frame, cv::Point(maxX, minY), 5, cv::Scalar(0, 255, 0), -1); // Top-right
   cv::circle(frame, cv::Point(minX, maxY), 5, cv::Scalar(0, 255, 0), -1); // Bottom-left
   cv::circle(frame, cv::Point(maxX, maxY), 5, cv::Scalar(0, 255, 0), -1); // Bottom-right
-
 }
 
 void ImageProcessor::crossHelperFunction(const cv::Mat& frame, cv::Mat& mask)
