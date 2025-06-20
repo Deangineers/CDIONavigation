@@ -57,7 +57,7 @@ void ImageProcessor::redPixelHelperFunction(const cv::Mat& frame, cv::Mat& mask)
       auto vectorToCreate = std::make_unique<VectorWithStartPos>(p1.x, p1.y, vector);
       if (not wallProcessor_->isWallValid(vectorToCreate.get()))
       {
-        continue;
+        //continue;
       }
 
       // Draw line (vector)
@@ -144,14 +144,14 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const cv::Mat& mas
     {
       detectedColor = "white";
     }
-    else if (h >= 5 && h <= 30 && s > 100 && v > 100)
+    else if (h >= 5 && h <= 50 && s > 100 && v > 100)
     {
       detectedColor = "orange";
     }
     else
     {
-      detectedColor = "unknown";
-      continue;
+      detectedColor = "orange";
+      //continue;
     }
 
     cv::Rect rect(cx - r, cy - r, 2 * r, 2 * r);
