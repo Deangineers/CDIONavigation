@@ -31,29 +31,32 @@ int main()
   auto ballProcessor = std::make_shared<BallProcessor>();
   const auto processor = std::make_unique<CloudyImageProcessor>(ballProcessor);
 
+  double lastFPS = 0;
+
+  std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
   while (cap.read(frame))
   {
     //cv::imwrite("../../TestImages/newTestImages0.jpeg", frame);
-    //frame = cv::imread("../TestImages/testImage4.jpg", cv::IMREAD_COLOR_BGR);
+    frame = cv::imread("../TestImages/testImage4.jpg", cv::IMREAD_COLOR_BGR);
 
-    std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
 
     processor->processImage(frame);
 
     MainController::navigateAndSendCommand(&frame);
 
-    std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    cv::putText(frame, "FPS: " + std::to_string(1000 / duration.count()),
+    cv::putText(frame, "FPS: " + std::to_string(lastFPS),
                 {1700, 1000}, cv::FONT_HERSHEY_SIMPLEX,
                 1, cv::Scalar(255, 255, 0), 2);
-
     cv::imshow("EngineBase", frame);
 
     if (cv::waitKey(1) == 27) // Wait for 1 ms and break on 'Esc' key
     {
       return 0;
     }
+    std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    lastFPS = 1000.0 / duration.count();
+    start = std::chrono::high_resolution_clock::now();
   }
 
   cap.release();
