@@ -28,45 +28,29 @@ void ImageProcessor::redPixelHelperFunction(const cv::Mat& frame, cv::Mat& mask)
   cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
   cv::morphologyEx(mask, mask, cv::MORPH_OPEN, kernel);
 
-  std::vector<std::vector<cv::Point>> contours;
-  cv::findContours(mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+  // Find non-zero points (i.e., red pixels)
+  std::vector<cv::Point> nonZeroPoints;
+  cv::findNonZero(mask, nonZeroPoints);
 
-  int label = 0;
-  for (const auto& contour : contours)
+  if (nonZeroPoints.empty())
   {
-    double area = cv::contourArea(contour);
-    if (area < ConfigController::getConfigInt("minRedSize"))
-    {
-      continue;
-    }
-    // Approximate contour to get corners
-    std::vector<cv::Point> approx;
-    cv::approxPolyDP(contour, approx, 10, true); // epsilon=10 can be tuned
-
-    // Draw vectors between points
-    for (size_t i = 0; i < approx.size(); ++i)
-    {
-      cv::Point p1 = approx[i];
-      cv::Point p2 = approx[(i + 1) % approx.size()]; // Loop back to start if needed
-      Vector vector(p2.x - p1.x, p2.y - p1.y);
-      if (vector.getLength() < ConfigController::getConfigInt("MinimumSizeOfBlockingObject"))
-      {
-        continue;
-      }
-
-      auto vectorToCreate = std::make_unique<VectorWithStartPos>(p1.x, p1.y, vector);
-      if (not wallProcessor_->isWallValid(vectorToCreate.get()))
-      {
-        //continue;
-      }
-
-      // Draw line (vector)
-      cv::line(frame, p1, p2, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("WallWidth"),
-               cv::LINE_AA, 0);
-      cv::putText(frame, std::to_string(label++), p1, cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
-      MainController::addBlockedObject(std::move(vectorToCreate));
-    }
+    return; // No red pixels found
   }
+
+  // Get bounding box from the non-zero points
+  cv::Rect boundingBox = cv::boundingRect(nonZeroPoints);
+
+  int minX = boundingBox.x;
+  int minY = boundingBox.y;
+  int maxX = boundingBox.x + boundingBox.width;
+  int maxY = boundingBox.y + boundingBox.height;
+
+  // Draw green dots at the 4 corners
+  cv::circle(frame, cv::Point(minX, minY), 5, cv::Scalar(0, 255, 0), -1); // Top-left
+  cv::circle(frame, cv::Point(maxX, minY), 5, cv::Scalar(0, 255, 0), -1); // Top-right
+  cv::circle(frame, cv::Point(minX, maxY), 5, cv::Scalar(0, 255, 0), -1); // Bottom-left
+  cv::circle(frame, cv::Point(maxX, maxY), 5, cv::Scalar(0, 255, 0), -1); // Bottom-right
+
 }
 
 void ImageProcessor::crossHelperFunction(const cv::Mat& frame, cv::Mat& mask)
