@@ -152,10 +152,11 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
 
   if (goToGoalCount_ >= stableThreshold)
   {
-    if (backUpAfterBallPickup_)
+    if (distanceToBackUp > 0)
     {
-      backUpAfterBallPickup_ = false;
-      return std::make_unique<JourneyModel>(-10, 0, true);
+      auto journey = std::make_unique<JourneyModel>(-distanceToBackUp, 0, true);
+      distanceToBackUp = 0;
+      return std::move(journey);
     }
     objectVector = navigateToGoal();
     auto vectorToRobotBack = MathUtil::calculateVectorToObject(robotBack_.get(), robotFront_.get());
@@ -191,6 +192,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
         atGoalTime_ = std::chrono::high_resolution_clock::now();
         atGoal_ = true;
         target_ = nullptr;
+        distanceToBackUp = 10;
         Utility::appendToFile("log.txt", "Shooting with angle: " + std::to_string(angleDiff) + "\n");
         return std::make_unique<JourneyModel>(0, 0, false);
       }
@@ -240,10 +242,11 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
       auto closestVector = getVectorsForClosestBlockingObjects(target_.get()).first;
       target_ = nullptr;
       sameTargetCount_ = 0;
-      if (backUpAfterBallPickup_)
+      if (distanceToBackUp > 0)
       {
-        backUpAfterBallPickup_ = false;
-        return std::make_unique<JourneyModel>(-10, 0, true);
+        auto journey = std::make_unique<JourneyModel>(-distanceToBackUp, 0, true);
+        distanceToBackUp = 0;
+        return std::move(journey);
       }
       return nullptr;
     }
@@ -280,7 +283,17 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     potentialTarget_ = nullptr;
     auto closestVectors = getVectorsForClosestBlockingObjects(target_.get());
     double distanceToWall = closestVectors.first.getLength();
-    backUpAfterBallPickup_ = distanceToWall < ConfigController::getConfigInt("DistanceBeforeToCloseToWall");
+    if (distanceToWall < ConfigController::getConfigInt("DistanceBeforeToCloseToWall"))
+    {
+      if (closestVectors.second.getLength() < ConfigController::getConfigInt("DistanceBeforeToCloseToWall"))
+      {
+        distanceToBackUp = 50;
+      }
+      else
+      {
+        distanceToBackUp = 10;
+      }
+    }
   }
 
 

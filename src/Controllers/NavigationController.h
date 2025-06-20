@@ -79,7 +79,7 @@ private:
   bool navigatedToGoalIntermediate_ = false;
 
   int sameTargetCount_ = 0;
-  bool backUpAfterBallPickup_ = false;
+  int distanceToBackUp = 0;
   std::atomic_bool lastSentCommandWasCompleted_ = false;
 
   int amountOfWalls_ = 0;
