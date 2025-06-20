@@ -27,38 +27,22 @@ void ImageProcessor::processImage(const cv::Mat& frame)
 
   auto f1 = std::async(std::launch::async, [&]
   {
-    std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
     detectBalls(frame, ballOverlay);
-    std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    std::cout << "detectBalls(): " << duration.count() << "ms\n";
   });
 
   auto f2 = std::async(std::launch::async, [&]
   {
-    std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
     detectEgg(frame, eggOverlay);
-    std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    std::cout << "detectEgg(): " << duration.count() << "ms\n";
   });
 
   auto f3 = std::async(std::launch::async, [&]
   {
-    std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
     detectRedPixels(frame, redOverlay);
-    std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    std::cout << "detectRedPixels(): " << duration.count() << "ms\n";
   });
 
   auto f4 = std::async(std::launch::async, [&]
   {
-    std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
     detectFrontAndBack(frame, frontBackOverlay);
-    std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    std::cout << "detectFrontAndBack(): " << duration.count() << "ms\n";
   });
 
 
