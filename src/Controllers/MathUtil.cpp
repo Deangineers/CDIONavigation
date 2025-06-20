@@ -61,42 +61,19 @@ CourseObject MathUtil::getRobotMiddle(const CourseObject* robotBack, const Cours
   return CourseObject(middleX, middleY, middleX, middleY, "");
 }
 
-void MathUtil::correctCourseObjectForHeightOffset(CourseObject* robotBack, CourseObject* robotFront)
+void MathUtil::correctCourseObjectForPerspective(CourseObject* robotBack, CourseObject* robotFront)
 {
-  const double robotHeight = ConfigController::getConfigInt("RobotHeightInMM");
-  const double robotLength = ConfigController::getConfigInt("RobotLengthInMM");
-
-  int backX = (robotBack->x1() + robotBack->x2()) / 2;
-  int backY = (robotBack->y1() + robotBack->y2()) / 2;
-  int frontX = (robotFront->x1() + robotFront->x2()) / 2;
-  int frontY = (robotFront->y1() + robotFront->y2()) / 2;
-
-  int dx = frontX - backX;
-  int dy = frontY - backY;
-  double pixelDistance = std::sqrt(dx * dx + dy * dy);
-  if (pixelDistance < 1e-3) return;
-
-  double mmPerPixel = robotLength / pixelDistance;
-
-  double offsetPixels = robotHeight / mmPerPixel;
-
   auto correct = [&](CourseObject* obj) {
-    int cx = (obj->x1() + obj->x2()) / 2;
-    int cy = (obj->y1() + obj->y2()) / 2;
+    int middleX = (obj->x1() + obj->x2()) / 2;
+    int middleY = (obj->y1() + obj->y2()) / 2;
+    int xDiff = imageCenterX_ - middleX;
+    int yDiff = imageCenterY_ - middleY;
 
-    int dcx = cx - imageCenterX_;
-    int dcy = cy - imageCenterY_;
-    double dist = std::sqrt(dcx * dcx + dcy * dcy);
-    if (dist < 1e-3) return;
+    double xOffset = xDiff * ConfigController::getConfigInt("PerspectiveOffset")*0.01;
+    double yOffset = yDiff * ConfigController::getConfigInt("PerspectiveOffset")*0.01;
 
-    double ux = static_cast<double>(dcx) / dist;
-    double uy = static_cast<double>(dcy) / dist;
-
-    int correctionX = static_cast<int>(std::round(-ux * offsetPixels));
-    int correctionY = static_cast<int>(std::round(-uy * offsetPixels));
-
-    obj->shiftX(correctionX);
-    obj->shiftY(correctionY);
+    obj->shiftX(xOffset);
+    obj->shiftY(yOffset);
   };
 
   correct(robotBack);

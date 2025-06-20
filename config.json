@@ -4,7 +4,7 @@
   "safeYTop": 50,
   "safeYBot": 650,
   "middleXOnAxis": 500,
-  "GoalShootingDistance": 85,
+  "GoalShootingDistance": 70,
   "GoalIntermediatePointDistance": 200,
   "RobotIP": "192.168.0.1",
   "RobotPort": 1234,
@@ -44,7 +44,7 @@
   "MaxCrossSize": 500000,
   "ToAverageCommandsInClientController": false,
   "MaxDiffInSameCourseObject": 20,
-  "ShiftDistanceOnCornerBall": -5,
+  "ShiftDistanceOnCornerBall": 22,
   "ImagesToAverage": 30,
   "AmountOfSeenBeforeCreate": 2,
   "WallSeenBeforeCreate": 1,
@@ -53,5 +53,6 @@
   "maxEggWidth": 250,
   "AllowedAngleDiffForWallInFrontOfRobotDetection": 60,
   "GoalSleepInMilli": 4000,
-  "AngleDiffBeforeCornerBall": 60
+  "AngleDiffBeforeCornerBall": 60,
+  "PerspectiveOffset": 7
 }

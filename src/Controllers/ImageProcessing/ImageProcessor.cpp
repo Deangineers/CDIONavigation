@@ -174,7 +174,7 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const cv::Mat& mas
 
     if (not ballProcessor_->isBallValid(courseObject.get()))
     {
-      continue;
+      //continue;
     }
 
     MainController::addCourseObject(std::move(courseObject));

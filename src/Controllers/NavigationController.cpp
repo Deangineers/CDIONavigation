@@ -115,6 +115,8 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     Utility::appendToFile("log.txt", "No Robot\n");
     return nullptr;
   }
+
+  MathUtil::correctCourseObjectForPerspective(robotBack_.get(), robotFront_.get());
   auto objectVector = Vector(0, 0);
   findSafeSpots();
   auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
@@ -255,8 +257,6 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
 
     return makeJourneyModel(vectorToObject, toCollectBalls_);
   }
-
-  //MathUtil::correctCourseObjectForHeightOffset(robotBack_.get(), robotFront_.get());
 
   removeBallsInsideRobot();
   removeBallsOutsideCourse();
