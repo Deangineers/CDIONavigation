@@ -583,7 +583,7 @@ Vector NavigationController::handleObjectNextToBlocking(const CourseObject* cour
     closestVectors.first, closestVectors.second);
   int maxAllowedAngleDiffBetweenClosestVectors = ConfigController::getConfigInt("AngleDiffBeforeCornerBall");
   if (closestVectors.second.getLength() > ConfigController::getConfigInt("DistanceToWallBeforeHandling")
-    || closestVectorsAngleDiff > maxAllowedAngleDiffBetweenClosestVectors)
+    || std::abs(closestVectorsAngleDiff) < maxAllowedAngleDiffBetweenClosestVectors)
   {
     auto vectorToWall = closestVectors.first;
 
