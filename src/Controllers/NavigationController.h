@@ -80,7 +80,7 @@ private:
 
   int sameTargetCount_ = 0;
   int distanceToBackUp = 0;
-  std::atomic_bool lastSentCommandWasCompleted_ = false;
+  std::atomic_bool lastSentCommandWasCompleted_ = true;
 
   int amountOfWalls_ = 0;
 };
