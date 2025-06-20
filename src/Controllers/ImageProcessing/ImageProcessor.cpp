@@ -52,12 +52,9 @@ void ImageProcessor::processImage(const cv::Mat& frame)
   f4.get();
   auto applyOverlay = [](const cv::Mat& base, const cv::Mat& overlay)
   {
-    // fallback for 3 channels overlay
     cv::Mat gray;
     cv::cvtColor(overlay, gray, cv::COLOR_BGR2GRAY);
-    cv::Mat mask;
-    cv::threshold(gray, mask, 0, 255, cv::THRESH_BINARY);
-    overlay.copyTo(base, mask);
+    overlay.copyTo(base, gray);
   };
 
   applyOverlay(frame, ballOverlay);
