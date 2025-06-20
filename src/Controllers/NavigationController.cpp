@@ -119,7 +119,8 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   findSafeSpots();
   auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
 
-  if ((ballVector_.empty() && deliveryCount_ == 1) || (ballVector_.size() <= 5 && deliveryCount_ == 0))
+
+  if (ballVector_.empty() || (ballVector_.size() <= 5 && not hasDeliveredBallsOnce_))
   {
     goToGoalCount_++;
   }
@@ -127,7 +128,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   {
     goToGoalCount_ = 0;
   }
-  if (atGoal_ && (deliveryCount_ == 1 || (ballVector_.empty() && deliveryCount_ == 2)))
+  if (atGoal_ && ((hasDeliveredBallsOnce_ && (not ballVector_.empty())) || sentShootAt0Balls_))
   {
     auto now = std::chrono::high_resolution_clock::now();
     if (now - atGoalTime_ > std::chrono::milliseconds(ConfigController::getConfigInt("GoalSleepInMilli")))
@@ -136,6 +137,10 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
       navigatedToGoalIntermediate_ = false;
     }
     return nullptr;
+  }
+  if (ballVector_.size() > 5 && hasDeliveredBallsOnce_)
+  {
+    hasDeliveredBallsOnce_ = false;
   }
 
   if (goToGoalCount_ >= stableThreshold)
@@ -287,7 +292,11 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
 
 void NavigationController::setHasDeliveredOnce()
 {
-  deliveryCount_++;
+  hasDeliveredBallsOnce_ = true;
+  if (ballVector_.empty())
+  {
+    sentShootAt0Balls_ = true;
+  }
 }
 
 std::unique_ptr<JourneyModel> NavigationController::makeJourneyModel(const Vector& objectVector,
