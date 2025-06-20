@@ -144,7 +144,7 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const cv::Mat& mas
     {
       detectedColor = "white";
     }
-    else if (h >= 5 && h <= 25 && s > 100 && v > 100)
+    else if (h >= 5 && h <= 30 && s > 100 && v > 100)
     {
       detectedColor = "orange";
     }
