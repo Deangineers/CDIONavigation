@@ -28,46 +28,83 @@ void ImageProcessor::redPixelHelperFunction(const cv::Mat& frame, cv::Mat& mask)
   cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
   cv::morphologyEx(mask, mask, cv::MORPH_OPEN, kernel);
 
-  std::vector<std::vector<cv::Point>> contours;
-  cv::findContours(mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+  std::vector<cv::Point> nonZeroPoints;
+  cv::findNonZero(mask, nonZeroPoints);
 
-  int label = 0;
-  for (const auto& contour : contours)
+  if (nonZeroPoints.empty())
+    return;
+
+  cv::Point leftmost = nonZeroPoints[0];
+  cv::Point rightmost = nonZeroPoints[0];
+  cv::Point topmost = nonZeroPoints[0];
+  cv::Point bottommost = nonZeroPoints[0];
+
+  for (const auto& pt : nonZeroPoints)
   {
-    double area = cv::contourArea(contour);
-    if (area < ConfigController::getConfigInt("minRedSize"))
-    {
-      continue;
-    }
-    // Approximate contour to get corners
-    std::vector<cv::Point> approx;
-    cv::approxPolyDP(contour, approx, 10, true); // epsilon=10 can be tuned
-
-    // Draw vectors between points
-    for (size_t i = 0; i < approx.size(); ++i)
-    {
-      cv::Point p1 = approx[i];
-      cv::Point p2 = approx[(i + 1) % approx.size()]; // Loop back to start if needed
-      Vector vector(p2.x - p1.x, p2.y - p1.y);
-      if (vector.getLength() < ConfigController::getConfigInt("MinimumSizeOfBlockingObject"))
-      {
-        continue;
-      }
-
-      auto vectorToCreate = std::make_unique<VectorWithStartPos>(p1.x, p1.y, vector);
-      if (not wallProcessor_->isWallValid(vectorToCreate.get()))
-      {
-        //continue;
-      }
-
-      // Draw line (vector)
-      cv::line(frame, p1, p2, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("WallWidth"),
-               cv::LINE_AA, 0);
-      cv::putText(frame, std::to_string(label++), p1, cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
-      MainController::addBlockedObject(std::move(vectorToCreate));
-    }
+    if (pt.x < leftmost.x) leftmost = pt;
+    if (pt.x > rightmost.x) rightmost = pt;
+    if (pt.y < topmost.y) topmost = pt;
+    if (pt.y > bottommost.y) bottommost = pt;
   }
+
+  int shift = ConfigController::getConfigInt("CornerCrossHalfSize");
+  leftmost.x += shift;
+  rightmost.x -= shift;
+  topmost.y += shift;
+  bottommost.y -= shift;
+
+  bool leftIsTop = std::abs(leftmost.y - topmost.y) < std::abs(leftmost.y - bottommost.y);
+
+  cv::Point topLeft = leftIsTop ? topmost : leftmost;
+  cv::Point bottomLeft = leftIsTop ? leftmost : bottommost;
+  cv::Point topRight = leftIsTop ? rightmost : topmost;
+  cv::Point bottomRight = leftIsTop ? bottommost : rightmost;
+
+  int xLeftToRight = bottomRight.x - topLeft.x;
+  int yLeftToRight = bottomRight.y - topLeft.y;
+
+  int xRightToLeft = topRight.x - bottomLeft.x;
+  int yRightToLeft = bottomLeft.y - topRight.y;
+
+  Vector criss = {xLeftToRight, yLeftToRight};
+  Vector cross = {xRightToLeft, yRightToLeft};
+
+  if (criss.getLength() > cross.getLength())
+  {
+    topRight.x = bottomRight.x;
+    topRight.y = topLeft.y;
+    bottomLeft.x = topLeft.x;
+    bottomLeft.y = bottomRight.y;
+  }
+  else
+  {
+    topLeft.x = bottomLeft.x;
+    topLeft.y = topRight.y;
+    bottomRight.x = topRight.x;
+    bottomRight.y = bottomLeft.y;
+  }
+
+  std::vector<std::pair<cv::Point, cv::Point>> walls = {
+    {topLeft, topRight},
+    {topRight, bottomRight},
+    {bottomRight, bottomLeft},
+    {bottomLeft, topLeft}
+  };
+
+  for (const auto& [start, end] : walls)
+  {
+    Vector vec(end.x - start.x, end.y - start.y);
+    auto wall = std::make_unique<VectorWithStartPos>(start.x, start.y, vec);
+
+    MainController::addBlockedObject(std::move(wall));
+    cv::line(frame, start, end, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("WallWidth"), cv::LINE_AA);
+  }
+  cv::circle(frame, topLeft, 5, cv::Scalar(0, 255, 0), -1);
+  cv::circle(frame, topRight, 5, cv::Scalar(0, 255, 0), -1);
+  cv::circle(frame, bottomRight, 5, cv::Scalar(0, 255, 0), -1);
+  cv::circle(frame, bottomLeft, 5, cv::Scalar(0, 255, 0), -1);
 }
+
 
 void ImageProcessor::crossHelperFunction(const cv::Mat& frame, cv::Mat& mask)
 {

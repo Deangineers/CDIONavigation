@@ -41,7 +41,7 @@
   "MinimumSizeOfBlockingObject": 50,
   "DistanceBeforeToCloseToWall": 200,
   "CrossWallWidth": 10,
-  "MaxCrossSize": 500000,
+  "MaxCrossSize": 25000,
   "ToAverageCommandsInClientController": false,
   "MaxDiffInSameCourseObject": 20,
   "ShiftDistanceOnCornerBall": 22,
@@ -54,5 +54,6 @@
   "AllowedAngleDiffForWallInFrontOfRobotDetection": 60,
   "GoalSleepInMilli": 4000,
   "AngleDiffBeforeCornerBall": 60,
+  "CornerCrossHalfSize": 35
   "PerspectiveOffset": 7
 }
