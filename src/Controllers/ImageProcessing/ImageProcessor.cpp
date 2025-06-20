@@ -155,13 +155,14 @@ void ImageProcessor::crossHelperFunction(const cv::Mat& frame, cv::Mat& mask)
   }
 }
 
-void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const cv::Mat& mask, const std::string& colorLabel)
+void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const std::string& colorLabel)
 {
   cv::Mat grey, hsv;
   cv::cvtColor(frame, hsv, cv::COLOR_BGR2HSV);
 
   cv::cvtColor(frame, grey, cv::COLOR_BGR2GRAY);
   std::vector<cv::Vec3f> circles;
+  // TODO, move to GPU
   cv::HoughCircles(grey, circles, cv::HOUGH_GRADIENT, 1,
                    20, // minDist between centers
                    150, // param1: upper threshold for Canny
@@ -211,7 +212,6 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const cv::Mat& mas
     int x2 = x1 + rect.width, y2 = y1 + rect.height;
 
     auto courseObject = std::make_unique<CourseObject>(x1, y1, x2, y2, label);
-
     if (not ballProcessor_->isBallValid(courseObject.get()))
     {
       //continue;

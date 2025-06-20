@@ -24,7 +24,7 @@ protected:
   virtual void detectFrontAndBack(const cv::Mat& frame) = 0;
   void redPixelHelperFunction(const cv::Mat& frame, cv::Mat& mask);
   void crossHelperFunction(const cv::Mat& frame, cv::Mat& mask);
-  void ballHelperFunction(const cv::Mat& frame, const cv::Mat& mask, const std::string& colorLabel);
+  void ballHelperFunction(const cv::Mat& frame, const std::string& colorLabel);
   void eggHelperFunction(const cv::Mat& frame, const cv::Mat& mask);
   void frontAndBackHelperFunction(const cv::Mat& frame, cv::Mat& mask, std::string label);
 
