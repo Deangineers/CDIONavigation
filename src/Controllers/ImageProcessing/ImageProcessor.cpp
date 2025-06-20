@@ -213,8 +213,7 @@ void ImageProcessor::crossHelperFunction(const cv::Mat& frame, cv::Mat& mask, co
 
 void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const std::string& colorLabel, const cv::Mat& overlay)
 {
-  cv::Mat grey, hsv;
-  cv::cvtColor(frame, hsv, cv::COLOR_BGR2HSV);
+  cv::Mat grey;
 
   cv::cvtColor(frame, grey, cv::COLOR_BGR2GRAY);
   std::vector<cv::Vec3f> circles;
