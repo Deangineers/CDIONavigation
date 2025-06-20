@@ -28,29 +28,60 @@ void ImageProcessor::redPixelHelperFunction(const cv::Mat& frame, cv::Mat& mask)
   cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
   cv::morphologyEx(mask, mask, cv::MORPH_OPEN, kernel);
 
-  // Find non-zero points (i.e., red pixels)
   std::vector<cv::Point> nonZeroPoints;
   cv::findNonZero(mask, nonZeroPoints);
 
   if (nonZeroPoints.empty())
+    return;
+
+  cv::Point leftmost = nonZeroPoints[0];
+  cv::Point rightmost = nonZeroPoints[0];
+  cv::Point topmost = nonZeroPoints[0];
+  cv::Point bottommost = nonZeroPoints[0];
+
+  for (const auto& pt : nonZeroPoints)
   {
-    return; // No red pixels found
+    if (pt.x < leftmost.x) leftmost = pt;
+    if (pt.x > rightmost.x) rightmost = pt;
+    if (pt.y < topmost.y) topmost = pt;
+    if (pt.y > bottommost.y) bottommost = pt;
   }
 
-  // Get bounding box from the non-zero points
-  cv::Rect boundingBox = cv::boundingRect(nonZeroPoints);
+  int shift = ConfigController::getConfigInt("CornerCrossHalfSize");
+  leftmost.x += shift;
+  rightmost.x -= shift;
+  topmost.y += shift;
+  bottommost.y -= shift;
 
-  int minX = boundingBox.x;
-  int minY = boundingBox.y;
-  int maxX = boundingBox.x + boundingBox.width;
-  int maxY = boundingBox.y + boundingBox.height;
+  bool leftIsTop = std::abs(leftmost.y - topmost.y) < std::abs(leftmost.y - bottommost.y);
 
-  // Draw green dots at the 4 corners
-  cv::circle(frame, cv::Point(minX, minY), 5, cv::Scalar(0, 255, 0), -1); // Top-left
-  cv::circle(frame, cv::Point(maxX, minY), 5, cv::Scalar(0, 255, 0), -1); // Top-right
-  cv::circle(frame, cv::Point(minX, maxY), 5, cv::Scalar(0, 255, 0), -1); // Bottom-left
-  cv::circle(frame, cv::Point(maxX, maxY), 5, cv::Scalar(0, 255, 0), -1); // Bottom-right
+  cv::Point topLeft = leftIsTop ? topmost : leftmost;
+  cv::Point bottomLeft = leftIsTop ? leftmost : bottommost;
+  cv::Point topRight = leftIsTop ? rightmost : topmost;
+  cv::Point bottomRight = leftIsTop ? bottommost : rightmost;
+
+
+  std::vector<std::pair<cv::Point, cv::Point>> walls = {
+    {topLeft, topRight},
+    {topRight, bottomRight},
+    {bottomRight, bottomLeft},
+    {bottomLeft, topLeft}
+  };
+
+  for (const auto& [start, end] : walls)
+  {
+    Vector vec(end.x - start.x, end.y - start.y);
+    auto wall = std::make_unique<VectorWithStartPos>(start.x, start.y, vec);
+
+    MainController::addBlockedObject(std::move(wall));
+    cv::line(frame, start, end, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("WallWidth"), cv::LINE_AA);
+  }
+  cv::circle(frame, topLeft, 5, cv::Scalar(0, 255, 0), -1);
+  cv::circle(frame, topRight, 5, cv::Scalar(0, 255, 0), -1);
+  cv::circle(frame, bottomRight, 5, cv::Scalar(0, 255, 0), -1);
+  cv::circle(frame, bottomLeft, 5, cv::Scalar(0, 255, 0), -1);
 }
+
 
 void ImageProcessor::crossHelperFunction(const cv::Mat& frame, cv::Mat& mask)
 {
