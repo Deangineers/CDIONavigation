@@ -779,11 +779,6 @@ bool NavigationController::checkCollisionOnRoute(const Vector& targetVector) con
 
 Vector NavigationController::navigateToSafeSpot()
 {
-  if (amountOfWalls_ != 4)
-  {
-    Utility::appendToFile("log.txt", "Not 4 walls\n");
-    return {0, 0};
-  }
   auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
   auto safeSpot = safeSpots_[currentSafeSpotIndex_];
   int startIndex = currentSafeSpotIndex_;
