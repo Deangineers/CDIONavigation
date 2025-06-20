@@ -69,7 +69,7 @@ private:
   int goToGoalCount_ = 0;
   const int stableThreshold = 3;
 
-  bool hasDeliveredBallsOnce_ = false;
+  int deliveryCount_ = 0;
   bool toCollectBalls_ = true;
   std::atomic_bool atGoal_ = false;
   std::chrono::high_resolution_clock::time_point atGoalTime_;
