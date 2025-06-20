@@ -140,6 +140,11 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
 
   if (goToGoalCount_ >= stableThreshold)
   {
+    if (backUpAfterBallPickup_)
+    {
+      backUpAfterBallPickup_ = false;
+      return std::make_unique<JourneyModel>(-10, 0, true);
+    }
     objectVector = navigateToGoal();
     auto vectorToRobotBack = MathUtil::calculateVectorToObject(robotBack_.get(), robotFront_.get());
     auto goalVector = MathUtil::calculateVectorToObject(&robotMiddle, goal_.get());
@@ -225,6 +230,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
       sameTargetCount_ = 0;
       if (backUpAfterBallPickup_)
       {
+        backUpAfterBallPickup_ = false;
         return std::make_unique<JourneyModel>(-10, 0, true);
       }
       return nullptr;
