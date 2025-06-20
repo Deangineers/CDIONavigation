@@ -17,9 +17,9 @@ void ImageProcessor::processImage(const cv::Mat& frame)
 {
   cv::cvtColor(frame, hsv_, cv::COLOR_BGR2HSV);
   ballProcessor_->begin();
-  detectRedPixels(frame);
   detectBalls(frame);
   detectEgg(frame);
+  detectRedPixels(frame);
   detectFrontAndBack(frame);
 }
 
