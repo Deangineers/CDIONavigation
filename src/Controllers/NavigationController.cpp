@@ -645,7 +645,7 @@ Vector NavigationController::handleObjectNearCorner(const CourseObject* courseOb
   int shiftedX = (ballCenterX > imageWidth / 2) ? -1 : 1;
   int shiftedY = (ballCenterY > imageHeight / 2) ? -1 : 1;
 
-  double angleDeg = 10;
+  int angleDeg = ConfigController::getConfigInt("CornerApproachAngle");
   double angleRad = angleDeg * CV_PI / 180.0;
   int shiftDist = ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning") * 5;
 
