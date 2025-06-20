@@ -579,7 +579,11 @@ Vector NavigationController::handleObjectNextToBlocking(const CourseObject* cour
                     cv::LINE_AA, 0, 0.01);
   }
 
-  if (closestVectors.second.getLength() > ConfigController::getConfigInt("DistanceToWallBeforeHandling"))
+  double closestVectorsAngleDiff = MathUtil::calculateAngleDifferenceBetweenVectors(
+    closestVectors.first, closestVectors.second);
+  int maxAllowedAngleDiffBetweenClosestVectors = ConfigController::getConfigInt("AngleDiffBeforeCornerBall");
+  if (closestVectors.second.getLength() > ConfigController::getConfigInt("DistanceToWallBeforeHandling")
+    || closestVectorsAngleDiff > maxAllowedAngleDiffBetweenClosestVectors)
   {
     auto vectorToWall = closestVectors.first;
 

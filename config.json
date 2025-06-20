@@ -52,5 +52,6 @@
   "maxEggHeight": 250,
   "maxEggWidth": 250,
   "AllowedAngleDiffForWallInFrontOfRobotDetection": 60,
-  "GoalSleepInMilli": 4000
+  "GoalSleepInMilli": 4000,
+  "AngleDiffBeforeCornerBall": 60
 }
