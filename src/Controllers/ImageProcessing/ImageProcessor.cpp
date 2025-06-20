@@ -60,6 +60,29 @@ void ImageProcessor::redPixelHelperFunction(const cv::Mat& frame, cv::Mat& mask)
   cv::Point topRight = leftIsTop ? rightmost : topmost;
   cv::Point bottomRight = leftIsTop ? bottommost : rightmost;
 
+  int xLeftToRight = bottomRight.x - topLeft.x;
+  int yLeftToRight = bottomRight.y - topLeft.y;
+
+  int xRightToLeft = topRight.x - bottomLeft.x;
+  int yRightToLeft = bottomLeft.y - topRight.y;
+
+  Vector criss = {xLeftToRight, yLeftToRight};
+  Vector cross = {xRightToLeft, yRightToLeft};
+
+  if (criss.getLength() > cross.getLength())
+  {
+    topRight.x = bottomRight.x;
+    topRight.y = topLeft.y;
+    bottomLeft.x = topLeft.x;
+    bottomLeft.y = bottomRight.y;
+  }
+  else
+  {
+    topLeft.x = bottomLeft.x;
+    topLeft.y = topRight.y;
+    bottomRight.x = topRight.x;
+    bottomRight.y = bottomLeft.y;
+  }
 
   std::vector<std::pair<cv::Point, cv::Point>> walls = {
     {topLeft, topRight},
