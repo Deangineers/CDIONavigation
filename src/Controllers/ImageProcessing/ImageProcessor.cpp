@@ -3,8 +3,6 @@
 //
 #include "ImageProcessor.h"
 
-#include <thread>
-
 #include "../MainController.h"
 #include "../../Models/Vector.h"
 #include "Utility/ConfigController.h"
@@ -19,15 +17,10 @@ void ImageProcessor::processImage(const cv::Mat& frame)
 {
   cv::cvtColor(frame, hsv_, cv::COLOR_BGR2HSV);
   ballProcessor_->begin();
-  std::vector<std::thread> threads;
-  threads.emplace_back(&ImageProcessor::detectBalls, this, frame.clone());
-  threads.emplace_back(&ImageProcessor::detectEgg, this, frame.clone());
-  threads.emplace_back(&ImageProcessor::detectRedPixels, this, frame.clone());
-  threads.emplace_back(&ImageProcessor::detectFrontAndBack, this, frame.clone());
-  for (auto& thread : threads)
-  {
-    thread.join();
-  }
+  detectBalls(frame);
+  detectEgg(frame);
+  detectRedPixels(frame);
+  detectFrontAndBack(frame);
 }
 
 void ImageProcessor::redPixelHelperFunction(const cv::Mat& frame, cv::Mat& mask)
@@ -218,6 +211,11 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const cv::Mat& mas
     int x2 = x1 + rect.width, y2 = y1 + rect.height;
 
     auto courseObject = std::make_unique<CourseObject>(x1, y1, x2, y2, label);
+
+    if (not ballProcessor_->isBallValid(courseObject.get()))
+    {
+      //continue;
+    }
 
     MainController::addCourseObject(std::move(courseObject));
 
