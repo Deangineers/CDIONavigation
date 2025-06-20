@@ -32,11 +32,6 @@ LinuxClient::~LinuxClient()
 void LinuxClient::sendCommandAndAddNewLine(const std::string& command)
 {
   std::lock_guard lock(mutex_);
-  if (first)
-  {
-    first = false;
-    return;
-  }
   commandToSend_ = command + "\n";
 }
 
@@ -110,7 +105,6 @@ void LinuxClient::sendCommand()
     if (bytesReceived > 0)
     {
       lock.lock();
-      first = true;
       commandToSend_ = "";
       if (atGoal)
       {
