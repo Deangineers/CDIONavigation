@@ -15,18 +15,13 @@ CloudyImageProcessor::CloudyImageProcessor(const std::shared_ptr<IBallProcessor>
 
 void CloudyImageProcessor::detectRedPixels(const cv::Mat& frame, const cv::Mat& overlay)
 {
-  cv::Mat mask1, mask2, redMask;
-  cv::inRange(hsv_, cv::Scalar(0, 100, 100), cv::Scalar(10, 255, 255), mask1);
-  cv::inRange(hsv_, cv::Scalar(160, 100, 100), cv::Scalar(180, 255, 255), mask2);
-  cv::bitwise_or(mask1, mask2, redMask);
-
   cv::Mat crossMask1, crossMask2, crossMask;
   cv::inRange(hsv_, cv::Scalar(0, 100, 100), cv::Scalar(5, 255, 255), crossMask1);
   cv::inRange(hsv_, cv::Scalar(170, 100, 100), cv::Scalar(180, 255, 255), crossMask2);
   cv::bitwise_or(crossMask1, crossMask2, crossMask);
 
   wallProcessor_->begin();
-  redPixelHelperFunction(frame, redMask, overlay);
+  redPixelHelperFunction(frame, crossMask, overlay);
   crossHelperFunction(frame, crossMask, overlay);
 }
 

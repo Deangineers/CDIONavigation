@@ -19,30 +19,46 @@ void ImageProcessor::processImage(const cv::Mat& frame)
 {
   cv::cvtColor(frame, hsv_, cv::COLOR_BGR2HSV);
   ballProcessor_->begin();
-
   cv::Mat ballOverlay = cv::Mat::zeros(frame.size(), frame.type());
   cv::Mat eggOverlay = cv::Mat::zeros(frame.size(), frame.type());
   cv::Mat redOverlay = cv::Mat::zeros(frame.size(), frame.type());
   cv::Mat frontBackOverlay = cv::Mat::zeros(frame.size(), frame.type());
 
+
   auto f1 = std::async(std::launch::async, [&]
   {
+    std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
     detectBalls(frame, ballOverlay);
+    std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << "detectBalls(): " << duration.count() << "ms\n";
   });
 
   auto f2 = std::async(std::launch::async, [&]
   {
+    std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
     detectEgg(frame, eggOverlay);
+    std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << "detectEgg(): " << duration.count() << "ms\n";
   });
 
   auto f3 = std::async(std::launch::async, [&]
   {
+    std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
     detectRedPixels(frame, redOverlay);
+    std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << "detectRedPixels(): " << duration.count() << "ms\n";
   });
 
   auto f4 = std::async(std::launch::async, [&]
   {
+    std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
     detectFrontAndBack(frame, frontBackOverlay);
+    std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << "detectFrontAndBack(): " << duration.count() << "ms\n";
   });
 
 
@@ -215,7 +231,7 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const std::string&
     int cy = cvRound(circle[1]);
     int r = cvRound(circle[2]);
 
-    cv::Vec3b hsvPixel = hsv.at<cv::Vec3b>(cy, cx);
+    cv::Vec3b hsvPixel = hsv_.at<cv::Vec3b>(cy, cx);
     int h = hsvPixel[0];
     int s = hsvPixel[1];
     int v = hsvPixel[2];
