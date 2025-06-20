@@ -3,6 +3,8 @@
 //
 #include "ImageProcessor.h"
 
+#include <future>
+
 #include "../MainController.h"
 #include "../../Models/Vector.h"
 #include "Utility/ConfigController.h"
@@ -17,13 +19,54 @@ void ImageProcessor::processImage(const cv::Mat& frame)
 {
   cv::cvtColor(frame, hsv_, cv::COLOR_BGR2HSV);
   ballProcessor_->begin();
-  detectBalls(frame);
-  detectEgg(frame);
-  detectRedPixels(frame);
-  detectFrontAndBack(frame);
+
+  cv::Mat ballOverlay = cv::Mat::zeros(frame.size(), frame.type());
+  cv::Mat eggOverlay = cv::Mat::zeros(frame.size(), frame.type());
+  cv::Mat redOverlay = cv::Mat::zeros(frame.size(), frame.type());
+  cv::Mat frontBackOverlay = cv::Mat::zeros(frame.size(), frame.type());
+
+  auto f1 = std::async(std::launch::async, [&]
+  {
+    detectBalls(frame, ballOverlay);
+  });
+
+  auto f2 = std::async(std::launch::async, [&]
+  {
+    detectEgg(frame, eggOverlay);
+  });
+
+  auto f3 = std::async(std::launch::async, [&]
+  {
+    detectRedPixels(frame, redOverlay);
+  });
+
+  auto f4 = std::async(std::launch::async, [&]
+  {
+    detectFrontAndBack(frame, frontBackOverlay);
+  });
+
+
+  f1.get();
+  f2.get();
+  f3.get();
+  f4.get();
+  auto applyOverlay = [](const cv::Mat& base, const cv::Mat& overlay)
+  {
+    // fallback for 3 channels overlay
+    cv::Mat gray;
+    cv::cvtColor(overlay, gray, cv::COLOR_BGR2GRAY);
+    cv::Mat mask;
+    cv::threshold(gray, mask, 0, 255, cv::THRESH_BINARY);
+    overlay.copyTo(base, mask);
+  };
+
+  applyOverlay(frame, ballOverlay);
+  applyOverlay(frame, eggOverlay);
+  applyOverlay(frame, redOverlay);
+  applyOverlay(frame, frontBackOverlay);
 }
 
-void ImageProcessor::redPixelHelperFunction(const cv::Mat& frame, cv::Mat& mask)
+void ImageProcessor::redPixelHelperFunction(const cv::Mat& frame, cv::Mat& mask, const cv::Mat& overlay)
 {
   cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
   cv::morphologyEx(mask, mask, cv::MORPH_OPEN, kernel);
@@ -100,16 +143,16 @@ void ImageProcessor::redPixelHelperFunction(const cv::Mat& frame, cv::Mat& mask)
     auto wall = std::make_unique<VectorWithStartPos>(start.x, start.y, vec);
 
     MainController::addBlockedObject(std::move(wall));
-    cv::line(frame, start, end, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("WallWidth"), cv::LINE_AA);
+    cv::line(overlay, start, end, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("WallWidth"), cv::LINE_AA);
   }
-  cv::circle(frame, topLeft, 5, cv::Scalar(0, 255, 0), -1);
-  cv::circle(frame, topRight, 5, cv::Scalar(0, 255, 0), -1);
-  cv::circle(frame, bottomRight, 5, cv::Scalar(0, 255, 0), -1);
-  cv::circle(frame, bottomLeft, 5, cv::Scalar(0, 255, 0), -1);
+  cv::circle(overlay, topLeft, 5, cv::Scalar(0, 255, 0), -1);
+  cv::circle(overlay, topRight, 5, cv::Scalar(0, 255, 0), -1);
+  cv::circle(overlay, bottomRight, 5, cv::Scalar(0, 255, 0), -1);
+  cv::circle(overlay, bottomLeft, 5, cv::Scalar(0, 255, 0), -1);
 }
 
 
-void ImageProcessor::crossHelperFunction(const cv::Mat& frame, cv::Mat& mask)
+void ImageProcessor::crossHelperFunction(const cv::Mat& frame, cv::Mat& mask, const cv::Mat& overlay)
 {
   cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
   cv::morphologyEx(mask, mask, cv::MORPH_OPEN, kernel);
@@ -146,16 +189,16 @@ void ImageProcessor::crossHelperFunction(const cv::Mat& frame, cv::Mat& mask)
         continue;
       }
       // Draw line (vector)
-      cv::line(frame, p1, p2, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("CrossWallWidth"),
+      cv::line(overlay, p1, p2, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("CrossWallWidth"),
                cv::LINE_AA, 0);
-      cv::putText(frame, std::to_string(label++), p1, cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
+      cv::putText(overlay, std::to_string(label++), p1, cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
       MainController::addCrossObject(std::move(vectorToCreate));
       MainController::addCrossObject(std::make_unique<VectorWithStartPos>(p1.x, p1.y, vector));
     }
   }
 }
 
-void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const std::string& colorLabel)
+void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const std::string& colorLabel, const cv::Mat& overlay)
 {
   cv::Mat grey, hsv;
   cv::cvtColor(frame, hsv, cv::COLOR_BGR2HSV);
@@ -219,13 +262,14 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const std::string&
 
     MainController::addCourseObject(std::move(courseObject));
 
-    cv::rectangle(frame, rect, cv::Scalar(0, 255, 0), 2);
-    cv::putText(frame, detectedColor, cv::Point(x1, y1 - 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
-    cv::circle(frame, cv::Point(cx, cy), 2, cv::Scalar(255, 0, 255), -1); // circle center
+    cv::rectangle(overlay, rect, cv::Scalar(0, 255, 0), 2);
+    cv::putText(overlay, detectedColor, cv::Point(x1, y1 - 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0),
+                2);
+    cv::circle(overlay, cv::Point(cx, cy), 2, cv::Scalar(255, 0, 255), -1); // circle center
   }
 }
 
-void ImageProcessor::eggHelperFunction(const cv::Mat& frame, const cv::Mat& mask)
+void ImageProcessor::eggHelperFunction(const cv::Mat& frame, const cv::Mat& mask, const cv::Mat& overlay)
 {
   cv::morphologyEx(mask, mask, cv::MORPH_OPEN, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(3, 3)));
 
@@ -271,8 +315,8 @@ void ImageProcessor::eggHelperFunction(const cv::Mat& frame, const cv::Mat& mask
     }
 
     MainController::addCourseObject(std::move(courseObject));
-    cv::rectangle(frame, rect, cv::Scalar(0, 255, 0), 2);
-    cv::putText(frame, label, cv::Point(x1, y1 - 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
+    cv::rectangle(overlay, rect, cv::Scalar(0, 255, 0), 2);
+    cv::putText(overlay, label, cv::Point(x1, y1 - 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
 
     cv::Mat roi_mask = mask(rect);
     cv::GaussianBlur(roi_mask, roi_mask, cv::Size(5, 5), 0);
@@ -283,13 +327,14 @@ void ImageProcessor::eggHelperFunction(const cv::Mat& frame, const cv::Mat& mask
     cv::findNonZero(edges, edge_points);
     for (const auto& pt : edge_points)
     {
-      cv::circle(frame, pt + rect.tl(), 1, cv::Scalar(0, 0, 255), -1);
+      cv::circle(overlay, pt + rect.tl(), 1, cv::Scalar(0, 0, 255), -1);
     }
   }
 }
 
 
-void ImageProcessor::frontAndBackHelperFunction(const cv::Mat& frame, cv::Mat& mask, std::string label)
+void ImageProcessor::frontAndBackHelperFunction(const cv::Mat& frame, cv::Mat& mask, std::string label,
+                                                const cv::Mat& overlay)
 {
   cv::Mat hsv;
   cv::cvtColor(frame, hsv, cv::COLOR_BGR2HSV);
@@ -312,8 +357,8 @@ void ImageProcessor::frontAndBackHelperFunction(const cv::Mat& frame, cv::Mat& m
       int x2 = x1 + rect.width, y2 = y1 + rect.height;
 
       MainController::addCourseObject(std::make_unique<CourseObject>(x1, y1, x2, y2, label));
-      cv::rectangle(frame, rect, cv::Scalar(0, 255, 0), 2);
-      cv::putText(frame, label, cv::Point(x1, y1 - 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0),
+      cv::rectangle(overlay, rect, cv::Scalar(0, 255, 0), 2);
+      cv::putText(overlay, label, cv::Point(x1, y1 - 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0),
                   2);
 
       cv::Mat roi_mask = mask(rect);
@@ -325,7 +370,7 @@ void ImageProcessor::frontAndBackHelperFunction(const cv::Mat& frame, cv::Mat& m
       cv::findNonZero(edges, edge_points);
       for (const auto& pt : edge_points)
       {
-        cv::circle(frame, pt + rect.tl(), 1, cv::Scalar(0, 0, 255), -1);
+        cv::circle(overlay, pt + rect.tl(), 1, cv::Scalar(0, 0, 255), -1);
       }
     }
   }

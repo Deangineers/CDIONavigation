@@ -14,10 +14,10 @@ public:
   ~CloudyImageProcessor() override = default;
 
 protected:
-  void detectRedPixels(const cv::Mat& frame) override;
-  void detectBalls(const cv::Mat& frame) override;
-  void detectEgg(const cv::Mat& frame) override;
-  void detectFrontAndBack(const cv::Mat& frame) override;
+  void detectRedPixels(const cv::Mat& frame, const cv::Mat& overlay) override;
+  void detectBalls(const cv::Mat& frame, const cv::Mat& overlay) override;
+  void detectEgg(const cv::Mat& frame, const cv::Mat& overlay) override;
+  void detectFrontAndBack(const cv::Mat& frame, const cv::Mat& overlay) override;
 };
 
 

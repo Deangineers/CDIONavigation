@@ -13,7 +13,7 @@ CloudyImageProcessor::CloudyImageProcessor(const std::shared_ptr<IBallProcessor>
 {
 }
 
-void CloudyImageProcessor::detectRedPixels(const cv::Mat& frame)
+void CloudyImageProcessor::detectRedPixels(const cv::Mat& frame, const cv::Mat& overlay)
 {
   cv::Mat mask1, mask2, redMask;
   cv::inRange(hsv_, cv::Scalar(0, 100, 100), cv::Scalar(10, 255, 255), mask1);
@@ -26,16 +26,16 @@ void CloudyImageProcessor::detectRedPixels(const cv::Mat& frame)
   cv::bitwise_or(crossMask1, crossMask2, crossMask);
 
   wallProcessor_->begin();
-  redPixelHelperFunction(frame, redMask);
-  crossHelperFunction(frame, crossMask);
+  redPixelHelperFunction(frame, redMask, overlay);
+  crossHelperFunction(frame, crossMask, overlay);
 }
 
-void CloudyImageProcessor::detectBalls(const cv::Mat& frame)
+void CloudyImageProcessor::detectBalls(const cv::Mat& frame, const cv::Mat& overlay)
 {
-  ballHelperFunction(frame, "orange");
+  ballHelperFunction(frame, "orange", overlay);
 }
 
-void CloudyImageProcessor::detectEgg(const cv::Mat& frame)
+void CloudyImageProcessor::detectEgg(const cv::Mat& frame, const cv::Mat& overlay)
 {
   cv::Mat eggMask;
   cv::inRange(hsv_, cv::Scalar(0, 0, 200), cv::Scalar(180, 40, 255), eggMask);
@@ -43,15 +43,15 @@ void CloudyImageProcessor::detectEgg(const cv::Mat& frame)
   cv::morphologyEx(eggMask, eggMask, cv::MORPH_OPEN,
                    cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)));
 
-  eggHelperFunction(frame, eggMask);
+  eggHelperFunction(frame, eggMask, overlay);
 }
 
-void CloudyImageProcessor::detectFrontAndBack(const cv::Mat& frame)
+void CloudyImageProcessor::detectFrontAndBack(const cv::Mat& frame, const cv::Mat& overlay)
 {
   cv::Mat frontMask, backMask, finalMask;
 
   cv::inRange(hsv_, cv::Scalar(35, 50, 50), cv::Scalar(85, 255, 255), frontMask);
   cv::inRange(hsv_, cv::Scalar(120, 85, 85), cv::Scalar(170, 255, 255), backMask);
-  frontAndBackHelperFunction(frame, frontMask, "robotFront");
-  frontAndBackHelperFunction(frame, backMask, "robotBack");
+  frontAndBackHelperFunction(frame, frontMask, "robotFront", overlay);
+  frontAndBackHelperFunction(frame, backMask, "robotBack", overlay);
 }
