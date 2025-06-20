@@ -43,11 +43,8 @@ private:
   std::pair<Vector, Vector> getVectorsForClosestBlockingObjects(const CourseObject* courseObject) const;
 
   [[nodiscard]] bool checkCollisionOnRoute(const Vector& targetVector) const;
-  [[nodiscard]] bool frontIsToCloseToBlockingObject() const;
   Vector navigateToSafeSpot();
   void findSafeSpots();
-
-  bool targetStillActual();
 
 
   std::vector<std::unique_ptr<CourseObject>> ballVector_;
@@ -79,6 +76,7 @@ private:
   bool navigatedToGoalIntermediate_ = false;
 
   int sameTargetCount_ = 0;
+  bool backUpAfterBallPickup_ = false;
 
   int amountOfWalls_ = 0;
 };

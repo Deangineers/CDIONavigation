@@ -208,10 +208,6 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
                 0.5, cv::Scalar(0, 255, 0), 2);
     return makeJourneyModel(objectVector, true);
   }
-  if (frontIsToCloseToBlockingObject() && target_ == nullptr)
-  {
-    return std::make_unique<JourneyModel>(-10, 0, true);
-  }
 
   if (target_ != nullptr)
   {
@@ -227,7 +223,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
       auto closestVector = getVectorsForClosestBlockingObjects(target_.get()).first;
       target_ = nullptr;
       sameTargetCount_ = 0;
-      if (closestVector.getLength() < ConfigController::getConfigInt("DistanceBeforeToCloseToWall"))
+      if (backUpAfterBallPickup_)
       {
         return std::make_unique<JourneyModel>(-10, 0, true);
       }
@@ -266,6 +262,9 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   {
     target_ = std::move(potentialTarget_);
     potentialTarget_ = nullptr;
+    auto closestVectors = getVectorsForClosestBlockingObjects(target_.get());
+    double distanceToWall = closestVectors.first.getLength();
+    backUpAfterBallPickup_ = distanceToWall < ConfigController::getConfigInt("DistanceBeforeToCloseToWall");
   }
 
 
@@ -775,37 +774,6 @@ bool NavigationController::checkCollisionOnRoute(const Vector& targetVector) con
     }
   }
 
-  return false;
-}
-
-bool NavigationController::frontIsToCloseToBlockingObject() const
-{
-  auto vectorsToBlockingObjects = getVectorsForClosestBlockingObjects(robotFront_.get());
-  auto vectorFromRobotBack = MathUtil::calculateVectorToObject(robotBack_.get(), robotFront_.get());
-  int allowedAngleDiff = ConfigController::getConfigInt("AllowedAngleDiffForWallInFrontOfRobotDetection");
-  int angleDiff = MathUtil::calculateAngleDifferenceBetweenVectors(vectorsToBlockingObjects.first, vectorFromRobotBack);
-  if (vectorsToBlockingObjects.first.getLength() < ConfigController::getConfigInt("DistanceBeforeToCloseToWall"))
-  {
-    return std::abs(angleDiff) < allowedAngleDiff;
-  }
-  return false;
-}
-
-bool NavigationController::targetStillActual()
-{
-  for (const auto& ball : ballVector_)
-  {
-    int x1Diff = std::abs(ball->x1() - target_->x1());
-    int x2Diff = std::abs(ball->x2() - target_->x2());
-    int y1Diff = std::abs(ball->y1() - target_->y1());
-    int y2Diff = std::abs(ball->y2() - target_->y2());
-
-    int allowedDiff = ConfigController::getConfigInt("AllowedDifferenceBetweenNewTargetAndPotential");
-    if (x1Diff < allowedDiff && y1Diff < allowedDiff && x2Diff < allowedDiff && y2Diff < allowedDiff)
-    {
-      return true;
-    }
-  }
   return false;
 }
 
