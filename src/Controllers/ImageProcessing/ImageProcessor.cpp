@@ -342,12 +342,8 @@ void ImageProcessor::eggHelperFunction(const cv::Mat& frame, const cv::Mat& mask
   }
 }
 
-void ImageProcessor::frontAndBackHelperFunction(const cv::Mat &frame, cv::Mat &maskInput, std::string label,
+void ImageProcessor::frontAndBackHelperFunction(const cv::Mat &frame, cv::Mat &mask, std::string label,
                                                 const cv::Mat &overlay) {
-
-  cv::Mat mask;
-  maskInput.copyTo(mask);
-
   // Preprocessing
   cv::morphologyEx(mask, mask, cv::MORPH_OPEN, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
 
