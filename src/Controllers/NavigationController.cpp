@@ -804,8 +804,6 @@ Vector NavigationController::navigateToSafeSpot()
     double distToBall = getDistanceToClosestBallFromSafeSpot(spot);
     safeSpotsWithDistance.emplace_back(i, spot, distToBall);
   }
-  distanceToBackUp = 0;
-  target_ = std::make_unique<CourseObject>(courseObject);
 
   std::sort(safeSpotsWithDistance.begin(), safeSpotsWithDistance.end(), [](const auto &a, const auto &b) {
     return std::get<2>(a) < std::get<2>(b);
@@ -828,6 +826,9 @@ Vector NavigationController::navigateToSafeSpot()
     }
 
     currentSafeSpotIndex_ = index;
+    target_ = std::make_unique<CourseObject>(courseObject);
+    distanceToBackUp = 0;
+
     return vectorToSpot;
   }
   return {0, 0};
