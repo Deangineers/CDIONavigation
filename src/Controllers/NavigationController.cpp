@@ -142,6 +142,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     {
       atGoal_ = false;
       navigatedToGoalIntermediate_ = false;
+      return std::make_unique<JourneyModel>(-10,0,true);
     }
     return nullptr;
   }
@@ -192,7 +193,6 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
         atGoalTime_ = std::chrono::high_resolution_clock::now();
         atGoal_ = true;
         target_ = nullptr;
-        distanceToBackUp = 10;
         Utility::appendToFile("log.txt", "Shooting with angle: " + std::to_string(angleDiff) + "\n");
         return std::make_unique<JourneyModel>(0, 0, false);
       }
@@ -848,6 +848,7 @@ Vector NavigationController::navigateToSafeSpot()
       return {0, 0};
     }
   }
+  distanceToBackUp = 0;
   target_ = std::make_unique<CourseObject>(courseObject);
 
   return vectorToObject;
