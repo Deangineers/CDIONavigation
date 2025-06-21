@@ -30,8 +30,7 @@ int main()
   cap.set(cv::CAP_PROP_FPS, 30);
 
   cv::Mat frame;
-  auto ballProcessor = std::make_shared<BallProcessor>();
-  const auto processor = std::make_unique<CloudyImageProcessor>(ballProcessor);
+  const auto processor = std::make_unique<CloudyImageProcessor>();
 
   double lastFPS = 0;
 
