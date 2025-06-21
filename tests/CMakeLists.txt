@@ -9,8 +9,6 @@ set(SOURCES
         BallDectectionTests.cpp
         FrontBackDetectionTests.cpp
         ${SRC_FILES}
-        TestBallProcessor.cpp
-        TestBallProcessor.h
 )
 add_executable(CDIONavigation_Tests ${SOURCES})
 

@@ -10,9 +10,8 @@
 #include "../../Models/Vector.h"
 #include "Utility/ConfigController.h"
 
-ImageProcessor::ImageProcessor(const std::shared_ptr<IBallProcessor>& ballProcessor) :
-  ballProcessor_(ballProcessor),
-  wallProcessor_(std::make_unique<WallProcessor>())
+
+ImageProcessor::ImageProcessor() : ballProcessor_(std::make_shared<BallProcessor>()),wallProcessor_(std::make_unique<WallProcessor>())
 {
 }
 
@@ -266,10 +265,7 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const std::string&
     int x2 = x1 + rect.width, y2 = y1 + rect.height;
 
     auto courseObject = std::make_unique<CourseObject>(x1, y1, x2, y2, label);
-    if (not ballProcessor_->isBallValid(courseObject.get()))
-    {
-      //continue;
-    }
+    ObjectCounter::objectDetected(label);
 
     MainController::addCourseObject(std::move(courseObject));
 
@@ -319,11 +315,6 @@ void ImageProcessor::eggHelperFunction(const cv::Mat& frame, const cv::Mat& mask
       continue;
     }
     auto courseObject = std::make_unique<CourseObject>(x1, y1, x2, y2, label);
-
-    if (not ballProcessor_->isEggValid(courseObject.get()))
-    {
-      continue;
-    }
 
     MainController::addCourseObject(std::move(courseObject));
     cv::rectangle(overlay, rect, cv::Scalar(0, 255, 0), 2);

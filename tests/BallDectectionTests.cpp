@@ -5,7 +5,6 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/core/mat.hpp>
 
-#include "TestBallProcessor.h"
 #include "../src/Controllers/MainController.h"
 #include "../src/Controllers/ObjectCounter.h"
 #include "../src/Controllers/ImageProcessing/CloudyImageProcessor.h"
@@ -24,15 +23,14 @@ public:
   BallDetectionTests()
   {
     MainController::testInit();
-    ballProcessor = std::make_shared<TestBallProcessor>();
-    imageProcessor = std::make_shared<CloudyImageProcessor>(ballProcessor);
+    imageProcessor = std::make_shared<CloudyImageProcessor>();
     ConfigController::TESTsetConfigInt("ImagesToAverage", 1);
     ConfigController::TESTsetConfigInt("AmountOfSeenBeforeCreate", 0);
   }
 
   void handleExpect(int expected)
   {
-    int seenBalls = ballProcessor->getBallCounter();
+    int seenBalls = ObjectCounter::getCount("ball");
     int diff = seenBalls - expected;
     totalDiff += std::abs(diff);
     aggregateDiff += diff;
@@ -49,7 +47,6 @@ public:
   }
 
   std::shared_ptr<CloudyImageProcessor> imageProcessor;
-  std::shared_ptr<TestBallProcessor> ballProcessor;
 };
 
 

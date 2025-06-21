@@ -4,7 +4,7 @@
 
 #include "ObjectCounter.h"
 
-void ObjectCounter::objectDetected(const std::string& label)
+void ObjectCounter::objectDetected(std::string label)
 {
   map_[label]++;
 }

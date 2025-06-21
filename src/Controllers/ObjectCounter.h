@@ -11,7 +11,7 @@
 class ObjectCounter
 {
 public:
-  static void objectDetected(const std::string& label);
+  static void objectDetected(std::string label);
   static void reset();
   static int getCount(std::string label);
 private:

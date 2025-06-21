@@ -7,12 +7,6 @@
 #include "Utility/ConfigController.h"
 #include "../MainController.h"
 
-
-CloudyImageProcessor::CloudyImageProcessor(const std::shared_ptr<IBallProcessor>& ballProcessor) : ImageProcessor(
-  ballProcessor)
-{
-}
-
 void CloudyImageProcessor::detectRedPixels(const cv::Mat& frame, const cv::Mat& overlay)
 {
   cv::Mat crossMask1, crossMask2, crossMask;

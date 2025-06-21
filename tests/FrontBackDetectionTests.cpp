@@ -2,7 +2,6 @@
 // Created by localadmin on 21/06/2025.
 //
 
-#include "TestBallProcessor.h"
 #include "../cmake-build-release/_deps/googletest-src/googletest/include/gtest/gtest.h"
 #include "../Simulator/TextureLocations.h"
 #include "../src/Controllers/ObjectCounter.h"
@@ -15,8 +14,7 @@ public:
   FrontBackDetectionTests()
   {
     MainController::testInit();
-    ballProcessor = std::make_shared<TestBallProcessor>();
-    imageProcessor = std::make_shared<CloudyImageProcessor>(ballProcessor);
+    imageProcessor = std::make_shared<CloudyImageProcessor>();
   }
 
   void handleExpect()
@@ -29,7 +27,6 @@ public:
   }
 
   std::shared_ptr<CloudyImageProcessor> imageProcessor;
-  std::shared_ptr<TestBallProcessor> ballProcessor;
 };
 
 TEST_F(FrontBackDetectionTests, testImage1)
