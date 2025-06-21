@@ -101,6 +101,27 @@ TEST_F(BallDetectionTests, testImage5)
   handleExpect(10);
 }
 
+TEST_F(BallDetectionTests, testImage6)
+{
+  cv::Mat frame = cv::imread("../TestImages/testImage6.jpg");
+  imageProcessor->processImage(frame);
+  handleExpect(7);
+}
+
+TEST_F(BallDetectionTests, testImage7)
+{
+  cv::Mat frame = cv::imread("../TestImages/testImage7.jpg");
+  imageProcessor->processImage(frame);
+  handleExpect(7);
+}
+
+TEST_F(BallDetectionTests, testImage8)
+{
+  cv::Mat frame = cv::imread("../../TestImages/testImage8.jpg");
+  imageProcessor->processImage(frame);
+  handleExpect(6);
+}
+
 TEST_F(BallDetectionTests, totalDiff)
 {
   EXPECT_EQ(amountOverTarget, 0);
