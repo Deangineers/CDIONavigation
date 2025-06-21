@@ -57,10 +57,10 @@ void ImageProcessor::processImage(const cv::Mat& frame)
     overlay.copyTo(base, gray);
   };
 
-  applyOverlay(frame, ballOverlay);
-  applyOverlay(frame, eggOverlay);
   applyOverlay(frame, redOverlay);
   applyOverlay(frame, frontBackOverlay);
+  applyOverlay(frame, ballOverlay);
+  applyOverlay(frame, eggOverlay);
 }
 
 void ImageProcessor::redPixelHelperFunction(const cv::Mat& frame, cv::Mat& mask, const cv::Mat& overlay)

@@ -287,7 +287,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     {
       if (closestVectors.second.getLength() < ConfigController::getConfigInt("DistanceBeforeToCloseToWall"))
       {
-        distanceToBackUp = 50;
+        distanceToBackUp = 30;
       }
       else
       {
