@@ -848,6 +848,7 @@ Vector NavigationController::navigateToSafeSpot()
       return {0, 0};
     }
   }
+  target_ = std::make_unique<CourseObject>(courseObject);
 
   return vectorToObject;
 }
