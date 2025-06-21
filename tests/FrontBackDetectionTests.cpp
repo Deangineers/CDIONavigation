@@ -84,3 +84,14 @@ TEST_F(FrontBackDetectionTests, testImage8)
   imageProcessor->processImage(frame);
   handleExpect();
 }
+
+TEST_F(FrontBackDetectionTests, testImages)
+{
+  int amountOfImages = 15;
+  for (int i = 1; i <= amountOfImages; i++)
+  {
+    cv::Mat frame = cv::imread("../../TestImages/testImage"+std::to_string(i)+".jpg");
+    imageProcessor->processImage(frame);
+    handleExpect();
+  }
+}
