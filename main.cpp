@@ -59,6 +59,7 @@ int main()
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     lastFPS = 1000.0 / duration.count();
     start = std::chrono::high_resolution_clock::now();
+    cap.grab();
   }
 
   cap.release();
