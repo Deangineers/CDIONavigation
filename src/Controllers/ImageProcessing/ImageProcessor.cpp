@@ -165,40 +165,53 @@ void ImageProcessor::crossHelperFunction(const cv::Mat& frame, cv::Mat& mask, co
     {
       continue;
     }
+    // Approximate contour to get corners
+    std::vector<cv::Point> approx;
+    cv::approxPolyDP(contour, approx, 10, true); // epsilon=10 can be tuned
 
-    cv::Point top(INT_MIN, INT_MIN), bottom(INT_MAX, INT_MAX);
-    cv::Point left(INT_MAX, INT_MAX), right(INT_MIN, INT_MIN);
+    cv::Point top = cv::Point(INT_MIN, INT_MIN);
+    cv::Point bottom = cv::Point(INT_MAX, INT_MAX);
+    cv::Point right = cv::Point(INT_MIN, INT_MIN);
+    cv::Point left = cv::Point(INT_MAX, INT_MAX);
 
-    for (const auto& p : contour)
+    for (size_t i = 0; i < approx.size(); ++i)
     {
-      if (p.y > top.y) top = p;
-      if (p.y < bottom.y) bottom = p;
-      if (p.x > right.x) right = p;
-      if (p.x < left.x) left = p;
+      cv::Point p = approx[i];
+      std::cout << i << ": " << p.x << " " << p.y << std::endl;
+      if (p.y > top.y)
+      {
+        top = p;
+      }
+
+      if (p.y < bottom.y)
+      {
+        bottom = p;
+      }
+
+      if (p.x > right.x)
+      {
+        right = p;
+      }
+
+      if (p.x < left.x)
+      {
+        left = p;
+      }
     }
 
-    cv::Moments M = cv::moments(contour);
-    if (M.m00 == 0) continue;
-    cv::Point center(M.m10 / M.m00, M.m01 / M.m00);
+    Vector horizontal = Vector(right.x - left.x, right.y - left.y);
+    Vector vertical = Vector(top.x - bottom.x, top.y - bottom.y);
 
-    cv::Point topArm(center.x, center.y - (center.y - bottom.y));
-    cv::Point bottomArm(center.x, center.y + (top.y - center.y));
-    Vector verticalVec(0, bottomArm.y - topArm.y);
+    MainController::addCrossObject(std::make_unique<VectorWithStartPos>(top.x, top.y, vertical));
+    MainController::addCrossObject(std::make_unique<VectorWithStartPos>(right.x, right.y, horizontal));
 
-    cv::Point leftArm(center.x - (right.x - center.x), center.y);
-    cv::Point rightArm(center.x + (center.x - left.x), center.y);
-    Vector horizontalVec(rightArm.x - leftArm.x, 0);
+    cv::line(overlay, bottom, top, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("CrossWallWidth"),
+               cv::LINE_AA, 0);
+    cv::putText(overlay, std::to_string(label++), bottom, cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
 
-    MainController::addCrossObject(std::make_unique<VectorWithStartPos>(topArm.x, topArm.y, verticalVec));
-    MainController::addCrossObject(std::make_unique<VectorWithStartPos>(leftArm.x, leftArm.y, horizontalVec));
-
-    cv::line(overlay, topArm, bottomArm, cv::Scalar(255, 0, 0),
-             ConfigController::getConfigInt("CrossWallWidth"), cv::LINE_AA);
-    cv::putText(overlay, std::to_string(label++), topArm, cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
-
-    cv::line(overlay, leftArm, rightArm, cv::Scalar(255, 0, 0),
-             ConfigController::getConfigInt("CrossWallWidth"), cv::LINE_AA);
-    cv::putText(overlay, std::to_string(label++), leftArm, cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
+    cv::line(overlay, left, right, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("CrossWallWidth"),
+               cv::LINE_AA, 0);
+    cv::putText(overlay, std::to_string(label++), left, cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
   }
 }
 
