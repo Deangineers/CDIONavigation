@@ -126,7 +126,6 @@ void ImageProcessor::redPixelHelperFunction(const cv::Mat& frame, cv::Mat& mask,
         }
         center *= (1.f / pts.size());
 
-
         std::vector<std::pair<double, cv::Point>> angles;
         for (const auto& p : pts)
         {
@@ -144,6 +143,22 @@ void ImageProcessor::redPixelHelperFunction(const cv::Mat& frame, cv::Mat& mask,
     };
 
     corners = sortCorners(approx);
+
+    // Adjust corners toward center of the corner crosses
+    if (corners.size() == 4)
+    {
+      corners[0].x += shift;  // top-left: right
+      corners[0].y += shift/2;  // top-left: down
+
+      corners[1].x -= shift/2;  // top-right: left
+      corners[1].y += shift;  // top-right: down
+
+      corners[2].x -= shift;  // bottom-right: left
+      corners[2].y -= shift/2;  // bottom-right: up
+
+      corners[3].x += shift/2;  // bottom-left: right
+      corners[3].y -= shift;  // bottom-left: up
+    }
   }
 
   // Draw walls
@@ -165,6 +180,7 @@ void ImageProcessor::redPixelHelperFunction(const cv::Mat& frame, cv::Mat& mask,
     cv::circle(overlay, pt, 5, cv::Scalar(0, 255, 0), -1);
   }
 }
+
 
 
 
