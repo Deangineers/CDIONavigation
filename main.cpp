@@ -13,7 +13,8 @@ int main()
   cv::VideoCapture cap;
 #if __linux__
   MainController::init();
-  cap = cv::VideoCapture(2);
+  cap = cv::VideoCapture(2, cv::CAP_V4L2);
+
 #else
   MainController::mockInit();
   cap = cv::VideoCapture(0);
@@ -26,6 +27,8 @@ int main()
   }
   cap.set(cv::CAP_PROP_FRAME_WIDTH, 1920);
   cap.set(cv::CAP_PROP_FRAME_HEIGHT, 1080);
+  cap.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));
+  cap.set(cv::CAP_PROP_FPS, 30);
 
   cv::Mat frame;
   auto ballProcessor = std::make_shared<BallProcessor>();
