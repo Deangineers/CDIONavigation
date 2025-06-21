@@ -170,40 +170,74 @@ void ImageProcessor::crossHelperFunction(const cv::Mat& frame, cv::Mat& mask, co
     for (size_t i = 0; i < approx.size(); ++i)
     {
       cv::Point p = approx[i];
-      if (p.y > top.y)
+      if (p.y > top.y) top = p;
+      if (p.y < bottom.y) bottom = p;
+      if (p.x > right.x) right = p;
+      if (p.x < left.x) left = p;
+    }
+
+    cv::Point closestToTop;
+    double minDistanceToTop = 50000;
+    cv::Point closestToBottom;
+    double minDistanceToBottom = 50000;
+    cv::Point closestToRight;
+    double minDistanceToRight = 50000;
+    cv::Point closestToLeft;
+    double minDistanceToLeft = 50000;
+
+    for (size_t i = 0; i < approx.size(); ++i)
+    {
+      cv::Point p = approx[i];
+      if (p == top || p == bottom || p == right || p == left) continue;
+
+      double distanceToTop = std::abs(Vector(p.x - top.x, p.y - top.y).getLength());
+      double distanceToBottom = std::abs(Vector(p.x - bottom.x, p.y - bottom.y).getLength());
+      double distanceToLeft = std::abs(Vector(p.x - left.x, p.y - left.y).getLength());
+      double distanceToRight = std::abs(Vector(p.x - right.x, p.y - right.y).getLength());
+
+      if (distanceToTop < minDistanceToTop)
       {
-        top = p;
+        minDistanceToTop = distanceToTop;
+        closestToTop = p;
       }
 
-      if (p.y < bottom.y)
+      if (distanceToBottom < minDistanceToBottom)
       {
-        bottom = p;
+        minDistanceToBottom = distanceToBottom;
+        closestToBottom = p;
       }
 
-      if (p.x > right.x)
+      if (distanceToLeft < minDistanceToLeft)
       {
-        right = p;
+        minDistanceToLeft = distanceToLeft;
+        closestToLeft = p;
       }
 
-      if (p.x < left.x)
+      if (distanceToRight < minDistanceToRight)
       {
-        left = p;
+        minDistanceToRight = distanceToRight;
+        closestToRight = p;
       }
     }
 
-    Vector horizontal = Vector(right.x - left.x, right.y - left.y);
-    Vector vertical = Vector(top.x - bottom.x, top.y - bottom.y);
+    auto topCenter = cv::Point((top.x + closestToTop.x) / 2, (top.y + closestToTop.y) / 2);
+    auto bottomCenter = cv::Point((bottom.x + closestToBottom.x) / 2, (bottom.y + closestToBottom.y) / 2);
+    auto rightCenter = cv::Point((right.x + closestToRight.x) / 2, (right.y + closestToRight.y) / 2);
+    auto leftCenter = cv::Point((left.x + closestToLeft.x) / 2, (left.y + closestToLeft.y) / 2);
 
-    MainController::addCrossObject(std::make_unique<VectorWithStartPos>(top.x, top.y, vertical));
-    MainController::addCrossObject(std::make_unique<VectorWithStartPos>(right.x, right.y, horizontal));
+    auto horizontal = Vector(rightCenter.x - leftCenter.x, rightCenter.y - leftCenter.y);
+    auto vertical = Vector(topCenter.x - bottomCenter.x, topCenter.y - bottomCenter.y);
 
-    cv::line(overlay, bottom, top, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("CrossWallWidth"),
+    MainController::addCrossObject(std::make_unique<VectorWithStartPos>(topCenter.x, topCenter.y, vertical));
+    MainController::addCrossObject(std::make_unique<VectorWithStartPos>(rightCenter.x, rightCenter.y, horizontal));
+
+    cv::line(overlay, bottomCenter, topCenter, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("CrossWallWidth"),
                cv::LINE_AA, 0);
-    cv::putText(overlay, std::to_string(label++), bottom, cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
+    cv::putText(overlay, std::to_string(label++), bottomCenter, cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
 
-    cv::line(overlay, left, right, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("CrossWallWidth"),
+    cv::line(overlay, leftCenter, rightCenter, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("CrossWallWidth"),
                cv::LINE_AA, 0);
-    cv::putText(overlay, std::to_string(label++), left, cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
+    cv::putText(overlay, std::to_string(label++), leftCenter, cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
   }
 }
 
