@@ -26,6 +26,8 @@ int main()
   }
   cap.set(cv::CAP_PROP_FRAME_WIDTH, 1920);
   cap.set(cv::CAP_PROP_FRAME_HEIGHT, 1080);
+  cap.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M','J','P','G'));
+  cap.set(cv::CAP_PROP_FPS, 30);
 
   cv::Mat frame;
   auto ballProcessor = std::make_shared<BallProcessor>();
