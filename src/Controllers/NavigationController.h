@@ -31,6 +31,7 @@ public:
 private:
   void removeBallsOutsideCourse();
   void removeBallsInsideRobot();
+  [[nodiscard]] double getDistanceToClosestBallFromSafeSpot(const std::pair<int, int>& spot) const;
   [[nodiscard]] std::unique_ptr<JourneyModel> makeJourneyModel(const Vector& objectVector, bool toCollectBalls) const;
   [[nodiscard]] Vector navigateToGoal();
   [[nodiscard]] Vector findClosestBall();
