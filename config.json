@@ -21,7 +21,7 @@
   "RobotWidth": 130,
   "TotalBalls": 5,
   "WallWidth": 40,
-  "RobotLengthInMM": 70,
+  "RobotLengthInMM": 65,
   "DistanceBeforeSmallBit": 50,
   "SmallBit": 40,
   "AmountOfCommandsToAverage": 4,
