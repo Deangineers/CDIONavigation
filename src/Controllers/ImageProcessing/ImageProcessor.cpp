@@ -6,6 +6,7 @@
 #include <future>
 
 #include "../MainController.h"
+#include "../ObjectCounter.h"
 #include "../../Models/Vector.h"
 #include "Utility/ConfigController.h"
 
@@ -371,6 +372,7 @@ void ImageProcessor::frontAndBackHelperFunction(const cv::Mat &frame, cv::Mat &m
       MainController::addCourseObject(std::move(courseObject));
 
       // Draw debug visuals
+      ObjectCounter::objectDetected(label);
       cv::rectangle(overlay, rect, cv::Scalar(0, 255, 0), 2);
       cv::putText(overlay, label, cv::Point(x1, y1 - 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
 

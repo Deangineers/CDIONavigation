@@ -7,6 +7,7 @@
 
 #include "TestBallProcessor.h"
 #include "../src/Controllers/MainController.h"
+#include "../src/Controllers/ObjectCounter.h"
 #include "../src/Controllers/ImageProcessing/CloudyImageProcessor.h"
 #include "gtest/gtest.h"
 #include "Utility/ConfigController.h"
@@ -44,6 +45,7 @@ public:
       amountUnderTarget++;
     }
     EXPECT_EQ(seenBalls, expected);
+    ObjectCounter::reset();
   }
 
   std::shared_ptr<CloudyImageProcessor> imageProcessor;
@@ -103,14 +105,14 @@ TEST_F(BallDetectionTests, testImage5)
 
 TEST_F(BallDetectionTests, testImage6)
 {
-  cv::Mat frame = cv::imread("../TestImages/testImage6.jpg");
+  cv::Mat frame = cv::imread("../../TestImages/testImage6.jpg");
   imageProcessor->processImage(frame);
   handleExpect(7);
 }
 
 TEST_F(BallDetectionTests, testImage7)
 {
-  cv::Mat frame = cv::imread("../TestImages/testImage7.jpg");
+  cv::Mat frame = cv::imread("../../TestImages/testImage7.jpg");
   imageProcessor->processImage(frame);
   handleExpect(7);
 }

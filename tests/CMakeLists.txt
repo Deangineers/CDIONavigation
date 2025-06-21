@@ -7,6 +7,7 @@ find_package(OpenCV REQUIRED)
 file(GLOB_RECURSE SRC_FILES ../src/*.cpp)
 set(SOURCES
         BallDectectionTests.cpp
+        FrontBackDetectionTests.cpp
         ${SRC_FILES}
         TestBallProcessor.cpp
         TestBallProcessor.h
