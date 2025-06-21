@@ -277,7 +277,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     return nullptr;
   }
 
-  if (sameTargetCount_ == ConfigController::getConfigInt("AmountOfCommandsToAverage"))
+  if (sameTargetCount_ == ConfigController::getConfigInt("TargetSameBeforeTargetSet"))
   {
     target_ = std::move(potentialTarget_);
     potentialTarget_ = nullptr;
