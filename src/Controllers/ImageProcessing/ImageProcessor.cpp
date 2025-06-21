@@ -336,12 +336,13 @@ void ImageProcessor::eggHelperFunction(const cv::Mat& frame, const cv::Mat& mask
   }
 }
 
+void ImageProcessor::frontAndBackHelperFunction(const cv::Mat &frame, cv::Mat &maskInput, std::string label,
+                                                const cv::Mat &overlay) {
 
-void ImageProcessor::frontAndBackHelperFunction(const cv::Mat& frame, cv::Mat& mask, std::string label,
-                                                const cv::Mat& overlay)
-{
-  cv::Mat hsv;
-  cv::cvtColor(frame, hsv, cv::COLOR_BGR2HSV);
+  cv::Mat mask;
+  maskInput.copyTo(mask);
+
+  // Preprocessing
   cv::morphologyEx(mask, mask, cv::MORPH_OPEN, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
 
   std::vector<std::vector<cv::Point>> contours;
@@ -353,18 +354,25 @@ void ImageProcessor::frontAndBackHelperFunction(const cv::Mat& frame, cv::Mat& m
     std::vector<cv::Point> approx;
     cv::approxPolyDP(cnt, approx, epsilon, true);
 
-    if (approx.size() == 4 && cv::isContourConvex(approx) && cv::contourArea(cnt) > ConfigController::getConfigInt(
-      "MinAreaOfRobotFrontAndBack"))
+    // Rectangle filter
+    if (approx.size() == 4 && cv::isContourConvex(approx))
     {
+      double area = cv::contourArea(cnt);
+      if (area < ConfigController::getConfigInt("MinAreaOfRobotFrontAndBack"))
+        continue;
+
       cv::Rect rect = cv::boundingRect(approx);
       int x1 = rect.x, y1 = rect.y;
       int x2 = x1 + rect.width, y2 = y1 + rect.height;
 
-      MainController::addCourseObject(std::make_unique<CourseObject>(x1, y1, x2, y2, label));
-      cv::rectangle(overlay, rect, cv::Scalar(0, 255, 0), 2);
-      cv::putText(overlay, label, cv::Point(x1, y1 - 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0),
-                  2);
+      auto courseObject = std::make_unique<CourseObject>(x1, y1, x2, y2, label);
+      MainController::addCourseObject(std::move(courseObject));
 
+      // Draw debug visuals
+      cv::rectangle(overlay, rect, cv::Scalar(0, 255, 0), 2);
+      cv::putText(overlay, label, cv::Point(x1, y1 - 10), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
+
+      // Optional: visualize edge points
       cv::Mat roi_mask = mask(rect);
       cv::GaussianBlur(roi_mask, roi_mask, cv::Size(5, 5), 0);
       cv::Mat edges;
@@ -379,5 +387,6 @@ void ImageProcessor::frontAndBackHelperFunction(const cv::Mat& frame, cv::Mat& m
     }
   }
 }
+
 
 
