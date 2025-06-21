@@ -57,6 +57,6 @@
   "AngleDiffBeforeCornerBall": 60,
   "CornerCrossHalfSize": 35,
   "PerspectiveOffset": 7,
-  "UseFourPointsForWall": true,
+  "UseFourPointsForWall": false,
   "TargetSameBeforeTargetSet": 3
 }

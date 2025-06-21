@@ -74,64 +74,58 @@ void ImageProcessor::redPixelHelperFunction(const cv::Mat& frame, cv::Mat& mask,
   if (nonZeroPoints.empty())
     return;
 
-  cv::Point leftmost = nonZeroPoints[0];
-  cv::Point rightmost = nonZeroPoints[0];
-  cv::Point topmost = nonZeroPoints[0];
-  cv::Point bottommost = nonZeroPoints[0];
-
-  for (const auto& pt : nonZeroPoints)
-  {
-    if (pt.x < leftmost.x) leftmost = pt;
-    if (pt.x > rightmost.x) rightmost = pt;
-    if (pt.y < topmost.y) topmost = pt;
-    if (pt.y > bottommost.y) bottommost = pt;
-  }
-
   int shift = ConfigController::getConfigInt("CornerCrossHalfSize");
-  leftmost.x += shift;
-  rightmost.x -= shift;
-  topmost.y += shift;
-  bottommost.y -= shift;
 
-  bool leftIsTop = std::abs(leftmost.y - topmost.y) < std::abs(leftmost.y - bottommost.y);
+  cv::Point topLeft, topRight, bottomLeft, bottomRight;
 
-  cv::Point topLeft = leftIsTop ? topmost : leftmost;
-  cv::Point bottomLeft = leftIsTop ? leftmost : bottommost;
-  cv::Point topRight = leftIsTop ? rightmost : topmost;
-  cv::Point bottomRight = leftIsTop ? bottommost : rightmost;
-
-  if (not ConfigController::getConfigBool("UseFourPointsForWall"))
+  if (!ConfigController::getConfigBool("UseFourPointsForWall"))
   {
-    int xLeftToRight = bottomRight.x - topLeft.x;
-    int yLeftToRight = bottomRight.y - topLeft.y;
+    cv::Rect bounding = cv::boundingRect(nonZeroPoints);
 
-    int xRightToLeft = topRight.x - bottomLeft.x;
-    int yRightToLeft = bottomLeft.y - topRight.y;
 
-    Vector criss = {xLeftToRight, yLeftToRight};
-    Vector cross = {xRightToLeft, yRightToLeft};
+    bounding.x += shift;
+    bounding.y += shift;
+    bounding.width = std::max(0, bounding.width - 2 * shift);
+    bounding.height = std::max(0, bounding.height - 2 * shift);
 
-    if (criss.getLength() > cross.getLength())
+    topLeft = cv::Point(bounding.x, bounding.y);
+    topRight = cv::Point(bounding.x + bounding.width, bounding.y);
+    bottomLeft = cv::Point(bounding.x, bounding.y + bounding.height);
+    bottomRight = cv::Point(bounding.x + bounding.width, bounding.y + bounding.height);
+  }
+  else
+  {
+    cv::Point leftmost = nonZeroPoints[0];
+    cv::Point rightmost = nonZeroPoints[0];
+    cv::Point topmost = nonZeroPoints[0];
+    cv::Point bottommost = nonZeroPoints[0];
+
+    for (const auto& pt : nonZeroPoints)
     {
-      topRight.x = bottomRight.x;
-      topRight.y = topLeft.y;
-      bottomLeft.x = topLeft.x;
-      bottomLeft.y = bottomRight.y;
+      if (pt.x < leftmost.x) leftmost = pt;
+      if (pt.x > rightmost.x) rightmost = pt;
+      if (pt.y < topmost.y) topmost = pt;
+      if (pt.y > bottommost.y) bottommost = pt;
     }
-    else
-    {
-      topLeft.x = bottomLeft.x;
-      topLeft.y = topRight.y;
-      bottomRight.x = topRight.x;
-      bottomRight.y = bottomLeft.y;
-    }
+
+    leftmost.x += shift;
+    rightmost.x -= shift;
+    topmost.y += shift;
+    bottommost.y -= shift;
+
+    bool leftIsTop = std::abs(leftmost.y - topmost.y) < std::abs(leftmost.y - bottommost.y);
+
+    topLeft = leftIsTop ? topmost : leftmost;
+    bottomLeft = leftIsTop ? leftmost : bottommost;
+    topRight = leftIsTop ? rightmost : topmost;
+    bottomRight = leftIsTop ? bottommost : rightmost;
   }
 
   std::vector<std::pair<cv::Point, cv::Point>> walls = {
-    {topLeft, topRight},
-    {topRight, bottomRight},
-    {bottomRight, bottomLeft},
-    {bottomLeft, topLeft}
+          {topLeft, topRight},
+          {topRight, bottomRight},
+          {bottomRight, bottomLeft},
+          {bottomLeft, topLeft}
   };
 
   for (const auto& [start, end] : walls)
@@ -142,11 +136,13 @@ void ImageProcessor::redPixelHelperFunction(const cv::Mat& frame, cv::Mat& mask,
     MainController::addBlockedObject(std::move(wall));
     cv::line(overlay, start, end, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("WallWidth"), cv::LINE_AA);
   }
+
   cv::circle(overlay, topLeft, 5, cv::Scalar(0, 255, 0), -1);
   cv::circle(overlay, topRight, 5, cv::Scalar(0, 255, 0), -1);
   cv::circle(overlay, bottomRight, 5, cv::Scalar(0, 255, 0), -1);
   cv::circle(overlay, bottomLeft, 5, cv::Scalar(0, 255, 0), -1);
 }
+
 
 
 void ImageProcessor::crossHelperFunction(const cv::Mat& frame, cv::Mat& mask, const cv::Mat& overlay)
