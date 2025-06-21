@@ -54,6 +54,11 @@ void MainController::addCrossObject(std::unique_ptr<VectorWithStartPos> blocking
   navigationController_->addCrossObject(std::move(blockingObject));
 }
 
+void MainController::addGoalObject(std::unique_ptr<CourseObject>&& goalObject)
+{
+  navigationController_->addGoalObject(std::move(goalObject));
+}
+
 void MainController::navigateAndSendCommand(cv::Mat* frame)
 {
   frame_ = frame;

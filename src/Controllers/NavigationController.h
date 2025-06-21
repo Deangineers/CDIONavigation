@@ -21,6 +21,7 @@ public:
   void addCourseObject(std::unique_ptr<CourseObject>&& courseObject);
   void addBlockingObject(std::unique_ptr<VectorWithStartPos>&& blockingObject);
   void addCrossObject(std::unique_ptr<VectorWithStartPos>&& blockingObject);
+  void addGoalObject(std::unique_ptr<CourseObject>&& goalObject);
   void clearObjects();
   std::unique_ptr<JourneyModel> calculateDegreesAndDistanceToObject();
 
@@ -35,8 +36,6 @@ private:
   [[nodiscard]] std::unique_ptr<JourneyModel> makeJourneyModel(const Vector& objectVector, bool toCollectBalls) const;
   [[nodiscard]] Vector navigateToGoal();
   [[nodiscard]] Vector findClosestBall();
-  [[nodiscard]] Vector navigateToLeftGoal() const;
-  [[nodiscard]] Vector navigateToRightGoal() const;
 
   Vector handleCollision(Vector objectVector);
   Vector handleObjectNextToBlocking(const CourseObject* courseObject) const;
