@@ -67,31 +67,44 @@ void ImageProcessor::redPixelHelperFunction(const cv::Mat& frame, cv::Mat& mask,
   if (nonZeroPoints.empty())
     return;
 
-  cv::Point leftmost = nonZeroPoints[0];
-  cv::Point rightmost = nonZeroPoints[0];
-  cv::Point topmost = nonZeroPoints[0];
-  cv::Point bottommost = nonZeroPoints[0];
+  int midX = mask.cols / 2;
+  int midY = mask.rows / 2;
+
+  cv::Point topLeftMinX(mask.cols, 0), topLeftMinY(0, mask.rows);
+  cv::Point topRightMaxX(0, 0), topRightMinY(mask.cols, mask.rows);
+  cv::Point bottomLeftMinX(mask.cols, 0), bottomLeftMaxY(0, 0);
+  cv::Point bottomRightMaxX(0, 0), bottomRightMaxY(0, 0);
 
   for (const auto& pt : nonZeroPoints)
   {
-    if (pt.x < leftmost.x) leftmost = pt;
-    if (pt.x > rightmost.x) rightmost = pt;
-    if (pt.y < topmost.y) topmost = pt;
-    if (pt.y > bottommost.y) bottommost = pt;
+    if (pt.x <= midX && pt.y <= midY)
+    {
+      if (pt.x < topLeftMinX.x) topLeftMinX = pt;
+      if (pt.y < topLeftMinY.y) topLeftMinY = pt;
+    }
+    else if (pt.x > midX && pt.y <= midY)
+    {
+      if (pt.x > topRightMaxX.x) topRightMaxX = pt;
+      if (pt.y < topRightMinY.y) topRightMinY = pt;
+    }
+    else if (pt.x <= midX && pt.y > midY)
+    {
+      if (pt.x < bottomLeftMinX.x) bottomLeftMinX = pt;
+      if (pt.y > bottomLeftMaxY.y) bottomLeftMaxY = pt;
+    }
+    else if (pt.x > midX && pt.y > midY)
+    {
+      if (pt.x > bottomRightMaxX.x) bottomRightMaxX = pt;
+      if (pt.y > bottomRightMaxY.y) bottomRightMaxY = pt;
+    }
   }
 
   int shift = ConfigController::getConfigInt("CornerCrossHalfSize");
-  leftmost.x += shift;
-  rightmost.x -= shift;
-  topmost.y += shift;
-  bottommost.y -= shift;
 
-  bool leftIsTop = std::abs(leftmost.y - topmost.y) < std::abs(leftmost.y - bottommost.y);
-
-  cv::Point topLeft = leftIsTop ? topmost : leftmost;
-  cv::Point bottomLeft = leftIsTop ? leftmost : bottommost;
-  cv::Point topRight = leftIsTop ? rightmost : topmost;
-  cv::Point bottomRight = leftIsTop ? bottommost : rightmost;
+  auto topLeft = cv::Point((topLeftMinX.x + topLeftMinY.x + shift)/2, (topLeftMinY.y + topLeftMinX.y + shift)/2);
+  auto bottomLeft = cv::Point((bottomLeftMinX.x + bottomLeftMaxY.x + shift)/2, (bottomLeftMaxY.y + bottomLeftMinX.y - shift)/2);
+  auto topRight = cv::Point((topRightMaxX.x + topRightMinY.x - shift)/2, (topRightMinY.y + topRightMaxX.y + shift)/2);
+  auto bottomRight = cv::Point((bottomRightMaxX.x + bottomRightMaxY.x - shift)/2, (bottomRightMaxY.y + bottomRightMaxX.y - shift)/2);
 
   if (not ConfigController::getConfigBool("UseFourPointsForWall"))
   {
