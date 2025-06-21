@@ -675,7 +675,7 @@ Vector NavigationController::handleObjectNearCorner(const CourseObject* courseOb
 
   int angleDeg = ConfigController::getConfigInt("CornerApproachAngle");
   double angleRad = angleDeg * CV_PI / 180.0;
-  int shiftDist = ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning") * 5;
+  int shiftDist = ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning") * 6;
 
   double dx = std::tan(angleRad) * shiftDist;
 
@@ -697,7 +697,7 @@ Vector NavigationController::handleObjectNearCorner(const CourseObject* courseOb
     {
       localObject.shiftX(shiftDistanceOnCornerBall);
     }
-    return MathUtil::calculateVectorToObject(&robotMiddle, &localObject);
+    return MathUtil::calculateVectorToObject(&robotMiddle, &localObject)*1.32;
   }
 
   return vectorToIntermediaryPoint;
