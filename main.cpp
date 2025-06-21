@@ -39,7 +39,7 @@ int main()
   while (cap.read(frame))
   {
     //cv::imwrite("../../TestImages/newTestImages0.jpeg", frame);
-    frame = cv::imread("../TestImages/testImage6.jpg", cv::IMREAD_COLOR);
+    frame = cv::imread("../TestImages/testImage17.jpg", cv::IMREAD_COLOR);
 
 
     processor->processImage(frame);
