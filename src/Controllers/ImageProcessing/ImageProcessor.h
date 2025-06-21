@@ -26,7 +26,7 @@ protected:
   void crossHelperFunction(const cv::Mat& frame, cv::Mat& mask, const cv::Mat& overlay);
   void ballHelperFunction(const cv::Mat& frame, const std::string& colorLabel, const cv::Mat& overlay);
   void eggHelperFunction(const cv::Mat& frame, const cv::Mat& mask, const cv::Mat& overlay);
-  void frontAndBackHelperFunction(const cv::Mat& frame, cv::Mat& mask, std::string label, const cv::Mat& overlay);
+  void frontAndBackHelperFunction(const cv::Mat& frame, cv::Mat& maskInput, std::string label, const cv::Mat& overlay);
 
   cv::Mat hsv_;
   std::shared_ptr<IBallProcessor> ballProcessor_;
