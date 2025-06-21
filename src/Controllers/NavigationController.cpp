@@ -135,7 +135,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     {
       atGoal_ = false;
       navigatedToGoalIntermediate_ = false;
-      return std::make_unique<JourneyModel>(-10,0,true);
+      return std::make_unique<JourneyModel>(-10, 0, true);
     }
     return nullptr;
   }
@@ -673,7 +673,7 @@ Vector NavigationController::handleObjectNearCorner(const CourseObject *courseOb
     {
       localObject.shiftX(shiftDistanceOnCornerBall);
     }
-    return MathUtil::calculateVectorToObject(&robotMiddle, &localObject)*1.32;
+    return MathUtil::calculateVectorToObject(&robotMiddle, &localObject) * 1.32;
   }
 
   return vectorToIntermediaryPoint;
