@@ -30,11 +30,6 @@ void ImageProcessor::processImage(const cv::Mat& frame)
     detectBalls(frame, ballOverlay);
   });
 
-  auto f2 = std::async(std::launch::async, [&]
-  {
-    detectEgg(frame, eggOverlay);
-  });
-
   auto f3 = std::async(std::launch::async, [&]
   {
     detectRedPixels(frame, redOverlay);
@@ -47,7 +42,6 @@ void ImageProcessor::processImage(const cv::Mat& frame)
 
 
   f1.get();
-  f2.get();
   f3.get();
   f4.get();
   auto applyOverlay = [](const cv::Mat& base, const cv::Mat& overlay)
@@ -177,7 +171,6 @@ void ImageProcessor::crossHelperFunction(const cv::Mat& frame, cv::Mat& mask, co
     for (size_t i = 0; i < approx.size(); ++i)
     {
       cv::Point p = approx[i];
-      std::cout << i << ": " << p.x << " " << p.y << std::endl;
       if (p.y > top.y)
       {
         top = p;
