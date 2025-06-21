@@ -12,7 +12,7 @@ int main()
 {
   cv::VideoCapture cap;
 #if __linux__
-  MainController::init();
+  MainController::mockInit();
   cap = cv::VideoCapture("/dev/video4",cv::CAP_V4L2);
 #else
   MainController::mockInit();
@@ -39,7 +39,7 @@ int main()
   while (cap.read(frame))
   {
     //cv::imwrite("../../TestImages/newTestImages0.jpeg", frame);
-    frame = cv::imread("../TestImages/testImage5.jpg", cv::IMREAD_COLOR);
+    //frame = cv::imread("../TestImages/testImage5.jpg", cv::IMREAD_COLOR);
 
 
     processor->processImage(frame);
