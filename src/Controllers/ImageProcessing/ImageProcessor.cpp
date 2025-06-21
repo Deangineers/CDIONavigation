@@ -71,12 +71,11 @@ void ImageProcessor::redPixelHelperFunction(const cv::Mat& frame, cv::Mat& mask,
   std::vector<cv::Point> nonZeroPoints;
   cv::findNonZero(mask, nonZeroPoints);
 
-  if (nonZeroPoints.empty())
-    return;
+  if (nonZeroPoints.empty()) return;
 
   int shift = ConfigController::getConfigInt("CornerCrossHalfSize");
 
-  cv::Point topLeft, topRight, bottomLeft, bottomRight;
+  std::vector<cv::Point> corners;
 
   if (!ConfigController::getConfigBool("UseFourPointsForWall"))
   {
@@ -87,23 +86,17 @@ void ImageProcessor::redPixelHelperFunction(const cv::Mat& frame, cv::Mat& mask,
     bounding.width = std::max(0, bounding.width - 2 * shift);
     bounding.height = std::max(0, bounding.height - 2 * shift);
 
-    topLeft = cv::Point(bounding.x, bounding.y);
-    topRight = cv::Point(bounding.x + bounding.width, bounding.y);
-    bottomLeft = cv::Point(bounding.x, bounding.y + bounding.height);
-    bottomRight = cv::Point(bounding.x + bounding.width, bounding.y + bounding.height);
+    corners = {
+            cv::Point(bounding.x, bounding.y), // top-left
+            cv::Point(bounding.x + bounding.width, bounding.y), // top-right
+            cv::Point(bounding.x + bounding.width, bounding.y + bounding.height), // bottom-right
+            cv::Point(bounding.x, bounding.y + bounding.height) // bottom-left
+    };
   }
   else
   {
-    // Shrink mask slightly to pull polygon inside actual red region
-    cv::Mat eroded;
-    cv::Mat shrinkKernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
-    cv::erode(mask, eroded, shrinkKernel);
-
-// Find contours
     std::vector<std::vector<cv::Point>> contours;
-    cv::findContours(eroded, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-
-
+    cv::findContours(mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
     if (contours.empty()) return;
 
     auto largestContour = *std::max_element(contours.begin(), contours.end(),
@@ -120,53 +113,45 @@ void ImageProcessor::redPixelHelperFunction(const cv::Mat& frame, cv::Mat& mask,
       return;
     }
 
-    // Sort the corners consistently: TL, TR, BR, BL
-    auto sortCorners = [](const std::vector<cv::Point>& pts) -> std::vector<cv::Point> {
-        std::vector<cv::Point> sorted = pts;
+    // Sort corners in consistent TL, TR, BR, BL order
+    auto sortCorners = [](std::vector<cv::Point>& pts) -> std::vector<cv::Point> {
+        std::sort(pts.begin(), pts.end(), [](const cv::Point& a, const cv::Point& b) {
+            return a.y == b.y ? a.x < b.x : a.y < b.y;
+        });
 
-        // Compute the centroid
         cv::Point2f center(0.f, 0.f);
-        for (const auto& pt : sorted)
-          center += cv::Point2f(static_cast<float>(pt.x), static_cast<float>(pt.y));
-        center *= (1.0f / sorted.size());
+        for (const auto& p : pts)
+        {
+          center += cv::Point2f(p.x, p.y);
+        }
+        center *= (1.f / pts.size());
 
-        std::vector<cv::Point> top, bottom;
-        for (const auto& pt : sorted) {
-          if (pt.y < center.y)
-            top.push_back(pt);
-          else
-            bottom.push_back(pt);
+
+        std::vector<std::pair<double, cv::Point>> angles;
+        for (const auto& p : pts)
+        {
+          double angle = std::atan2(p.y - center.y, p.x - center.x);
+          angles.emplace_back(angle, p);
         }
 
-        if (top.size() != 2 || bottom.size() != 2) {
-          std::cerr << "Corner sorting failed due to incorrect top/bottom split\n";
-          return pts; // fallback to original
-        }
+        std::sort(angles.begin(), angles.end(), [](const auto& a, const auto& b) {
+            return a.first < b.first;
+        });
 
-        cv::Point topLeft = top[0].x < top[1].x ? top[0] : top[1];
-        cv::Point topRight = top[0].x > top[1].x ? top[0] : top[1];
-        cv::Point bottomLeft = bottom[0].x < bottom[1].x ? bottom[0] : bottom[1];
-        cv::Point bottomRight = bottom[0].x > bottom[1].x ? bottom[0] : bottom[1];
-
-        return {topLeft, topRight, bottomRight, bottomLeft};
+        std::vector<cv::Point> ordered;
+        for (const auto& [_, pt] : angles) ordered.push_back(pt);
+        return ordered;
     };
 
-    auto ordered = sortCorners(approx);
-    topLeft = ordered[0];
-    topRight = ordered[1];
-    bottomRight = ordered[2];
-    bottomLeft = ordered[3];
+    corners = sortCorners(approx);
   }
 
-  std::vector<std::pair<cv::Point, cv::Point>> walls = {
-          {topLeft, topRight},
-          {topRight, bottomRight},
-          {bottomRight, bottomLeft},
-          {bottomLeft, topLeft}
-  };
-
-  for (const auto& [start, end] : walls)
+  // Draw walls
+  for (size_t i = 0; i < corners.size(); ++i)
   {
+    const auto& start = corners[i];
+    const auto& end = corners[(i + 1) % corners.size()];
+
     Vector vec(end.x - start.x, end.y - start.y);
     auto wall = std::make_unique<VectorWithStartPos>(start.x, start.y, vec);
 
@@ -174,11 +159,13 @@ void ImageProcessor::redPixelHelperFunction(const cv::Mat& frame, cv::Mat& mask,
     cv::line(overlay, start, end, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("WallWidth"), cv::LINE_AA);
   }
 
-  cv::circle(overlay, topLeft, 5, cv::Scalar(0, 255, 0), -1);
-  cv::circle(overlay, topRight, 5, cv::Scalar(0, 255, 0), -1);
-  cv::circle(overlay, bottomRight, 5, cv::Scalar(0, 255, 0), -1);
-  cv::circle(overlay, bottomLeft, 5, cv::Scalar(0, 255, 0), -1);
+  // Draw points
+  for (const auto& pt : corners)
+  {
+    cv::circle(overlay, pt, 5, cv::Scalar(0, 255, 0), -1);
+  }
 }
+
 
 
 
