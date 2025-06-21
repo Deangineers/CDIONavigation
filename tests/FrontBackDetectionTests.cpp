@@ -29,62 +29,6 @@ public:
   std::shared_ptr<CloudyImageProcessor> imageProcessor;
 };
 
-TEST_F(FrontBackDetectionTests, testImage1)
-{
-  cv::Mat frame = cv::imread("../../TestImages/testImage1.jpg");
-  imageProcessor->processImage(frame);
-  handleExpect();
-}
-
-TEST_F(FrontBackDetectionTests, testImage2)
-{
-  cv::Mat frame = cv::imread("../../TestImages/testImage2.jpg");
-  imageProcessor->processImage(frame);
-  handleExpect();
-}
-
-TEST_F(FrontBackDetectionTests, testImage3)
-{
-  cv::Mat frame = cv::imread("../../TestImages/testImage3.jpg");
-  imageProcessor->processImage(frame);
-  handleExpect();
-}
-
-TEST_F(FrontBackDetectionTests, testImage4)
-{
-  cv::Mat frame = cv::imread("../../TestImages/testImage4.jpg");
-  imageProcessor->processImage(frame);
-  handleExpect();
-}
-
-TEST_F(FrontBackDetectionTests, testImage5)
-{
-  cv::Mat frame = cv::imread("../../TestImages/testImage5.jpg");
-  imageProcessor->processImage(frame);
-  handleExpect();
-}
-
-TEST_F(FrontBackDetectionTests, testImage6)
-{
-  cv::Mat frame = cv::imread("../../TestImages/testImage6.jpg");
-  imageProcessor->processImage(frame);
-  handleExpect();
-}
-
-TEST_F(FrontBackDetectionTests, testImage7)
-{
-  cv::Mat frame = cv::imread("../../TestImages/testImage7.jpg");
-  imageProcessor->processImage(frame);
-  handleExpect();
-}
-
-TEST_F(FrontBackDetectionTests, testImage8)
-{
-  cv::Mat frame = cv::imread("../../TestImages/testImage8.jpg");
-  imageProcessor->processImage(frame);
-  handleExpect();
-}
-
 TEST_F(FrontBackDetectionTests, testImages)
 {
   int amountOfImages = 15;

@@ -244,7 +244,7 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const std::string&
     else
     {
       detectedColor = "orange";
-      //continue;
+      continue;
     }
 
     cv::Rect rect(cx - r, cy - r, 2 * r, 2 * r);
