@@ -18,7 +18,7 @@
   "ForwardFastSpeed": 500,
   "ForwardSlowSpeed": 200,
   "DistanceBeforeTargetReached": 75,
-  "RobotWidth": 175,
+  "RobotWidth": 140,
   "TotalBalls": 5,
   "WallWidth": 40,
   "RobotLengthInMM": 65,

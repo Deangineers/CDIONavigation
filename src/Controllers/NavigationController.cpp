@@ -109,7 +109,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     Utility::appendToFile("log.txt", "No Robot\n");
     return nullptr;
   }
-  checkCollisionOnRoute({0,0});
+
   if (not lastSentCommandWasCompleted_)
   {
     Utility::appendToFile("log.txt", "Waiting for command Completion\n");
@@ -680,6 +680,86 @@ Vector NavigationController::handleObjectNearCorner(const CourseObject *courseOb
   return vectorToIntermediaryPoint;
 }
 
+bool NavigationController::checkCollisionOnRoute(const Vector &targetVector) const
+{
+  if (!robotFront_ || !robotBack_ || crossObjects_.size() != 2)
+  {
+    return false;
+  }
+  std::vector<CourseObject> robotMiddles;
+  robotMiddles.reserve(3);
+  Vector acrossRobotVector = Vector(targetVector.y, -targetVector.x);
+  int robotWidth = ConfigController::getConfigInt("RobotWidth");
+  acrossRobotVector = acrossRobotVector * ((static_cast<double>(robotWidth)/2) / acrossRobotVector.getLength());
+
+  auto robotMiddleObject = MathUtil::getRobotMiddle(robotBack_.get(),robotFront_.get());
+  auto robotLeftSide = CourseObject(robotMiddleObject);
+  robotMiddles.emplace_back(robotMiddleObject);
+  robotLeftSide.shiftX(acrossRobotVector.x);
+  robotLeftSide.shiftY(acrossRobotVector.y);
+  robotMiddles.push_back(robotLeftSide);
+
+  auto robotRightSide = CourseObject(robotMiddleObject);
+  robotRightSide.shiftX(-acrossRobotVector.x);
+  robotRightSide.shiftY(-acrossRobotVector.y);
+  robotMiddles.push_back(robotRightSide);
+
+  for (const auto& robotMiddle : robotMiddles)
+  {
+
+    auto backToFrontVector = MathUtil::calculateVectorToObject(robotBack_.get(), robotFront_.get());
+    auto cross1 = crossObjects_[0].get();
+    auto cross2 = crossObjects_[1].get();
+
+    auto point1 = CourseObject(cross1->startX_,cross1->startY_,cross1->startX_,cross1->startY_,"");
+    auto point2 = CourseObject(cross1->startX_ + cross1->x, cross1->startY_ + cross1->y,cross1->startX_ + cross1->x, cross1->startY_ + cross1->y,"");
+    auto point3 = CourseObject(cross2->startX_,cross2->startY_,cross2->startX_,cross2->startY_,"");
+    auto point4 = CourseObject(cross2->startX_ + cross2->x, cross2->startY_ + cross2->y,cross2->startX_ + cross2->x, cross2->startY_ + cross2->y,"");
+    int middleX = (cross1->startX_ + cross1->startX_ + cross1->x)/2;
+    int middleY = (cross1->startY_ + cross1->startY_)/2;
+    auto middlePoint = CourseObject(middleX, middleY, middleX,middleY, "");
+
+    cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},
+                    {point1.x1(), point1.y1()},
+                    cv::Scalar(255, 0, 255), 1,
+                    cv::LINE_AA, 0, 0.01);
+    cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},
+                    {point2.x1(), point2.y1()},
+                    cv::Scalar(255, 0, 255), 1,
+                    cv::LINE_AA, 0, 0.01);
+    cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},
+                    {point3.x1(), point3.y1()},
+                    cv::Scalar(255, 0, 255), 1,
+                    cv::LINE_AA, 0, 0.01);
+    cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},
+                    {point4.x1(), point4.y1()},
+                    cv::Scalar(255, 0, 255), 1,
+                    cv::LINE_AA, 0, 0.01);
+
+    auto point1Vector = MathUtil::calculateVectorToObject(&robotMiddle, &point1);
+    auto point2Vector = MathUtil::calculateVectorToObject(&robotMiddle, &point2);
+    auto point3Vector = MathUtil::calculateVectorToObject(&robotMiddle, &point3);
+    auto point4Vector = MathUtil::calculateVectorToObject(&robotMiddle, &point4);
+    auto middleVector = MathUtil::calculateVectorToObject(&robotMiddle, &middlePoint);
+
+    auto point1Angle = MathUtil::calculateAngleDifferenceBetweenVectors(backToFrontVector, point1Vector);
+    auto point2Angle = MathUtil::calculateAngleDifferenceBetweenVectors(backToFrontVector, point2Vector);
+    auto point3Angle = MathUtil::calculateAngleDifferenceBetweenVectors(backToFrontVector, point3Vector);
+    auto point4Angle = MathUtil::calculateAngleDifferenceBetweenVectors(backToFrontVector, point4Vector);
+    auto middleAngle = MathUtil::calculateAngleDifferenceBetweenVectors(backToFrontVector, middleVector);
+
+    double minAngle = std::min(std::min(point1Angle, point2Angle),std::min(point3Angle,point4Angle));
+    double maxAngle = std::max(std::max(point1Angle, point2Angle),std::max(point3Angle,point4Angle));
+
+    double angleToTargetVector = MathUtil::calculateAngleDifferenceBetweenVectors(backToFrontVector, targetVector);
+    if (not (angleToTargetVector < minAngle || angleToTargetVector > maxAngle) && middleVector.getLength() < targetVector.getLength())
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
 std::pair<Vector, Vector> NavigationController::getVectorsForClosestBlockingObjects(
   const CourseObject *courseObject) const
 {
@@ -730,69 +810,6 @@ bool segmentsIntersect(int x1, int y1, int x2, int y2,
   if (o2 == 0 && onSegment(x1, y1, x2, y2, x4, y4)) return true;
   if (o3 == 0 && onSegment(x3, y3, x4, y4, x1, y1)) return true;
   if (o4 == 0 && onSegment(x3, y3, x4, y4, x2, y2)) return true;
-
-  return false;
-}
-
-bool NavigationController::checkCollisionOnRoute(const Vector &targetVector) const
-{
-  if (!robotFront_ || !robotBack_ || crossObjects_.size() != 2)
-  {
-    return false;
-  }
-  int robotWidth = ConfigController::getConfigInt("RobotWidth");
-  auto robotBack = CourseObject(*robotBack_);
-  auto robotFront = CourseObject(*robotFront_);
-  auto robotMiddle = MathUtil::getRobotMiddle(&robotBack,&robotFront);
-  auto backToFrontVector = MathUtil::calculateVectorToObject(robotBack_.get(), robotFront_.get());
-  auto cross1 = crossObjects_[0].get();
-  auto cross2 = crossObjects_[1].get();
-
-  auto point1 = CourseObject(cross1->startX_,cross1->startY_,cross1->startX_,cross1->startY_,"");
-  auto point2 = CourseObject(cross1->startX_ + cross1->x, cross1->startY_ + cross1->y,cross1->startX_ + cross1->x, cross1->startY_ + cross1->y,"");
-  auto point3 = CourseObject(cross2->startX_,cross2->startY_,cross2->startX_,cross2->startY_,"");
-  auto point4 = CourseObject(cross2->startX_ + cross2->x, cross2->startY_ + cross2->y,cross2->startX_ + cross2->x, cross2->startY_ + cross2->y,"");
-  int middleX = (cross1->startX_ + cross1->startX_ + cross1->x)/2;
-  int middleY = (cross1->startY_ + cross1->startY_)/2;
-  auto middlePoint = CourseObject(middleX, middleY, middleX,middleY, "");
-
-  cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},
-                  {point1.x1(), point1.y1()},
-                  cv::Scalar(255, 0, 255), 1,
-                  cv::LINE_AA, 0, 0.01);
-  cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},
-                  {point2.x1(), point2.y1()},
-                  cv::Scalar(255, 0, 255), 1,
-                  cv::LINE_AA, 0, 0.01);
-  cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},
-                  {point3.x1(), point3.y1()},
-                  cv::Scalar(255, 0, 255), 1,
-                  cv::LINE_AA, 0, 0.01);
-  cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},
-                  {point4.x1(), point4.y1()},
-                  cv::Scalar(255, 0, 255), 1,
-                  cv::LINE_AA, 0, 0.01);
-
-  auto point1Vector = MathUtil::calculateVectorToObject(&robotMiddle, &point1);
-  auto point2Vector = MathUtil::calculateVectorToObject(&robotMiddle, &point2);
-  auto point3Vector = MathUtil::calculateVectorToObject(&robotMiddle, &point3);
-  auto point4Vector = MathUtil::calculateVectorToObject(&robotMiddle, &point4);
-  auto middleVector = MathUtil::calculateVectorToObject(&robotMiddle, &middlePoint);
-
-  auto point1Angle = MathUtil::calculateAngleDifferenceBetweenVectors(backToFrontVector, point1Vector);
-  auto point2Angle = MathUtil::calculateAngleDifferenceBetweenVectors(backToFrontVector, point2Vector);
-  auto point3Angle = MathUtil::calculateAngleDifferenceBetweenVectors(backToFrontVector, point3Vector);
-  auto point4Angle = MathUtil::calculateAngleDifferenceBetweenVectors(backToFrontVector, point4Vector);
-  auto middleAngle = MathUtil::calculateAngleDifferenceBetweenVectors(backToFrontVector, middleVector);
-
-  double minAngle = std::min(std::min(point1Angle, point2Angle),std::min(point3Angle,point4Angle));
-  double maxAngle = std::max(std::max(point1Angle, point2Angle),std::max(point3Angle,point4Angle));
-
-  double angleToTargetVector = MathUtil::calculateAngleDifferenceBetweenVectors(backToFrontVector, targetVector);
-  if (not (angleToTargetVector < minAngle || angleToTargetVector > maxAngle) && middleVector.getLength() < targetVector.getLength())
-  {
-    return true;
-  }
 
   return false;
 }
