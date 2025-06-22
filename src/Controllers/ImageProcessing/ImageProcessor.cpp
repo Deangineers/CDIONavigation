@@ -242,8 +242,8 @@ void ImageProcessor::crossHelperFunction(const cv::Mat& frame, cv::Mat& mask, co
     auto rightCenter = cv::Point((right.x + closestToRight.x) / 2, (right.y + closestToRight.y) / 2);
     auto leftCenter = cv::Point((left.x + closestToLeft.x) / 2, (left.y + closestToLeft.y) / 2);
 
-    auto horizontal = Vector(rightCenter.x - leftCenter.x, rightCenter.y - leftCenter.y);
-    auto vertical = Vector(topCenter.x - bottomCenter.x, topCenter.y - bottomCenter.y);
+    auto horizontal = Vector(leftCenter.x - rightCenter.x , leftCenter.y - rightCenter.y);
+    auto vertical = Vector( bottomCenter.x - topCenter.x,  bottomCenter.y - topCenter.y);
 
     MainController::addCrossObject(std::make_unique<VectorWithStartPos>(topCenter.x, topCenter.y, vertical));
     MainController::addCrossObject(std::make_unique<VectorWithStartPos>(rightCenter.x, rightCenter.y, horizontal));
