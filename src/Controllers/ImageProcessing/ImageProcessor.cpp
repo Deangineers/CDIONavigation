@@ -158,6 +158,10 @@ void ImageProcessor::crossHelperFunction(const cv::Mat& frame, cv::Mat& mask, co
     {
       continue;
     }
+    if (area < 700)
+    {
+      continue;
+    }
     // Approximate contour to get corners
     std::vector<cv::Point> approx;
     cv::approxPolyDP(contour, approx, 10, true); // epsilon=10 can be tuned
@@ -191,8 +195,8 @@ void ImageProcessor::crossHelperFunction(const cv::Mat& frame, cv::Mat& mask, co
       }
     }
 
-    Vector horizontal = Vector(right.x - left.x, right.y - left.y);
-    Vector vertical = Vector(top.x - bottom.x, top.y - bottom.y);
+    Vector horizontal = Vector(left.x - right.x, left.y - right.y);
+    Vector vertical = Vector(bottom.x - top.x, bottom.y - top.y);
 
     MainController::addCrossObject(std::make_unique<VectorWithStartPos>(top.x, top.y, vertical));
     MainController::addCrossObject(std::make_unique<VectorWithStartPos>(right.x, right.y, horizontal));
