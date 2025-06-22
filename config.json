@@ -36,7 +36,7 @@
   "MinimumBallSize": 250,
   "EggBallDiffVal": 1000,
   "EggMaxSize": 5000,
-  "goalIsLeft": true,
+  "goalIsLeft": false,
   "minRedSize": 50,
   "showVectorsToWall": true,
   "MinimumSizeOfBlockingObject": 50,
@@ -58,5 +58,6 @@
   "CornerCrossHalfSize": 35,
   "PerspectiveOffset": 7,
   "UseFourPointsForWall": true,
-  "TargetSameBeforeTargetSet": 3
+  "TargetSameBeforeTargetSet": 3,
+  "AngleCheckCollision": 1250
 }

@@ -12,7 +12,7 @@ int main()
 {
   cv::VideoCapture cap;
 #if __linux__
-  MainController::mockInit();
+  MainController::init();
   cap = cv::VideoCapture("/dev/video4",cv::CAP_V4L2);
 #else
   MainController::mockInit();
