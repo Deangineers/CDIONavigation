@@ -109,6 +109,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     Utility::appendToFile("log.txt", "No Robot\n");
     return nullptr;
   }
+  auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
 
   if (not lastSentCommandWasCompleted_)
   {
@@ -119,7 +120,6 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   MathUtil::correctCourseObjectForPerspective(robotBack_.get(), robotFront_.get());
   auto objectVector = Vector(0, 0);
   findSafeSpots();
-  auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
 
 
   if (ballVector_.empty() || (ballVector_.size() <= 5 && not hasDeliveredBallsOnce_))
@@ -718,7 +718,7 @@ bool NavigationController::checkCollisionOnRoute(const Vector &targetVector) con
     int middleX = (cross1->startX_ + cross1->startX_ + cross1->x)/2;
     int middleY = (cross1->startY_ + cross1->startY_)/2;
     auto middlePoint = CourseObject(middleX, middleY, middleX,middleY, "");
-
+/*
     cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},
                     {point1.x1(), point1.y1()},
                     cv::Scalar(255, 0, 255), 1,
@@ -735,7 +735,7 @@ bool NavigationController::checkCollisionOnRoute(const Vector &targetVector) con
                     {point4.x1(), point4.y1()},
                     cv::Scalar(255, 0, 255), 1,
                     cv::LINE_AA, 0, 0.01);
-
+*/
     auto point1Vector = MathUtil::calculateVectorToObject(&robotMiddle, &point1);
     auto point2Vector = MathUtil::calculateVectorToObject(&robotMiddle, &point2);
     auto point3Vector = MathUtil::calculateVectorToObject(&robotMiddle, &point3);
@@ -754,6 +754,7 @@ bool NavigationController::checkCollisionOnRoute(const Vector &targetVector) con
     double angleToTargetVector = MathUtil::calculateAngleDifferenceBetweenVectors(backToFrontVector, targetVector);
     if (not (angleToTargetVector < minAngle || angleToTargetVector > maxAngle) && middleVector.getLength() < targetVector.getLength())
     {
+      cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},{robotMiddle.x1() + targetVector.x, robotMiddle.y1() + targetVector.y}, cv::Scalar(255, 0, 255), 1);
       return true;
     }
   }
