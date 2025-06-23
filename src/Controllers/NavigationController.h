@@ -65,7 +65,7 @@ private:
   std::unique_ptr<CourseObject> goal_;
   std::unique_ptr<CourseObject> robotFront_;
   std::unique_ptr<CourseObject> robotBack_;
-  std::vector<std::unique_ptr<VectorWithStartPos> > blockingObjects_;
+  std::vector<std::unique_ptr<VectorWithStartPos> > wallObjects_;
   std::vector<std::unique_ptr<VectorWithStartPos> > crossObjects_;
   std::unique_ptr<CourseObject> target_;
   std::unique_ptr<CourseObject> potentialTarget_;

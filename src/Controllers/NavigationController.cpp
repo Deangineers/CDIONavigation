@@ -53,7 +53,7 @@ void NavigationController::addCourseObject(std::unique_ptr<CourseObject> &&cours
     int y1 = courseObject->y1();
     int x2 = courseObject->x2();
     int y2 = courseObject->y2();
-    blockingObjects_.push_back(std::make_unique<Egg>(x1, y1, x2, y2));
+    wallObjects_.push_back(std::make_unique<Egg>(x1, y1, x2, y2));
   } else if (name == "goal")
   {
     if (goal_ == nullptr)
@@ -81,13 +81,11 @@ void NavigationController::addCourseObject(std::unique_ptr<CourseObject> &&cours
 void NavigationController::addBlockingObject(std::unique_ptr<VectorWithStartPos> &&blockingObject)
 {
   amountOfWalls_++;
-  blockingObjects_.push_back(std::move(blockingObject));
+  wallObjects_.push_back(std::move(blockingObject));
 }
 
 void NavigationController::addCrossObject(std::unique_ptr<VectorWithStartPos> &&blockingObject)
 {
-  auto thing = std::make_unique<VectorWithStartPos>(*blockingObject);
-  blockingObjects_.push_back(std::move(thing));
   crossObjects_.push_back(std::move(blockingObject));
 }
 
@@ -99,7 +97,7 @@ void NavigationController::addGoalObject(std::unique_ptr<CourseObject> &&goalObj
 void NavigationController::clearObjects()
 {
   ballVector_.clear();
-  blockingObjects_.clear();
+  wallObjects_.clear();
   crossObjects_.clear();
   safeSpots_.clear();
   goal_ = nullptr;
@@ -116,7 +114,6 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     return nullptr;
   }
   auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
-
   if (not lastSentCommandWasCompleted_)
   {
     Utility::appendToFile("log.txt", "Waiting for command Completion\n");
@@ -341,7 +338,7 @@ std::unique_ptr<JourneyModel> NavigationController::makeJourneyModel(const Vecto
 
 void NavigationController::removeBallsOutsideCourse()
 {
-  if (blockingObjects_.empty())
+  if (wallObjects_.empty())
   {
     return;
   }
@@ -351,7 +348,7 @@ void NavigationController::removeBallsOutsideCourse()
   int maxX = INT_MIN;
   int maxY = INT_MIN;
 
-  for (const auto &blockingObject: blockingObjects_)
+  for (const auto &blockingObject: wallObjects_)
   {
     minX = std::min(minX, blockingObject->getLowestX());
     minY = std::min(minY, blockingObject->getLowestY());
@@ -670,7 +667,7 @@ Vector NavigationController::handleObjectNearCross(const CourseObject *courseObj
   normalVector = normalVector * (1.0 / normalVector.getLength());
 
   const double halfWidth = ConfigController::getConfigInt("RobotWidth") / 2.0;
-  const double shiftDist = ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning") * 10;
+  const double shiftDist = ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning") * 5;
 
   Vector shiftedObjectPoint = ballCentre + normalVector * halfWidth;
   Vector shiftedApproachPoint = crossSegmentDirection * (1.0 / crossSegmentDirection.getLength()) * shiftDist +
@@ -807,27 +804,6 @@ const
       returnPair.first.isCross = true;
     }
   }
-
-  for (const auto &blockingObject: blockingObjects_)
-  {
-    auto fromPointVector = Vector((courseObject->x1() + courseObject->x2()) / 2,
-                                  (courseObject->y1() + courseObject->y2()) / 2);
-    auto vector = blockingObject->closestVectorFromPoint(fromPointVector);
-    /*cv::arrowedLine(*MainController::getFrame(), {fromPointVector.x, fromPointVector.y},
-                    {fromPointVector.x + vector.x, fromPointVector.y + vector.y}, cv::Scalar(0, 0, 255), 1,
-                    cv::LINE_AA, 0, 0.01);
-*/
-    if (returnPair.first.vector.getLength() > vector.getLength())
-    {
-      returnPair.second = returnPair.first;
-      returnPair.first.vector = vector;
-      returnPair.first.isCross = false;
-    } else if (returnPair.second.vector.getLength() > vector.getLength())
-    {
-      returnPair.second.vector = vector;
-      returnPair.first.isCross = false;
-    }
-  }
   return returnPair;
 }
 
@@ -915,7 +891,7 @@ void NavigationController::findSafeSpots()
   int maxY = INT_MIN;
   int maxX = INT_MIN;
 
-  for (const auto &object: blockingObjects_)
+  for (const auto &object: wallObjects_)
   {
     const int x0 = object->startX();
     const int y0 = object->startY();

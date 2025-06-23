@@ -187,7 +187,7 @@ void ImageProcessor::crossHelperFunction(const cv::Mat& frame, cv::Mat& mask, co
     if (rect.center.x < midX - crossBorder || rect.center.x > midX + crossBorder || rect.center.y < midY - crossBorder || rect.center.y > midY + crossBorder)
       continue;
 
-    if (rect.size.area() < 100 || rect.size.area() > ConfigController::getConfigInt("MaxCrossSize"))
+    if (rect.size.area() < 10000 || rect.size.area() > ConfigController::getConfigInt("MaxCrossSize"))
       continue;
 
     cv::Point2f points[4];
@@ -195,8 +195,8 @@ void ImageProcessor::crossHelperFunction(const cv::Mat& frame, cv::Mat& mask, co
 
     for (int i = 0; i < 2; i++)
     {
-      auto vector = Vector(static_cast<int>(points[i + 2].x) - static_cast<int>(points[i].x), static_cast<int>(points[i + 2].y) - static_cast<int>(points[i].x));
-      MainController::addCrossObject(std::make_unique<VectorWithStartPos>(static_cast<int>(points[i].x), static_cast<int>(points[i].x), vector));
+      auto vector = Vector(static_cast<int>(points[i + 2].x) - static_cast<int>(points[i].x), static_cast<int>(points[i + 2].y) - static_cast<int>(points[i].y));
+      MainController::addCrossObject(std::make_unique<VectorWithStartPos>(static_cast<int>(points[i].x), static_cast<int>(points[i].y), vector));
 
       cv::line(overlay, points[i], points[i+2], cv::Scalar(255, 0, 0), ConfigController::getConfigInt("CrossWallWidth"), cv::LINE_AA);
       cv::putText(overlay, std::to_string(i), points[i], cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
