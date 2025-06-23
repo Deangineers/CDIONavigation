@@ -30,8 +30,7 @@ int main()
   cap.set(cv::CAP_PROP_FPS, 30);
 
   cv::Mat frame;
-  auto ballProcessor = std::make_shared<BallProcessor>();
-  const auto processor = std::make_unique<CloudyImageProcessor>(ballProcessor);
+  const auto processor = std::make_unique<CloudyImageProcessor>();
 
   double lastFPS = 0;
 
@@ -39,7 +38,7 @@ int main()
   while (cap.read(frame))
   {
     //cv::imwrite("../../TestImages/newTestImages0.jpeg", frame);
-    frame = cv::imread("../TestImages/testImage17.jpg", cv::IMREAD_COLOR);
+    //frame = cv::imread("../TestImages/testImage5.jpg", cv::IMREAD_COLOR);
 
 
     processor->processImage(frame);
@@ -59,6 +58,7 @@ int main()
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     lastFPS = 1000.0 / duration.count();
     start = std::chrono::high_resolution_clock::now();
+    cap.grab();
   }
 
   cap.release();
