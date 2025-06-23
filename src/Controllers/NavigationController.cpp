@@ -21,7 +21,7 @@
 void NavigationController::addCourseObject(std::unique_ptr<CourseObject> &&courseObject)
 {
   const std::string name = courseObject->name();
-  if (name == "ball")
+  if (name == "white" || name == "orange")
   {
     ballVector_.push_back(std::move(courseObject));
   } else if (name == "robotFront")

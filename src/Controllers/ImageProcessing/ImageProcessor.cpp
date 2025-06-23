@@ -292,9 +292,17 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const std::string&
     {
       detectedColor = "orange";
     }
-    else
+    else if (h >= 30 && h <= 85 && s > 35 && v > 35)
     {
-      detectedColor = "orange";
+      detectedColor = "robotFront";
+    }
+    else if (h >= 120 && h <= 170 && s > 85 && v > 85)
+    {
+      detectedColor = "robotBack";
+    }
+
+    if (detectedColor.empty())
+    {
       continue;
     }
 
@@ -304,7 +312,7 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const std::string&
 
     double area = CV_PI * r * r;
     if (area < ConfigController::getConfigInt("MinimumSizeOfBlockingObject")
-      || area > ConfigController::getConfigInt("EggBallDiffVal"))
+      || area > ConfigController::getConfigInt("EggBallDiffVal") && detectedColor != "robotFront" && detectedColor != "robotBack")
     {
       continue;
     }
@@ -314,8 +322,8 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const std::string&
     int x1 = rect.x, y1 = rect.y;
     int x2 = x1 + rect.width, y2 = y1 + rect.height;
 
-    auto courseObject = std::make_unique<CourseObject>(x1, y1, x2, y2, label);
-    ObjectCounter::objectDetected(label);
+    auto courseObject = std::make_unique<CourseObject>(x1, y1, x2, y2, detectedColor);
+    ObjectCounter::objectDetected(detectedColor);
 
     MainController::addCourseObject(std::move(courseObject));
 

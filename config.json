@@ -58,6 +58,6 @@
   "CornerCrossHalfSize": 35,
   "PerspectiveOffset": 7,
   "UseFourPointsForWall": true,
-  "TargetSameBeforeTargetSet": 3,
+  "TargetSameBeforeTargetSet": 2,
   "AngleCheckCollision": 1250
 }
