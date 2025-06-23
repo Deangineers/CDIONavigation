@@ -37,6 +37,7 @@ void CloudyImageProcessor::detectEgg(const cv::Mat& frame, const cv::Mat& overla
 
 void CloudyImageProcessor::detectFrontAndBack(const cv::Mat& frame, const cv::Mat& overlay)
 {
+  /*
   cv::Mat frontMask, backMask;
 
   cv::inRange(hsv_, cv::Scalar(30, 35, 35), cv::Scalar(85, 255, 255), frontMask);
@@ -44,5 +45,6 @@ void CloudyImageProcessor::detectFrontAndBack(const cv::Mat& frame, const cv::Ma
 
   frontAndBackHelperFunction(frame, frontMask, "robotFront", overlay);
   frontAndBackHelperFunction(frame, backMask, "robotBack", overlay);
+  */
 }
 

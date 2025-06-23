@@ -27,25 +27,25 @@ void ImageProcessor::processImage(const cv::Mat& frame)
 
   auto f1 = std::async(std::launch::async, [&]
   {
-    detectBalls(frame, ballOverlay);
+      detectBalls(frame, ballOverlay);
   });
 
   auto f3 = std::async(std::launch::async, [&]
   {
-    detectRedPixels(frame, redOverlay);
+      detectRedPixels(frame, redOverlay);
   });
 
   auto f4 = std::async(std::launch::async, [&]
   {
-    detectFrontAndBack(frame, frontBackOverlay);
+      detectFrontAndBack(frame, frontBackOverlay);
   });
 
 
   auto applyOverlay = [](const cv::Mat& base, const cv::Mat& overlay)
   {
-    cv::Mat gray;
-    cv::cvtColor(overlay, gray, cv::COLOR_BGR2GRAY);
-    overlay.copyTo(base, gray);
+      cv::Mat gray;
+      cv::cvtColor(overlay, gray, cv::COLOR_BGR2GRAY);
+      overlay.copyTo(base, gray);
   };
 
   f1.get();
@@ -134,10 +134,10 @@ void ImageProcessor::redPixelHelperFunction(const cv::Mat& frame, cv::Mat& mask,
   }
 
   std::vector<std::pair<cv::Point, cv::Point>> walls = {
-    {topLeft, topRight},
-    {topRight, bottomRight},
-    {bottomRight, bottomLeft},
-    {bottomLeft, topLeft}
+          {topLeft, topRight},
+          {topRight, bottomRight},
+          {bottomRight, bottomLeft},
+          {bottomLeft, topLeft}
   };
 
   bool goalIsLeft = ConfigController::getConfigBool("goalIsLeft");
@@ -178,94 +178,26 @@ void ImageProcessor::crossHelperFunction(const cv::Mat& frame, cv::Mat& mask, co
   std::vector<std::vector<cv::Point>> contours;
   cv::findContours(mask, contours, cv::RETR_CCOMP, cv::CHAIN_APPROX_SIMPLE);
 
-  int label = 0;
-  for (const auto& contour : contours)
-  {
-    double area = cv::contourArea(contour);
-    if (area > ConfigController::getConfigInt("MaxCrossSize"))
+  int midX = mask.cols / 2;
+  int midY = mask.rows / 2;
+  int crossBorder = ConfigController::getConfigInt("CrossBorder");
+
+  for (auto& contour : contours) {
+    cv::RotatedRect rect = minAreaRect(contour);
+    if (rect.center.x < midX - crossBorder || rect.center.x > midX + crossBorder || rect.center.y < midY - crossBorder || rect.center.y > midY + crossBorder)
+    if (rect.size.area() < 100 || rect.size.area() > ConfigController::getConfigInt("MaxCrossSize")) continue;
+
+    cv::Point2f points[4];
+    rect.points(points);
+
+    for (int i = 0; i < 2; i++)
     {
-      continue;
+      auto vector = Vector(static_cast<int>(points[i + 2].x) - static_cast<int>(points[i].x), static_cast<int>(points[i + 2].y) - static_cast<int>(points[i].x));
+      MainController::addCrossObject(std::make_unique<VectorWithStartPos>(static_cast<int>(points[i].x), static_cast<int>(points[i].x), vector));
+
+      cv::line(overlay, points[i], points[i+2], cv::Scalar(255, 0, 0), ConfigController::getConfigInt("CrossWallWidth"), cv::LINE_AA);
+      cv::putText(overlay, std::to_string(i), points[i], cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
     }
-    // Approximate contour to get corners
-    std::vector<cv::Point> approx;
-    cv::approxPolyDP(contour, approx, 10, true); // epsilon=10 can be tuned
-
-    cv::Point top = cv::Point(INT_MIN, INT_MIN);
-    cv::Point bottom = cv::Point(INT_MAX, INT_MAX);
-    cv::Point right = cv::Point(INT_MIN, INT_MIN);
-    cv::Point left = cv::Point(INT_MAX, INT_MAX);
-
-    for (size_t i = 0; i < approx.size(); ++i)
-    {
-      cv::Point p = approx[i];
-      if (p.y > top.y) top = p;
-      if (p.y < bottom.y) bottom = p;
-      if (p.x > right.x) right = p;
-      if (p.x < left.x) left = p;
-    }
-
-    cv::Point closestToTop;
-    double minDistanceToTop = 50000;
-    cv::Point closestToBottom;
-    double minDistanceToBottom = 50000;
-    cv::Point closestToRight;
-    double minDistanceToRight = 50000;
-    cv::Point closestToLeft;
-    double minDistanceToLeft = 50000;
-
-    for (size_t i = 0; i < approx.size(); ++i)
-    {
-      cv::Point p = approx[i];
-      if (p == top || p == bottom || p == right || p == left) continue;
-
-      double distanceToTop = std::abs(Vector(p.x - top.x, p.y - top.y).getLength());
-      double distanceToBottom = std::abs(Vector(p.x - bottom.x, p.y - bottom.y).getLength());
-      double distanceToLeft = std::abs(Vector(p.x - left.x, p.y - left.y).getLength());
-      double distanceToRight = std::abs(Vector(p.x - right.x, p.y - right.y).getLength());
-
-      if (distanceToTop < minDistanceToTop)
-      {
-        minDistanceToTop = distanceToTop;
-        closestToTop = p;
-      }
-
-      if (distanceToBottom < minDistanceToBottom)
-      {
-        minDistanceToBottom = distanceToBottom;
-        closestToBottom = p;
-      }
-
-      if (distanceToLeft < minDistanceToLeft)
-      {
-        minDistanceToLeft = distanceToLeft;
-        closestToLeft = p;
-      }
-
-      if (distanceToRight < minDistanceToRight)
-      {
-        minDistanceToRight = distanceToRight;
-        closestToRight = p;
-      }
-    }
-
-    auto topCenter = cv::Point((top.x + closestToTop.x) / 2, (top.y + closestToTop.y) / 2);
-    auto bottomCenter = cv::Point((bottom.x + closestToBottom.x) / 2, (bottom.y + closestToBottom.y) / 2);
-    auto rightCenter = cv::Point((right.x + closestToRight.x) / 2, (right.y + closestToRight.y) / 2);
-    auto leftCenter = cv::Point((left.x + closestToLeft.x) / 2, (left.y + closestToLeft.y) / 2);
-
-    auto horizontal = Vector(rightCenter.x - leftCenter.x, rightCenter.y - leftCenter.y);
-    auto vertical = Vector(topCenter.x - bottomCenter.x, topCenter.y - bottomCenter.y);
-
-    MainController::addCrossObject(std::make_unique<VectorWithStartPos>(topCenter.x, topCenter.y, vertical));
-    MainController::addCrossObject(std::make_unique<VectorWithStartPos>(rightCenter.x, rightCenter.y, horizontal));
-
-    cv::line(overlay, bottomCenter, topCenter, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("CrossWallWidth"),
-               cv::LINE_AA, 0);
-    cv::putText(overlay, std::to_string(label++), bottomCenter, cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
-
-    cv::line(overlay, leftCenter, rightCenter, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("CrossWallWidth"),
-               cv::LINE_AA, 0);
-    cv::putText(overlay, std::to_string(label++), leftCenter, cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
   }
 }
 
@@ -303,9 +235,17 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const std::string&
     {
       detectedColor = "orange";
     }
-    else
+    else if (h >= 30 && h <= 85 && s > 35 && v > 35)
     {
-      detectedColor = "orange";
+      detectedColor = "robotFront";
+    }
+    else if (h >= 120 && h <= 170 && s > 85 && v > 85)
+    {
+      detectedColor = "robotBack";
+    }
+
+    if (detectedColor.empty())
+    {
       continue;
     }
 
@@ -315,9 +255,13 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const std::string&
 
     double area = CV_PI * r * r;
     if (area < ConfigController::getConfigInt("MinimumSizeOfBlockingObject")
-      || area > ConfigController::getConfigInt("EggBallDiffVal"))
+      || area > ConfigController::getConfigInt("EggBallDiffVal") && detectedColor != "robotFront" && detectedColor != "robotBack")
     {
       continue;
+    }
+    if ((detectedColor == "robotFront" || detectedColor == "robotBack") && area < 1850)
+    {
+      detectedColor = "orange";
     }
     std::string label = "ball";
     // at some point we might want to add the colorLabel here to separate white and orange balls
@@ -325,8 +269,8 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const std::string&
     int x1 = rect.x, y1 = rect.y;
     int x2 = x1 + rect.width, y2 = y1 + rect.height;
 
-    auto courseObject = std::make_unique<CourseObject>(x1, y1, x2, y2, label);
-    ObjectCounter::objectDetected(label);
+    auto courseObject = std::make_unique<CourseObject>(x1, y1, x2, y2, detectedColor);
+    ObjectCounter::objectDetected(detectedColor);
 
     MainController::addCourseObject(std::move(courseObject));
 
@@ -443,6 +387,5 @@ void ImageProcessor::frontAndBackHelperFunction(const cv::Mat &frame, cv::Mat &m
     }
   }
 }
-
 
 

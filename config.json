@@ -5,7 +5,7 @@
   "safeYBot": 650,
   "middleXOnAxis": 500,
   "GoalShootingDistance": 80,
-  "GoalIntermediatePointDistance": 200,
+  "GoalIntermediatePointDistance": 300,
   "CornerApproachAngle": 10,
   "RobotIP": "192.168.0.1",
   "RobotPort": 1234,
@@ -18,7 +18,7 @@
   "ForwardFastSpeed": 500,
   "ForwardSlowSpeed": 200,
   "DistanceBeforeTargetReached": 75,
-  "RobotWidth": 175,
+  "RobotWidth": 140,
   "TotalBalls": 5,
   "WallWidth": 40,
   "RobotLengthInMM": 65,
@@ -58,5 +58,8 @@
   "CornerCrossHalfSize": 35,
   "PerspectiveOffset": 7,
   "UseFourPointsForWall": true,
-  "TargetSameBeforeTargetSet": 3
+  "TargetSameBeforeTargetSet": 2,
+  "AngleCheckCollision": 1250,
+  "DeliverOrangeFirst": true,
+  "CrossBorder": 300
 }
