@@ -5,7 +5,7 @@
   "safeYBot": 650,
   "middleXOnAxis": 500,
   "GoalShootingDistance": 80,
-  "GoalIntermediatePointDistance": 200,
+  "GoalIntermediatePointDistance": 300,
   "CornerApproachAngle": 10,
   "RobotIP": "192.168.0.1",
   "RobotPort": 1234,
