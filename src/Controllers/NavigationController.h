@@ -42,9 +42,6 @@ private:
 
   [[nodiscard]] Vector navigateToGoal(CourseObject* fromObject);
   [[nodiscard]] Vector findClosestBall(CourseObject* fromObject);
-  [[nodiscard]] Vector navigateToLeftGoal() const;
-
-  [[nodiscard]] Vector navigateToRightGoal() const;
 
   Vector handleCollision(Vector objectVector);
 
