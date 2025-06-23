@@ -698,6 +698,9 @@ Vector NavigationController::handleObjectNearCross(const CourseObject *courseObj
     Vector direction(cross->x, cross->y);
 
     const double len2 = direction.x * direction.x + direction.y * direction.y;
+    if (len2 == 0.0) {
+        continue; // Skip zero-length direction vectors
+    }
 
     const double t = ((ballCentre.x - start.x) * direction.x
                       + (ballCentre.y - start.y) * direction.y) / len2;
