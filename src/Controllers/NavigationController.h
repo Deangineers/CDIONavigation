@@ -52,7 +52,7 @@ private:
   Vector handleObjectNearCorner(const CourseObject *courseObject,
                                 const std::pair<Vector, Vector> &closestVectors) const;
 
-  Vector handleObjectNearCross(const CourseObject *courseObject, const Vector& vector) const;
+  Vector handleObjectNearCross(const CourseObject *courseObject, const std::pair<Vector,Vector>& vectors) const;
 
   std::pair<VectorToBlockingObject, VectorToBlockingObject> getVectorsForClosestBlockingObjects(const CourseObject *courseObject) const;
 
