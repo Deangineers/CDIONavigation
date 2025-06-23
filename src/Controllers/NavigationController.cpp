@@ -843,7 +843,8 @@ std::pair<VectorToBlockingObject, VectorToBlockingObject> NavigationController::
 )
 const
 {
-  auto returnPair = std::make_pair(VectorToBlockingObject({5000, 5000},false),VectorToBlockingObject(Vector(5000, 5000),false));
+  const auto startVector = Vector(5000,5000);
+  auto returnPair = std::make_pair(VectorToBlockingObject(startVector,false),VectorToBlockingObject(startVector,false));
 
   for (const auto &blockingObject: crossObjects_)
   {

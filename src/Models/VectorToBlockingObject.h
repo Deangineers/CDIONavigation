@@ -10,7 +10,7 @@
 class VectorToBlockingObject
 {
 public:
-  VectorToBlockingObject(const Vector& vector, bool isCross);
+  VectorToBlockingObject(Vector vector, bool isCross);
 
   Vector vector;
   bool isCross;

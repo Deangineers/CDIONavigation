@@ -4,6 +4,6 @@
 
 #include "VectorToBlockingObject.h"
 
-VectorToBlockingObject::VectorToBlockingObject(const Vector& vector, const bool isCross) : vector(vector) ,isCross(isCross)
+VectorToBlockingObject::VectorToBlockingObject(Vector vector, const bool isCross) : vector(vector) ,isCross(isCross)
 {
 }
