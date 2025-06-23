@@ -684,7 +684,7 @@ bool NavigationController::checkCollisionOnRoute(const Vector &targetVector) con
 {
   if (!robotFront_ || !robotBack_ || crossObjects_.size() != 2)
   {
-    return false;
+    return true;
   }
   std::vector<CourseObject> robotMiddles;
   robotMiddles.reserve(3);
