@@ -27,25 +27,25 @@ void ImageProcessor::processImage(const cv::Mat& frame)
 
   auto f1 = std::async(std::launch::async, [&]
   {
-    detectBalls(frame, ballOverlay);
+      detectBalls(frame, ballOverlay);
   });
 
   auto f3 = std::async(std::launch::async, [&]
   {
-    detectRedPixels(frame, redOverlay);
+      detectRedPixels(frame, redOverlay);
   });
 
   auto f4 = std::async(std::launch::async, [&]
   {
-    detectFrontAndBack(frame, frontBackOverlay);
+      detectFrontAndBack(frame, frontBackOverlay);
   });
 
 
   auto applyOverlay = [](const cv::Mat& base, const cv::Mat& overlay)
   {
-    cv::Mat gray;
-    cv::cvtColor(overlay, gray, cv::COLOR_BGR2GRAY);
-    overlay.copyTo(base, gray);
+      cv::Mat gray;
+      cv::cvtColor(overlay, gray, cv::COLOR_BGR2GRAY);
+      overlay.copyTo(base, gray);
   };
 
   f1.get();
@@ -134,10 +134,10 @@ void ImageProcessor::redPixelHelperFunction(const cv::Mat& frame, cv::Mat& mask,
   }
 
   std::vector<std::pair<cv::Point, cv::Point>> walls = {
-    {topLeft, topRight},
-    {topRight, bottomRight},
-    {bottomRight, bottomLeft},
-    {bottomLeft, topLeft}
+          {topLeft, topRight},
+          {topRight, bottomRight},
+          {bottomRight, bottomLeft},
+          {bottomLeft, topLeft}
   };
 
   for (const auto& [start, end] : walls)
@@ -249,11 +249,11 @@ void ImageProcessor::crossHelperFunction(const cv::Mat& frame, cv::Mat& mask, co
     MainController::addCrossObject(std::make_unique<VectorWithStartPos>(rightCenter.x, rightCenter.y, horizontal));
 
     cv::line(overlay, bottomCenter, topCenter, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("CrossWallWidth"),
-               cv::LINE_AA, 0);
+             cv::LINE_AA, 0);
     cv::putText(overlay, std::to_string(label++), bottomCenter, cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
 
     cv::line(overlay, leftCenter, rightCenter, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("CrossWallWidth"),
-               cv::LINE_AA, 0);
+             cv::LINE_AA, 0);
     cv::putText(overlay, std::to_string(label++), leftCenter, cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
   }
 }
@@ -440,6 +440,5 @@ void ImageProcessor::frontAndBackHelperFunction(const cv::Mat &frame, cv::Mat &m
     }
   }
 }
-
 
 
