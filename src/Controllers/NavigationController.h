@@ -39,15 +39,9 @@ private:
   void removeBallsOutsideCourse();
 
   void removeBallsInsideRobot();
-
-  [[nodiscard]] double getDistanceToClosestBallFromSafeSpot(const std::pair<int, int> &spot) const;
-
-  [[nodiscard]] std::unique_ptr<JourneyModel> makeJourneyModel(const Vector &objectVector, bool toCollectBalls) const;
-
-  [[nodiscard]] Vector navigateToGoal();
-
-  [[nodiscard]] Vector findClosestBall();
-
+  [[nodiscard]] std::unique_ptr<JourneyModel> makeJourneyModel(const Vector& objectVector, bool toCollectBalls) const;
+  [[nodiscard]] Vector navigateToGoal(CourseObject* fromObject);
+  [[nodiscard]] Vector findClosestBall(CourseObject* fromObject);
   [[nodiscard]] Vector navigateToLeftGoal() const;
 
   [[nodiscard]] Vector navigateToRightGoal() const;
@@ -65,10 +59,8 @@ private:
 
   std::pair<VectorToBlockingObject, VectorToBlockingObject> getVectorsForClosestBlockingObjects(const CourseObject *courseObject) const;
 
-  [[nodiscard]] bool checkCollisionOnRoute(const Vector &targetVector) const;
-
-  Vector navigateToSafeSpot();
-
+  [[nodiscard]] bool checkCollisionOnRoute(const Vector& targetVector) const;
+  Vector navigateToSafeSpot(bool toGoal);
   void findSafeSpots();
 
 
