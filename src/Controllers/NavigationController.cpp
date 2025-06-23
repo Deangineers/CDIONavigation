@@ -628,11 +628,11 @@ Vector NavigationController::handleObjectNextToBlocking(const CourseObject *cour
     return handleObjectNearWall(courseObject, vectorToWall.vector);
   }
 
-  auto vectorPair = std::make_pair(closestVectors.first.vector, closestVectors.second.vector);
   if (closestVectors.first.isCross)
   {
-    return handleObjectNearCross(courseObject, vectorPair);
+    return handleObjectNearCross(courseObject, closestVectors.first.vector);
   }
+  auto vectorPair = std::make_pair(closestVectors.first.vector, closestVectors.second.vector);
   return handleObjectNearCorner(courseObject, vectorPair);
 }
 
@@ -705,49 +705,19 @@ Vector NavigationController::handleObjectNearCorner(const CourseObject *courseOb
 }
 
 Vector NavigationController::handleObjectNearCross(const CourseObject *courseObject,
-                                                   const std::pair<Vector, Vector> &) const
+                                                   const Vector& vector) const
 {
   CourseObject robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
   const int ballX = (courseObject->x1() + courseObject->x2()) / 2;
   const int ballY = (courseObject->y1() + courseObject->y2()) / 2;
   Vector ballCentre(ballX, ballY);
-  const VectorWithStartPos *closestCrossVector = nullptr;
-  double closestDist = INT16_MAX;
+  auto closestCrossVector = VectorWithStartPos(ballX,ballY,vector);
 
-  for (const auto &crossSegment: crossObjects_)
-  {
-    const auto *cross = crossSegment.get();
-
-    Vector start(cross->startX_, cross->startY_);
-    Vector direction(cross->x, cross->y);
-
-    const double len2 = direction.x * direction.x + direction.y * direction.y;
-    if (len2 == 0.0) {
-        continue; // Skip zero-length direction vectors
-    }
-
-    const double t = ((ballCentre.x - start.x) * direction.x
-                      + (ballCentre.y - start.y) * direction.y) / len2;
-    Vector projection(start.x + t * direction.x, start.y + t * direction.y);
-
-    const double dist = (ballCentre - projection).getLength();
-    if (dist < closestDist)
-    {
-      closestDist = dist;
-      closestCrossVector = cross;
-    }
-  }
-
-  if (!closestCrossVector) //cross not found in frame
-  {
-    return MathUtil::calculateVectorToObject(&robotMiddle, courseObject);
-  }
-
-  Vector crossSegmentDirection(closestCrossVector->x, closestCrossVector->y);
+  Vector crossSegmentDirection(closestCrossVector.x, closestCrossVector.y);
   Vector normalVector(-crossSegmentDirection.y, crossSegmentDirection.x);
 
-  if (normalVector.x * (ballCentre.x - closestCrossVector->startX_)
-      + normalVector.y * (ballCentre.y - closestCrossVector->startY_) < 0)
+  if (normalVector.x * (ballCentre.x - closestCrossVector.startX_)
+      + normalVector.y * (ballCentre.y - closestCrossVector.startY_) < 0)
   {
     normalVector = normalVector * -1.0;
   }
@@ -755,7 +725,7 @@ Vector NavigationController::handleObjectNearCross(const CourseObject *courseObj
   normalVector = normalVector * (1.0 / normalVector.getLength());
 
   const double halfWidth = ConfigController::getConfigInt("RobotWidth") / 2.0;
-  const double shiftDist = ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning") * 5;
+  const double shiftDist = ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning") * 10;
 
   Vector approachPt = ballCentre + normalVector * halfWidth;
   Vector shiftPt = approachPt + normalVector * shiftDist;
@@ -767,7 +737,12 @@ Vector NavigationController::handleObjectNearCross(const CourseObject *courseObj
   const int targetReached = ConfigController::getConfigInt("DistanceBeforeTargetReached");
   if (vectorToShifted.getLength() < targetReached)
   {
-    return MathUtil::calculateVectorToObject(&robotMiddle, courseObject);
+    Vector courseObjectShiftedPoint = ballCentre + normalVector * halfWidth;
+    CourseObject shiftedCourse = CourseObject(*courseObject);
+    shiftedCourse.shiftX(courseObjectShiftedPoint.x);
+    shiftedCourse.shiftY(courseObjectShiftedPoint.y);
+
+    return MathUtil::calculateVectorToObject(&robotMiddle, &shiftedObject);
   }
 
   return vectorToShifted;
