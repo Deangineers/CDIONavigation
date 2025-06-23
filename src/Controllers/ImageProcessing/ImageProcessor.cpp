@@ -140,6 +140,21 @@ void ImageProcessor::redPixelHelperFunction(const cv::Mat& frame, cv::Mat& mask,
           {bottomLeft, topLeft}
   };
 
+  bool goalIsLeft = ConfigController::getConfigBool("goalIsLeft");
+  int goalX, goalY;
+
+  if (goalIsLeft)
+  {
+    goalX = (topLeft.x + bottomLeft.x) / 2;
+    goalY = (topLeft.y + bottomLeft.y) / 2;
+  }
+  else
+  {
+    goalX = (topRight.x + bottomRight.x) / 2;
+    goalY = (topRight.y + bottomRight.y) / 2;
+  }
+
+  MainController::addGoalObject(std::make_unique<CourseObject>(goalX, goalY, goalX, goalY, "goal"));
   for (const auto& [start, end] : walls)
   {
     Vector vec(end.x - start.x, end.y - start.y);

@@ -19,11 +19,10 @@ class NavigationController {
 public:
   NavigationController() = default;
 
-  void addCourseObject(std::unique_ptr<CourseObject> &&courseObject);
-
-  void addBlockingObject(std::unique_ptr<VectorWithStartPos> &&blockingObject);
-
-  void addCrossObject(std::unique_ptr<VectorWithStartPos> &&blockingObject);
+  void addCourseObject(std::unique_ptr<CourseObject>&& courseObject);
+  void addBlockingObject(std::unique_ptr<VectorWithStartPos>&& blockingObject);
+  void addCrossObject(std::unique_ptr<VectorWithStartPos>&& blockingObject);
+  void addGoalObject(std::unique_ptr<CourseObject>&& goalObject);
 
   void clearObjects();
 
@@ -40,6 +39,7 @@ private:
 
   void removeBallsInsideRobot();
   [[nodiscard]] std::unique_ptr<JourneyModel> makeJourneyModel(const Vector& objectVector, bool toCollectBalls) const;
+
   [[nodiscard]] Vector navigateToGoal(CourseObject* fromObject);
   [[nodiscard]] Vector findClosestBall(CourseObject* fromObject);
   [[nodiscard]] Vector navigateToLeftGoal() const;

@@ -91,6 +91,11 @@ void NavigationController::addCrossObject(std::unique_ptr<VectorWithStartPos> &&
   crossObjects_.push_back(std::move(blockingObject));
 }
 
+void NavigationController::addGoalObject(std::unique_ptr<CourseObject> &&goalObject)
+{
+  goal_ = std::move(goalObject);
+}
+
 void NavigationController::clearObjects()
 {
   ballVector_.clear();
@@ -392,27 +397,14 @@ void NavigationController::removeBallsInsideRobot()
 
 Vector NavigationController::navigateToGoal(CourseObject *fromObject)
 {
-  Vector goal(-1, -1);
-  if (ConfigController::getConfigBool("goalIsLeft"))
-  {
-    goal = navigateToLeftGoal();
-  } else
-  {
-    goal = navigateToRightGoal();
-  }
-
-  if (goal.x == -1)
-  {
-    return {0, 0};
-  }
-
   int targetX;
-  if (goal.x > ConfigController::getConfigInt("middleXOnAxis"))
+
+  if (goal_.get()->x1() > ConfigController::getConfigInt("middleXOnAxis"))
   {
-    targetX = goal.x - ConfigController::getConfigInt("GoalIntermediatePointDistance");
+    targetX = goal_.get()->x1() - ConfigController::getConfigInt("GoalIntermediatePointDistance");
   } else
   {
-    targetX = goal.x + ConfigController::getConfigInt("GoalIntermediatePointDistance");
+    targetX = goal_.get()->x1() + ConfigController::getConfigInt("GoalIntermediatePointDistance");
   }
   goal_ = std::make_unique<CourseObject>(goal.x, goal.y - 10, goal.x, goal.y - 10, "goal");
   auto localGoal = CourseObject(targetX, goal.y, targetX, goal.y, "goal");
@@ -492,52 +484,6 @@ Vector NavigationController::findClosestBall(CourseObject *fromObject)
     return {0, 0};
   }
   return handleObjectNextToBlocking(closestBall);
-}
-
-Vector NavigationController::navigateToLeftGoal() const
-{
-  int minY = INT_MAX;
-  int minX = INT_MAX;
-  int maxY = INT_MIN;
-
-  for (const auto &object: blockingObjects_)
-  {
-    const int x0 = object->startX();
-    const int y0 = object->startY();
-
-    const int x1 = x0 + object->x;
-    const int y1 = y0 + object->y;
-
-    minX = std::min({minX, x0, x1});
-    minY = std::min({minY, y0, y1});
-    maxY = std::max({maxY, y0, y1});
-  }
-
-  const int middleY = (minY + maxY) / 2;
-  return Vector{minX, middleY};
-}
-
-Vector NavigationController::navigateToRightGoal() const
-{
-  int minY = INT_MAX;
-  int maxX = INT_MIN;
-  int maxY = INT_MIN;
-
-  for (const auto &object: blockingObjects_)
-  {
-    const int x0 = object->startX();
-    const int y0 = object->startY();
-
-    const int x1 = x0 + object->x;
-    const int y1 = y0 + object->y;
-
-    maxX = std::max({maxX, x0, x1});
-    minY = std::min({minY, y0, y1});
-    maxY = std::max({maxY, y0, y1});
-  }
-
-  const int middleY = (minY + maxY) / 2;
-  return Vector{maxX, middleY};
 }
 
 Vector NavigationController::handleCollision(Vector objectVector)
