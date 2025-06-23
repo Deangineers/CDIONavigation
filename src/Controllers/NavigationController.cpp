@@ -390,7 +390,7 @@ void NavigationController::removeBallsInsideRobot()
   });
 }
 
-Vector NavigationController::navigateToGoal(CourseObject* fromObject)
+Vector NavigationController::navigateToGoal(CourseObject *fromObject)
 {
   Vector goal(-1, -1);
   if (ConfigController::getConfigBool("goalIsLeft"))
@@ -423,7 +423,7 @@ Vector NavigationController::navigateToGoal(CourseObject* fromObject)
   return MathUtil::calculateVectorToObject(fromObject, &localGoal);
 }
 
-Vector NavigationController::findClosestBall(CourseObject* fromObject)
+Vector NavigationController::findClosestBall(CourseObject *fromObject)
 {
   if (ballVector_.empty())
   {
@@ -705,13 +705,13 @@ Vector NavigationController::handleObjectNearCorner(const CourseObject *courseOb
 }
 
 Vector NavigationController::handleObjectNearCross(const CourseObject *courseObject,
-                                                   const Vector& vector) const
+                                                   const Vector &vector) const
 {
   CourseObject robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
   const int ballX = (courseObject->x1() + courseObject->x2()) / 2;
   const int ballY = (courseObject->y1() + courseObject->y2()) / 2;
   Vector ballCentre(ballX, ballY);
-  auto closestCrossVector = VectorWithStartPos(ballX,ballY,vector);
+  auto closestCrossVector = VectorWithStartPos(ballX, ballY, vector);
 
   Vector crossSegmentDirection(closestCrossVector.x, closestCrossVector.y);
   Vector normalVector(-crossSegmentDirection.y, crossSegmentDirection.x);
@@ -728,16 +728,19 @@ Vector NavigationController::handleObjectNearCross(const CourseObject *courseObj
   const double shiftDist = ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning") * 10;
 
   Vector shiftedObjectPoint = ballCentre + normalVector * halfWidth;
-  Vector shiftedApproachPoint = crossSegmentDirection * (1.0 / crossSegmentDirection.getLength()) * shiftDist + shiftedObjectPoint;
+  Vector shiftedApproachPoint = crossSegmentDirection * (1.0 / crossSegmentDirection.getLength()) * shiftDist +
+                                shiftedObjectPoint;
 
-  CourseObject shiftedApproachPointObject(shiftedApproachPoint.x, shiftedApproachPoint.y, shiftedApproachPoint.x, shiftedApproachPoint.y, "");
+  CourseObject shiftedApproachPointObject(shiftedApproachPoint.x, shiftedApproachPoint.y, shiftedApproachPoint.x,
+                                          shiftedApproachPoint.y, "");
 
   Vector vectorToShifted = MathUtil::calculateVectorToObject(&robotMiddle, &shiftedApproachPointObject);
 
   const int targetReached = ConfigController::getConfigInt("DistanceBeforeTargetReached");
   if (vectorToShifted.getLength() < targetReached)
   {
-    CourseObject shiftedCourse = CourseObject(shiftedObjectPoint.x, shiftedObjectPoint.y, shiftedObjectPoint.x, shiftedObjectPoint.y, "ball");
+    CourseObject shiftedCourse = CourseObject(shiftedObjectPoint.x, shiftedObjectPoint.y, shiftedObjectPoint.x,
+                                              shiftedObjectPoint.y, "ball");
     return MathUtil::calculateVectorToObject(&robotMiddle, &shiftedCourse);
   }
 
@@ -835,8 +838,9 @@ std::pair<VectorToBlockingObject, VectorToBlockingObject> NavigationController::
 )
 const
 {
-  const auto startVector = Vector(5000,5000);
-  auto returnPair = std::make_pair(VectorToBlockingObject(startVector,false),VectorToBlockingObject(startVector,false));
+  const auto startVector = Vector(5000, 5000);
+  auto returnPair = std::make_pair(VectorToBlockingObject(startVector, false),
+                                   VectorToBlockingObject(startVector, false));
 
   for (const auto &blockingObject: crossObjects_)
   {
