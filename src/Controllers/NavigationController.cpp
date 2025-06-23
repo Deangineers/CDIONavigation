@@ -559,7 +559,8 @@ Vector NavigationController::handleObjectNextToBlocking(const CourseObject *cour
     closestVectors.first.vector, closestVectors.second.vector);
   int maxAllowedAngleDiffBetweenClosestVectors = ConfigController::getConfigInt("AngleDiffBeforeCornerBall");
   if ((closestVectors.second.vector.getLength() > ConfigController::getConfigInt("DistanceToWallBeforeHandling")
-      || std::abs(closestVectorsAngleDiff) < maxAllowedAngleDiffBetweenClosestVectors) && not closestVectors.first.isCross)
+       || std::abs(closestVectorsAngleDiff) < maxAllowedAngleDiffBetweenClosestVectors) && not closestVectors.first.
+      isCross)
   {
     auto vectorToWall = closestVectors.first;
 
@@ -655,35 +656,37 @@ Vector NavigationController::handleObjectNearCross(const CourseObject *courseObj
   Vector ballCentre(ballX, ballY);
   auto closestCrossVector = VectorWithStartPos(ballX, ballY, vector);
 
-  Vector crossSegmentDirection(closestCrossVector.x, closestCrossVector.y);
-  Vector normalVector(-crossSegmentDirection.y, crossSegmentDirection.x);
+  Vector vectorFromBallToClosestCrossSegment(closestCrossVector.x, closestCrossVector.y);
+  Vector vectorParallelToClosestCrossSegment(-vectorFromBallToClosestCrossSegment.y,
+                                             vectorFromBallToClosestCrossSegment.x);
 
-  if (normalVector.x * (ballCentre.x - closestCrossVector.startX_)
-      + normalVector.y * (ballCentre.y - closestCrossVector.startY_) < 0)
+  if (vectorParallelToClosestCrossSegment.x * (ballCentre.x - closestCrossVector.startX_) +
+      vectorParallelToClosestCrossSegment.y * (ballCentre.y - closestCrossVector.startY_) < 0)
   {
-    normalVector = normalVector * -1.0;
+    vectorParallelToClosestCrossSegment = vectorParallelToClosestCrossSegment * -1.0;
   }
-
-  normalVector = normalVector * (1.0 / normalVector.getLength());
+  auto normalizedVectorFromBallToCross = vectorParallelToClosestCrossSegment * (
+                                           1.0 / vectorParallelToClosestCrossSegment.getLength());
+  auto normalizedVectorParallelToClosest = vectorParallelToClosestCrossSegment * (
+                                             1.0 / vectorParallelToClosestCrossSegment.getLength());
 
   const double halfWidth = ConfigController::getConfigInt("RobotWidth") / 2.0;
   const double shiftDist = ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning") * 5;
 
-  Vector shiftedObjectPoint = ballCentre + normalVector * halfWidth;
-  Vector shiftedApproachPoint = crossSegmentDirection * (1.0 / crossSegmentDirection.getLength()) * shiftDist +
-                                shiftedObjectPoint;
+  Vector shiftedObjectPoint = ballCentre + normalizedVectorFromBallToCross * halfWidth;
+  Vector shiftedApproachPoint = shiftedObjectPoint + normalizedVectorParallelToClosest * shiftDist;
 
-  CourseObject shiftedApproachPointObject(shiftedApproachPoint.x, shiftedApproachPoint.y, shiftedApproachPoint.x,
-                                          shiftedApproachPoint.y, "");
+  CourseObject shiftedApproachObj(shiftedApproachPoint.x, shiftedApproachPoint.y,
+                                  shiftedApproachPoint.x, shiftedApproachPoint.y, "");
 
-  Vector vectorToShifted = MathUtil::calculateVectorToObject(&robotMiddle, &shiftedApproachPointObject);
+  Vector vectorToShifted = MathUtil::calculateVectorToObject(&robotMiddle, &shiftedApproachObj);
 
   const int targetReached = ConfigController::getConfigInt("DistanceBeforeTargetReached");
   if (vectorToShifted.getLength() < targetReached)
   {
-    CourseObject shiftedCourse = CourseObject(shiftedObjectPoint.x, shiftedObjectPoint.y, shiftedObjectPoint.x,
+    CourseObject shiftedCourseObject = CourseObject(shiftedObjectPoint.x, shiftedObjectPoint.y, shiftedObjectPoint.x,
                                               shiftedObjectPoint.y, "ball");
-    return MathUtil::calculateVectorToObject(&robotMiddle, &shiftedCourse);
+    return MathUtil::calculateVectorToObject(&robotMiddle, &shiftedCourseObject);
   }
 
   return vectorToShifted;
