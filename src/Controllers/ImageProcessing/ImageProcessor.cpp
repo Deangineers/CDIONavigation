@@ -163,9 +163,14 @@ void ImageProcessor::crossHelperFunction(const cv::Mat& frame, cv::Mat& mask, co
   std::vector<std::vector<cv::Point>> contours;
   cv::findContours(mask, contours, cv::RETR_CCOMP, cv::CHAIN_APPROX_SIMPLE);
 
+  int midX = mask.cols / 2;
+  int midY = mask.rows / 2;
+  int crossBorder = ConfigController::getConfigInt("CrossBorder");
+
   for (auto& contour : contours) {
     cv::RotatedRect rect = minAreaRect(contour);
-    if (rect.size.area() < 100 || rect.size.area() > ConfigController::getConfigInt("MaxCrossSize")) continue;  // Skip small areas
+    if (rect.center.x < midX - crossBorder || rect.center.x > midX + crossBorder || rect.center.y < midY - crossBorder || rect.center.y > midY + crossBorder)
+    if (rect.size.area() < 100 || rect.size.area() > ConfigController::getConfigInt("MaxCrossSize")) continue;
 
     cv::Point2f points[4];
     rect.points(points);

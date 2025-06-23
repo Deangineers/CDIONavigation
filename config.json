@@ -60,5 +60,6 @@
   "UseFourPointsForWall": true,
   "TargetSameBeforeTargetSet": 2,
   "AngleCheckCollision": 1250,
-  "DeliverOrangeFirst": true
+  "DeliverOrangeFirst": true,
+  "CrossBorder": 300
 }
