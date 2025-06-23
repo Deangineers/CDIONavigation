@@ -185,7 +185,10 @@ void ImageProcessor::crossHelperFunction(const cv::Mat& frame, cv::Mat& mask, co
   for (auto& contour : contours) {
     cv::RotatedRect rect = minAreaRect(contour);
     if (rect.center.x < midX - crossBorder || rect.center.x > midX + crossBorder || rect.center.y < midY - crossBorder || rect.center.y > midY + crossBorder)
-    if (rect.size.area() < 100 || rect.size.area() > ConfigController::getConfigInt("MaxCrossSize")) continue;
+      continue;
+
+    if (rect.size.area() < 100 || rect.size.area() > ConfigController::getConfigInt("MaxCrossSize"))
+      continue;
 
     cv::Point2f points[4];
     rect.points(points);
