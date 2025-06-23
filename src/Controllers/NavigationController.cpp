@@ -399,15 +399,14 @@ Vector NavigationController::navigateToGoal(CourseObject *fromObject)
 {
   int targetX;
 
-  if (goal_.get()->x1() > ConfigController::getConfigInt("middleXOnAxis"))
+  if (goal_->x1() > ConfigController::getConfigInt("middleXOnAxis"))
   {
-    targetX = goal_.get()->x1() - ConfigController::getConfigInt("GoalIntermediatePointDistance");
+    targetX = goal_->x1() - ConfigController::getConfigInt("GoalIntermediatePointDistance");
   } else
   {
-    targetX = goal_.get()->x1() + ConfigController::getConfigInt("GoalIntermediatePointDistance");
+    targetX = goal_->x1() + ConfigController::getConfigInt("GoalIntermediatePointDistance");
   }
-  goal_ = std::make_unique<CourseObject>(goal.x, goal.y - 10, goal.x, goal.y - 10, "goal");
-  auto localGoal = CourseObject(targetX, goal.y, targetX, goal.y, "goal");
+  auto localGoal = CourseObject(targetX, goal_->y1(), targetX, goal_->y1(), "goal");
   Utility::appendToFile(
     "log.txt",
     "Navigating to Goal: " + std::to_string(goal_->x1()) + ", " + std::to_string(goal_->y1()) + "\n");
