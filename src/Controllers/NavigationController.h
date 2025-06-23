@@ -38,21 +38,21 @@ private:
   void removeBallsOutsideCourse();
 
   void removeBallsInsideRobot();
-  [[nodiscard]] std::unique_ptr<JourneyModel> makeJourneyModel(const Vector& objectVector, bool toCollectBalls) const;
+  [[nodiscard]] std::unique_ptr<JourneyModel> makeJourneyModel(const Vector& objectVector, bool toCollectBalls);
 
   [[nodiscard]] Vector navigateToGoal(CourseObject* fromObject);
   [[nodiscard]] Vector findClosestBall(CourseObject* fromObject);
 
   Vector handleCollision(Vector objectVector);
 
-  Vector handleObjectNextToBlocking(const CourseObject *courseObject) const;
+  Vector handleObjectNextToBlocking(const CourseObject *courseObject);
 
   Vector handleObjectNearWall(const CourseObject *courseObject, const Vector &vectorToWall) const;
 
   Vector handleObjectNearCorner(const CourseObject *courseObject,
                                 const std::pair<Vector, Vector> &closestVectors) const;
 
-  Vector handleObjectNearCross(const CourseObject *courseObject, const std::pair<Vector,Vector>& vectors) const;
+  Vector handleObjectNearCross(const CourseObject *courseObject, const std::pair<Vector,Vector>& vectors);
 
   std::pair<VectorToBlockingObject, VectorToBlockingObject> getVectorsForClosestBlockingObjects(const CourseObject *courseObject) const;
 
@@ -95,6 +95,7 @@ private:
   std::atomic_bool lastSentCommandWasCompleted_ = true;
 
   int amountOfWalls_ = 0;
+  bool ballNearCross_ = false;
 };
 
 

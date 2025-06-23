@@ -128,7 +128,8 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   if (ballVector_.empty() || (ballVector_.size() <= 5 && not hasDeliveredBallsOnce_))
   {
     goToGoalCount_++;
-  } else
+  }
+  else
   {
     goToGoalCount_ = 0;
   }
@@ -324,7 +325,7 @@ void NavigationController::newCommandSent()
 }
 
 std::unique_ptr<JourneyModel> NavigationController::makeJourneyModel(const Vector &objectVector,
-                                                                     bool toCollectBalls) const
+                                                                     bool toCollectBalls)
 {
   const Vector robotVector = {robotFront_->x1() - robotBack_->x1(), robotFront_->y1() - robotBack_->y1()};
   const double angle = MathUtil::calculateAngleDifferenceBetweenVectors(robotVector, objectVector);
@@ -333,7 +334,10 @@ std::unique_ptr<JourneyModel> NavigationController::makeJourneyModel(const Vecto
   double distanceInCm = objectVector.getLength() * ((static_cast<double>(ConfigController::getConfigInt(
                                                        "RobotLengthInMM")) /
                                                      10) / vectorToRobotBack.getLength());
-  return std::make_unique<JourneyModel>(distanceInCm, angle, toCollectBalls);
+
+  bool localCross = ballNearCross_;
+  ballNearCross_ = false;
+  return std::make_unique<JourneyModel>(distanceInCm, angle, toCollectBalls, localCross);
 }
 
 void NavigationController::removeBallsOutsideCourse()
@@ -530,7 +534,7 @@ Vector NavigationController::handleCollision(Vector objectVector)
   return objectVector;
 }
 
-Vector NavigationController::handleObjectNextToBlocking(const CourseObject *courseObject) const
+Vector NavigationController::handleObjectNextToBlocking(const CourseObject *courseObject)
 {
   if (courseObject == nullptr)
   {
@@ -569,6 +573,11 @@ Vector NavigationController::handleObjectNextToBlocking(const CourseObject *cour
       return MathUtil::calculateVectorToObject(&robotMiddle, courseObject);
     }
     return handleObjectNearWall(courseObject, vectorToWall.vector);
+  }
+
+  if (closestVectors.first.vector.getLength() > ConfigController::getConfigInt("DistanceToWallBeforeHandling"))
+  {
+    return MathUtil::calculateVectorToObject(&robotMiddle, courseObject);
   }
 
   auto vectorPair = std::make_pair(closestVectors.first.vector, closestVectors.second.vector);
@@ -648,14 +657,14 @@ Vector NavigationController::handleObjectNearCorner(const CourseObject *courseOb
 }
 
 Vector NavigationController::handleObjectNearCross(const CourseObject *courseObject,
-                                                   const std::pair<Vector,Vector> &vectors) const
+                                                   const std::pair<Vector,Vector> &vectors)
 {
   CourseObject robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
 
   Vector shiftedVector = Vector(vectors.second);
   shiftedVector = Vector(-shiftedVector.x,-shiftedVector.y);
-  shiftedVector.x = 1.0 / shiftedVector.getLength() * shiftedVector.x * (robotWidth_/2);
-  shiftedVector.y = 1.0/ shiftedVector.getLength() * shiftedVector.y * (robotWidth_/2);
+  shiftedVector.x = 1.0 / shiftedVector.getLength() * shiftedVector.x * (robotWidth_/3);
+  shiftedVector.y = 1.0/ shiftedVector.getLength() * shiftedVector.y * (robotWidth_/3);
 
   const int ballX = (courseObject->x1() + courseObject->x2()) / 2 + shiftedVector.x;
   const int ballY = (courseObject->y1() + courseObject->y2()) / 2 + shiftedVector.y;
@@ -671,7 +680,8 @@ Vector NavigationController::handleObjectNearCross(const CourseObject *courseObj
     auto localCourseObjcet = CourseObject(*courseObject);
     localCourseObjcet.shiftX(shiftedVector.x);
     localCourseObjcet.shiftY(shiftedVector.y);
-    return MathUtil::calculateVectorToObject(&robotMiddle, &localCourseObjcet);
+    ballNearCross_ = true;
+    return MathUtil::calculateVectorToObject(&robotMiddle, &localCourseObjcet) * 0.7;
   }
   return vectorToIntermediatePoint;
 }

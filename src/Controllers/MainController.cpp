@@ -134,6 +134,10 @@ Command MainController::journeyToCommand(const JourneyModel* journey)
     {
       command.setDistanceOrAngle(journey->distance);
     }
+    if (journey->isCross)
+    {
+      command.setSpeed(30);
+    }
     return command;
   }
 
