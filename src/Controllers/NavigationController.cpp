@@ -727,22 +727,18 @@ Vector NavigationController::handleObjectNearCross(const CourseObject *courseObj
   const double halfWidth = ConfigController::getConfigInt("RobotWidth") / 2.0;
   const double shiftDist = ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning") * 10;
 
-  Vector approachPt = ballCentre + normalVector * halfWidth;
-  Vector shiftPt = approachPt + normalVector * shiftDist;
+  Vector shiftedObjectPoint = ballCentre + normalVector * halfWidth;
+  Vector shiftedApproachPoint = crossSegmentDirection * (1.0 / crossSegmentDirection.getLength()) * shiftDist + shiftedObjectPoint;
 
-  CourseObject shiftedObject(shiftPt.x, shiftPt.y, shiftPt.x, shiftPt.y, "");
+  CourseObject shiftedApproachPointObject(shiftedApproachPoint.x, shiftedApproachPoint.y, shiftedApproachPoint.x, shiftedApproachPoint.y, "");
 
-  Vector vectorToShifted = MathUtil::calculateVectorToObject(&robotMiddle, &shiftedObject);
+  Vector vectorToShifted = MathUtil::calculateVectorToObject(&robotMiddle, &shiftedApproachPointObject);
 
   const int targetReached = ConfigController::getConfigInt("DistanceBeforeTargetReached");
   if (vectorToShifted.getLength() < targetReached)
   {
-    Vector courseObjectShiftedPoint = ballCentre + normalVector * halfWidth;
-    CourseObject shiftedCourse = CourseObject(*courseObject);
-    shiftedCourse.shiftX(courseObjectShiftedPoint.x);
-    shiftedCourse.shiftY(courseObjectShiftedPoint.y);
-
-    return MathUtil::calculateVectorToObject(&robotMiddle, &shiftedObject);
+    CourseObject shiftedCourse = CourseObject(shiftedObjectPoint.x, shiftedObjectPoint.y, shiftedObjectPoint.x, shiftedObjectPoint.y, "ball");
+    return MathUtil::calculateVectorToObject(&robotMiddle, &shiftedCourse);
   }
 
   return vectorToShifted;
