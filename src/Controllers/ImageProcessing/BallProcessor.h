@@ -5,18 +5,16 @@
 #ifndef BALLPROCESSOR_H
 #define BALLPROCESSOR_H
 #include <opencv2/core/mat.hpp>
-
-#include "IBallProcessor.h"
 #include "../../Models/CourseObject.h"
 
 
-class BallProcessor : public IBallProcessor
+class BallProcessor
 {
 public:
   BallProcessor();
-  void begin() override;
-  bool isBallValid(CourseObject* courseObject) override;
-  bool isEggValid(const CourseObject* courseObject) override;
+  void begin();
+  bool isBallValid(CourseObject* courseObject);
+  bool isEggValid(const CourseObject* courseObject);
 
 private:
   bool toAddBall(const CourseObject* courseObject) const;

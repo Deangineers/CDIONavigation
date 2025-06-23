@@ -5,8 +5,8 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/core/mat.hpp>
 
-#include "TestBallProcessor.h"
 #include "../src/Controllers/MainController.h"
+#include "../src/Controllers/ObjectCounter.h"
 #include "../src/Controllers/ImageProcessing/CloudyImageProcessor.h"
 #include "gtest/gtest.h"
 #include "Utility/ConfigController.h"
@@ -23,15 +23,14 @@ public:
   BallDetectionTests()
   {
     MainController::testInit();
-    ballProcessor = std::make_shared<TestBallProcessor>();
-    imageProcessor = std::make_shared<CloudyImageProcessor>(ballProcessor);
+    imageProcessor = std::make_shared<CloudyImageProcessor>();
     ConfigController::TESTsetConfigInt("ImagesToAverage", 1);
     ConfigController::TESTsetConfigInt("AmountOfSeenBeforeCreate", 0);
   }
 
   void handleExpect(int expected)
   {
-    int seenBalls = ballProcessor->getBallCounter();
+    int seenBalls = ObjectCounter::getCount("ball");
     int diff = seenBalls - expected;
     totalDiff += std::abs(diff);
     aggregateDiff += diff;
@@ -44,10 +43,10 @@ public:
       amountUnderTarget++;
     }
     EXPECT_EQ(seenBalls, expected);
+    ObjectCounter::reset();
   }
 
   std::shared_ptr<CloudyImageProcessor> imageProcessor;
-  std::shared_ptr<TestBallProcessor> ballProcessor;
 };
 
 
@@ -99,6 +98,27 @@ TEST_F(BallDetectionTests, testImage5)
   cv::Mat frame = cv::imread("../../TestImages/testImage5.jpg");
   imageProcessor->processImage(frame);
   handleExpect(10);
+}
+
+TEST_F(BallDetectionTests, testImage6)
+{
+  cv::Mat frame = cv::imread("../../TestImages/testImage6.jpg");
+  imageProcessor->processImage(frame);
+  handleExpect(7);
+}
+
+TEST_F(BallDetectionTests, testImage7)
+{
+  cv::Mat frame = cv::imread("../../TestImages/testImage7.jpg");
+  imageProcessor->processImage(frame);
+  handleExpect(7);
+}
+
+TEST_F(BallDetectionTests, testImage8)
+{
+  cv::Mat frame = cv::imread("../../TestImages/testImage8.jpg");
+  imageProcessor->processImage(frame);
+  handleExpect(6);
 }
 
 TEST_F(BallDetectionTests, totalDiff)

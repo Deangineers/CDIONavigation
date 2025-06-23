@@ -7,12 +7,6 @@
 #include "Utility/ConfigController.h"
 #include "../MainController.h"
 
-
-CloudyImageProcessor::CloudyImageProcessor(const std::shared_ptr<IBallProcessor>& ballProcessor) : ImageProcessor(
-  ballProcessor)
-{
-}
-
 void CloudyImageProcessor::detectRedPixels(const cv::Mat& frame, const cv::Mat& overlay)
 {
   cv::Mat crossMask1, crossMask2, crossMask;
@@ -45,7 +39,7 @@ void CloudyImageProcessor::detectFrontAndBack(const cv::Mat& frame, const cv::Ma
 {
   cv::Mat frontMask, backMask;
 
-  cv::inRange(hsv_, cv::Scalar(30, 30, 40), cv::Scalar(78, 255, 255), frontMask);
+  cv::inRange(hsv_, cv::Scalar(30, 35, 35), cv::Scalar(85, 255, 255), frontMask);
   cv::inRange(hsv_, cv::Scalar(120, 85, 85), cv::Scalar(170, 255, 255), backMask);
 
   frontAndBackHelperFunction(frame, frontMask, "robotFront", overlay);

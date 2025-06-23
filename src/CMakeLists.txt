@@ -39,7 +39,8 @@ add_library(CDIONavigationLib STATIC
         Controllers/ImageProcessing/BallProcessor.h
         Controllers/ImageProcessing/WallProcessor.cpp
         Controllers/ImageProcessing/WallProcessor.h
-        Controllers/ImageProcessing/IBallProcessor.h
+        Controllers/ObjectCounter.cpp
+        Controllers/ObjectCounter.h
 )
 
 target_link_libraries(CDIONavigationLib PUBLIC Utility)
