@@ -5,7 +5,7 @@
   "safeYBot": 650,
   "middleXOnAxis": 500,
   "GoalShootingDistance": 80,
-  "GoalIntermediatePointDistance": 200,
+  "GoalIntermediatePointDistance": 300,
   "CornerApproachAngle": 10,
   "RobotIP": "192.168.0.1",
   "RobotPort": 1234,
@@ -58,6 +58,7 @@
   "CornerCrossHalfSize": 35,
   "PerspectiveOffset": 7,
   "UseFourPointsForWall": true,
-  "TargetSameBeforeTargetSet": 3,
-  "AngleCheckCollision": 1250
+  "TargetSameBeforeTargetSet": 2,
+  "AngleCheckCollision": 1250,
+  "DeliverOrangeFirst": true
 }

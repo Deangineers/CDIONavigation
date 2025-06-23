@@ -21,7 +21,7 @@
 void NavigationController::addCourseObject(std::unique_ptr<CourseObject> &&courseObject)
 {
   const std::string name = courseObject->name();
-  if (name == "ball")
+  if (name == "white" || name == "orange")
   {
     ballVector_.push_back(std::move(courseObject));
   } else if (name == "robotFront")
@@ -153,7 +153,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
       distanceToBackUp = 0;
       return std::move(journey);
     }
-    objectVector = navigateToGoal();
+    objectVector = navigateToGoal(&robotMiddle);
     auto vectorToRobotBack = MathUtil::calculateVectorToObject(robotBack_.get(), robotFront_.get());
     auto goalVector = MathUtil::calculateVectorToObject(&robotMiddle, goal_.get());
     auto shootingCourseObject = CourseObject(*goal_);
@@ -203,7 +203,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
 
     if (checkCollisionOnRoute(objectVector))
     {
-      objectVector = navigateToSafeSpot();
+      objectVector = navigateToSafeSpot(true);
       if (objectVector.isNullVector())
       {
         std::cout << "could not find a safe, safe spot" << std::endl;
@@ -247,7 +247,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
 
     if (checkCollisionOnRoute(vectorToObject))
     {
-      vectorToObject = navigateToSafeSpot();
+      vectorToObject = navigateToSafeSpot(false);
       if (vectorToObject.isNullVector())
       {
         std::cout << "could not find a safe, safe spot" << std::endl;
@@ -262,7 +262,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
 
   removeBallsInsideRobot();
   removeBallsOutsideCourse();
-  objectVector = findClosestBall();
+  objectVector = findClosestBall(&robotMiddle);
   toCollectBalls_ = true;
 
   if (objectVector.isNullVector())
@@ -389,7 +389,7 @@ void NavigationController::removeBallsInsideRobot()
   });
 }
 
-Vector NavigationController::navigateToGoal()
+Vector NavigationController::navigateToGoal(CourseObject* fromObject)
 {
   Vector goal(-1, -1);
   if (ConfigController::getConfigBool("goalIsLeft"))
@@ -413,17 +413,16 @@ Vector NavigationController::navigateToGoal()
   {
     targetX = goal.x + ConfigController::getConfigInt("GoalIntermediatePointDistance");
   }
-  goal_ = std::make_unique<CourseObject>(goal.x, goal.y, goal.x, goal.y, "goal");
+  goal_ = std::make_unique<CourseObject>(goal.x, goal.y - 10, goal.x, goal.y - 10, "goal");
   auto localGoal = CourseObject(targetX, goal.y, targetX, goal.y, "goal");
   Utility::appendToFile(
     "log.txt",
     "Navigating to Goal: " + std::to_string(goal_->x1()) + ", " + std::to_string(goal_->y1()) + "\n");
 
-  auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
-  return MathUtil::calculateVectorToObject(&robotMiddle, &localGoal);
+  return MathUtil::calculateVectorToObject(fromObject, &localGoal);
 }
 
-Vector NavigationController::findClosestBall()
+Vector NavigationController::findClosestBall(CourseObject* fromObject)
 {
   if (ballVector_.empty())
   {
@@ -432,12 +431,30 @@ Vector NavigationController::findClosestBall()
 
   auto shortestVector = Vector(5000, 5000);
   CourseObject *closestBall = nullptr;
+  auto deliverOrangeFirst = ConfigController::getConfigBool("DeliverOrangeFirst");
+
   for (const auto &ball: ballVector_)
   {
-    auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
-    auto vectorToBall = MathUtil::calculateVectorToObject(&robotMiddle, ball.get());
+    auto vectorToBall = MathUtil::calculateVectorToObject(fromObject, ball.get());
+
+    if (ballVector_.size() == 6 && not hasDeliveredBallsOnce_ && deliverOrangeFirst)
+    {
+      if (ball->name() != "orange")
+      {
+        continue;
+      }
+
+      closestBall = ball.get();
+      break;
+    }
+
     if (vectorToBall.getLength() < shortestVector.getLength() && not vectorToBall.isNullVector())
     {
+      if (ballVector_.size() > 6 && ball->name() == "orange" && deliverOrangeFirst)
+      {
+        continue;
+      }
+
       shortestVector = vectorToBall;
       closestBall = ball.get();
     }
@@ -684,7 +701,7 @@ bool NavigationController::checkCollisionOnRoute(const Vector &targetVector) con
 {
   if (!robotFront_ || !robotBack_ || crossObjects_.size() != 2)
   {
-    return false;
+    return true;
   }
   std::vector<CourseObject> robotMiddles;
   robotMiddles.reserve(3);
@@ -815,7 +832,7 @@ bool segmentsIntersect(int x1, int y1, int x2, int y2,
   return false;
 }
 
-Vector NavigationController::navigateToSafeSpot()
+Vector NavigationController::navigateToSafeSpot(bool toGoal)
 {
   auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
   int allowedDistance = ConfigController::getConfigInt("DistanceBeforeTargetReached");
@@ -824,7 +841,13 @@ Vector NavigationController::navigateToSafeSpot()
   for (int i = 0; i < safeSpots_.size(); i++)
   {
     const auto &spot = safeSpots_[i];
-    double distToBall = getDistanceToClosestBallFromSafeSpot(spot);
+    CourseObject courseObject(spot.first, spot.second,
+                              spot.first, spot.second, "safeSpot");
+    double distToBall = findClosestBall(&courseObject).getLength();
+    if (toGoal)
+    {
+      distToBall = navigateToGoal(&courseObject).getLength();
+    }
     safeSpotsWithDistance.emplace_back(i, spot, distToBall);
   }
 
@@ -897,21 +920,4 @@ void NavigationController::findSafeSpots()
 
   cv::drawMarker(*MainController::getFrame(), {minX + xOffset, maxY - yOffset}, cv::Scalar(0, 0, 255),
                  cv::MARKER_CROSS, 10, 2);
-}
-
-double NavigationController::getDistanceToClosestBallFromSafeSpot(const std::pair<int, int> &spot) const
-{
-  if (ballVector_.empty())
-    return INT16_MAX;
-
-  double closestBallFromSafeSpot = INT16_MAX;
-  for (const auto &ball: ballVector_)
-  {
-    double dx = spot.first - ball->x1();
-    double dy = spot.second - ball->y1();
-    double dist = std::sqrt(dx * dx + dy * dy);
-    if (dist < closestBallFromSafeSpot)
-      closestBallFromSafeSpot = dist;
-  }
-  return closestBallFromSafeSpot;
 }

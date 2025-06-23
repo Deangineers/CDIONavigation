@@ -27,25 +27,25 @@ void ImageProcessor::processImage(const cv::Mat& frame)
 
   auto f1 = std::async(std::launch::async, [&]
   {
-    detectBalls(frame, ballOverlay);
+      detectBalls(frame, ballOverlay);
   });
 
   auto f3 = std::async(std::launch::async, [&]
   {
-    detectRedPixels(frame, redOverlay);
+      detectRedPixels(frame, redOverlay);
   });
 
   auto f4 = std::async(std::launch::async, [&]
   {
-    detectFrontAndBack(frame, frontBackOverlay);
+      detectFrontAndBack(frame, frontBackOverlay);
   });
 
 
   auto applyOverlay = [](const cv::Mat& base, const cv::Mat& overlay)
   {
-    cv::Mat gray;
-    cv::cvtColor(overlay, gray, cv::COLOR_BGR2GRAY);
-    overlay.copyTo(base, gray);
+      cv::Mat gray;
+      cv::cvtColor(overlay, gray, cv::COLOR_BGR2GRAY);
+      overlay.copyTo(base, gray);
   };
 
   f1.get();
@@ -134,10 +134,10 @@ void ImageProcessor::redPixelHelperFunction(const cv::Mat& frame, cv::Mat& mask,
   }
 
   std::vector<std::pair<cv::Point, cv::Point>> walls = {
-    {topLeft, topRight},
-    {topRight, bottomRight},
-    {bottomRight, bottomLeft},
-    {bottomLeft, topLeft}
+          {topLeft, topRight},
+          {topRight, bottomRight},
+          {bottomRight, bottomLeft},
+          {bottomLeft, topLeft}
   };
 
   for (const auto& [start, end] : walls)
@@ -280,9 +280,17 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const std::string&
     {
       detectedColor = "orange";
     }
-    else
+    else if (h >= 30 && h <= 85 && s > 35 && v > 35)
     {
-      detectedColor = "orange";
+      detectedColor = "robotFront";
+    }
+    else if (h >= 120 && h <= 170 && s > 85 && v > 85)
+    {
+      detectedColor = "robotBack";
+    }
+
+    if (detectedColor.empty())
+    {
       continue;
     }
 
@@ -292,9 +300,13 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const std::string&
 
     double area = CV_PI * r * r;
     if (area < ConfigController::getConfigInt("MinimumSizeOfBlockingObject")
-      || area > ConfigController::getConfigInt("EggBallDiffVal"))
+      || area > ConfigController::getConfigInt("EggBallDiffVal") && detectedColor != "robotFront" && detectedColor != "robotBack")
     {
       continue;
+    }
+    if ((detectedColor == "robotFront" || detectedColor == "robotBack") && area < 1850)
+    {
+      detectedColor = "orange";
     }
     std::string label = "ball";
     // at some point we might want to add the colorLabel here to separate white and orange balls
@@ -302,8 +314,8 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const std::string&
     int x1 = rect.x, y1 = rect.y;
     int x2 = x1 + rect.width, y2 = y1 + rect.height;
 
-    auto courseObject = std::make_unique<CourseObject>(x1, y1, x2, y2, label);
-    ObjectCounter::objectDetected(label);
+    auto courseObject = std::make_unique<CourseObject>(x1, y1, x2, y2, detectedColor);
+    ObjectCounter::objectDetected(detectedColor);
 
     MainController::addCourseObject(std::move(courseObject));
 
@@ -420,6 +432,5 @@ void ImageProcessor::frontAndBackHelperFunction(const cv::Mat &frame, cv::Mat &m
     }
   }
 }
-
 
 
