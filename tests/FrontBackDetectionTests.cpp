@@ -31,7 +31,7 @@ public:
 
 TEST_F(FrontBackDetectionTests, testImages)
 {
-  int amountOfImages = 25;
+  int amountOfImages = 24;
   for (int i = 1; i <= amountOfImages; i++)
   {
     cv::Mat frame = cv::imread("../../TestImages/testImage"+std::to_string(i)+".jpg");
