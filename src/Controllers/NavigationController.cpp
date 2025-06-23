@@ -432,12 +432,27 @@ Vector NavigationController::findClosestBall()
 
   auto shortestVector = Vector(5000, 5000);
   CourseObject *closestBall = nullptr;
+  auto deliverOrangeFirst = ConfigController::getConfigBool("DeliverOrangeFirst");
+
   for (const auto &ball: ballVector_)
   {
     auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
     auto vectorToBall = MathUtil::calculateVectorToObject(&robotMiddle, ball.get());
+
+    if (ballVector_.size() == 6 && not hasDeliveredBallsOnce_ && deliverOrangeFirst)
+    {
+      if (ball.get()->name() != "orange")
+        continue;
+
+      closestBall = ball.get();
+      break;
+    }
+
     if (vectorToBall.getLength() < shortestVector.getLength() && not vectorToBall.isNullVector())
     {
+      if (ballVector_.size() != 6 && ball.get()->name() == "orange" && deliverOrangeFirst)
+        continue;
+
       shortestVector = vectorToBall;
       closestBall = ball.get();
     }

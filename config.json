@@ -59,5 +59,6 @@
   "PerspectiveOffset": 7,
   "UseFourPointsForWall": true,
   "TargetSameBeforeTargetSet": 2,
-  "AngleCheckCollision": 1250
+  "AngleCheckCollision": 1250,
+  "DeliverOrangeFirst": false
 }
