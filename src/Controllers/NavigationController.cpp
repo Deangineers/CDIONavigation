@@ -829,7 +829,9 @@ bool NavigationController::checkCollisionOnRoute(const Vector &targetVector) con
 }
 
 std::pair<Vector, Vector> NavigationController::getVectorsForClosestBlockingObjects(
-  const CourseObject *courseObject) const
+  const CourseObject *courseObject
+)
+const
 {
   auto returnPair = std::make_pair(Vector(5000, 5000), Vector(5000, 5000));
   for (const auto &blockingObject: blockingObjects_)
@@ -837,6 +839,25 @@ std::pair<Vector, Vector> NavigationController::getVectorsForClosestBlockingObje
     auto fromPointVector = Vector((courseObject->x1() + courseObject->x2()) / 2,
                                   (courseObject->y1() + courseObject->y2()) / 2);
     auto vector = blockingObject->closestVectorFromPoint(fromPointVector);
+    /*cv::arrowedLine(*MainController::getFrame(), {fromPointVector.x, fromPointVector.y},
+                    {fromPointVector.x + vector.x, fromPointVector.y + vector.y}, cv::Scalar(0, 0, 255), 1,
+                    cv::LINE_AA, 0, 0.01);
+*/
+    if (returnPair.first.getLength() > vector.getLength())
+    {
+      returnPair.second = returnPair.first;
+      returnPair.first = vector;
+    } else if (returnPair.second.getLength() > vector.getLength())
+    {
+      returnPair.second = vector;
+    }
+  }
+
+  for (const auto &crossObject: crossObjects_)
+  {
+    auto fromPointVector = Vector((courseObject->x1() + courseObject->x2()) / 2,
+                                  (courseObject->y1() + courseObject->y2()) / 2);
+    auto vector = crossObject->closestVectorFromPoint(fromPointVector);
     /*cv::arrowedLine(*MainController::getFrame(), {fromPointVector.x, fromPointVector.y},
                     {fromPointVector.x + vector.x, fromPointVector.y + vector.y}, cv::Scalar(0, 0, 255), 1,
                     cv::LINE_AA, 0, 0.01);
