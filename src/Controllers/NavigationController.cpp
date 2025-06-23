@@ -441,8 +441,10 @@ Vector NavigationController::findClosestBall()
 
     if (ballVector_.size() == 6 && not hasDeliveredBallsOnce_ && deliverOrangeFirst)
     {
-      if (ball.get()->name() != "orange")
+      if (ball->name() != "orange")
+      {
         continue;
+      }
 
       closestBall = ball.get();
       break;
@@ -450,8 +452,10 @@ Vector NavigationController::findClosestBall()
 
     if (vectorToBall.getLength() < shortestVector.getLength() && not vectorToBall.isNullVector())
     {
-      if (ballVector_.size() != 6 && ball.get()->name() == "orange" && deliverOrangeFirst)
+      if (ballVector_.size() > 6 && ball->name() == "orange" && deliverOrangeFirst)
+      {
         continue;
+      }
 
       shortestVector = vectorToBall;
       closestBall = ball.get();

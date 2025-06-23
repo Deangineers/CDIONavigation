@@ -316,6 +316,10 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const std::string&
     {
       continue;
     }
+    if ((detectedColor == "robotFront" || detectedColor == "robotBack") && area < 1850)
+    {
+      detectedColor = "orange";
+    }
     std::string label = "ball";
     // at some point we might want to add the colorLabel here to separate white and orange balls
 
