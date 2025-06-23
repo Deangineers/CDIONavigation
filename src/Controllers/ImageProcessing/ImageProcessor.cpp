@@ -181,57 +181,102 @@ void ImageProcessor::redPixelHelperFunction(const cv::Mat& frame, cv::Mat& mask,
   }
 }
 
-void ImageProcessor::crossHelperFunction(const cv::Mat& frame, cv::Mat& mask, const cv::Mat& overlay)
+void ImageProcessor::redPixelHelperFunction(const cv::Mat& frame, cv::Mat& mask, const cv::Mat& overlay)
 {
   cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
   cv::morphologyEx(mask, mask, cv::MORPH_OPEN, kernel);
 
-  std::vector<std::vector<cv::Point>> contours;
-  cv::findContours(mask, contours, cv::RETR_CCOMP, cv::CHAIN_APPROX_SIMPLE);
+  std::vector<cv::Point> nonZeroPoints;
+  cv::findNonZero(mask, nonZeroPoints);
 
-  int label = 0;
-  for (const auto& contour : contours)
+  if (nonZeroPoints.empty())
+    return;
+
+  int midX = mask.cols / 2;
+  int midY = mask.rows / 2;
+
+  cv::Point topLeftMinX(mask.cols, 0), topLeftMinY(0, mask.rows);
+  cv::Point topRightMaxX(0, 0), topRightMinY(mask.cols, mask.rows);
+  cv::Point bottomLeftMinX(mask.cols, 0), bottomLeftMaxY(0, 0);
+  cv::Point bottomRightMaxX(0, 0), bottomRightMaxY(0, 0);
+
+  for (const auto& pt : nonZeroPoints)
   {
-    double area = cv::contourArea(contour);
-    if (area > ConfigController::getConfigInt("MaxCrossSize"))
+    if (pt.x <= midX && pt.y <= midY)
     {
-      continue;
+      if (pt.x < topLeftMinX.x) topLeftMinX = pt;
+      if (pt.y < topLeftMinY.y) topLeftMinY = pt;
     }
-
-    cv::Point top(INT_MIN, INT_MIN), bottom(INT_MAX, INT_MAX);
-    cv::Point left(INT_MAX, INT_MAX), right(INT_MIN, INT_MIN);
-
-    for (const auto& p : contour)
+    else if (pt.x > midX && pt.y <= midY)
     {
-      if (p.y > top.y) top = p;
-      if (p.y < bottom.y) bottom = p;
-      if (p.x > right.x) right = p;
-      if (p.x < left.x) left = p;
+      if (pt.x > topRightMaxX.x) topRightMaxX = pt;
+      if (pt.y < topRightMinY.y) topRightMinY = pt;
     }
-
-    cv::Moments M = cv::moments(contour);
-    if (M.m00 == 0) continue;
-    cv::Point center(M.m10 / M.m00, M.m01 / M.m00);
-
-    cv::Point topArm(center.x, center.y - (center.y - bottom.y));
-    cv::Point bottomArm(center.x, center.y + (top.y - center.y));
-    Vector verticalVec(0, bottomArm.y - topArm.y);
-
-    cv::Point leftArm(center.x - (right.x - center.x), center.y);
-    cv::Point rightArm(center.x + (center.x - left.x), center.y);
-    Vector horizontalVec(rightArm.x - leftArm.x, 0);
-
-    MainController::addCrossObject(std::make_unique<VectorWithStartPos>(topArm.x, topArm.y, verticalVec));
-    MainController::addCrossObject(std::make_unique<VectorWithStartPos>(leftArm.x, leftArm.y, horizontalVec));
-
-    cv::line(overlay, topArm, bottomArm, cv::Scalar(255, 0, 0),
-             ConfigController::getConfigInt("CrossWallWidth"), cv::LINE_AA);
-    cv::putText(overlay, std::to_string(label++), topArm, cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
-
-    cv::line(overlay, leftArm, rightArm, cv::Scalar(255, 0, 0),
-             ConfigController::getConfigInt("CrossWallWidth"), cv::LINE_AA);
-    cv::putText(overlay, std::to_string(label++), leftArm, cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
+    else if (pt.x <= midX && pt.y > midY)
+    {
+      if (pt.x < bottomLeftMinX.x) bottomLeftMinX = pt;
+      if (pt.y > bottomLeftMaxY.y) bottomLeftMaxY = pt;
+    }
+    else if (pt.x > midX && pt.y > midY)
+    {
+      if (pt.x > bottomRightMaxX.x) bottomRightMaxX = pt;
+      if (pt.y > bottomRightMaxY.y) bottomRightMaxY = pt;
+    }
   }
+
+  int shift = ConfigController::getConfigInt("CornerCrossHalfSize");
+
+  auto topLeft = cv::Point((topLeftMinX.x + topLeftMinY.x + shift)/2, (topLeftMinY.y + topLeftMinX.y + shift)/2);
+  auto bottomLeft = cv::Point((bottomLeftMinX.x + bottomLeftMaxY.x + shift)/2, (bottomLeftMaxY.y + bottomLeftMinX.y - shift)/2);
+  auto topRight = cv::Point((topRightMaxX.x + topRightMinY.x - shift)/2, (topRightMinY.y + topRightMaxX.y + shift)/2);
+  auto bottomRight = cv::Point((bottomRightMaxX.x + bottomRightMaxY.x - shift)/2, (bottomRightMaxY.y + bottomRightMaxX.y - shift)/2);
+
+  if (not ConfigController::getConfigBool("UseFourPointsForWall"))
+  {
+    int xLeftToRight = bottomRight.x - topLeft.x;
+    int yLeftToRight = bottomRight.y - topLeft.y;
+
+    int xRightToLeft = topRight.x - bottomLeft.x;
+    int yRightToLeft = bottomLeft.y - topRight.y;
+
+    Vector criss = {xLeftToRight, yLeftToRight};
+    Vector cross = {xRightToLeft, yRightToLeft};
+
+    if (criss.getLength() > cross.getLength())
+    {
+      topRight.x = bottomRight.x;
+      topRight.y = topLeft.y;
+      bottomLeft.x = topLeft.x;
+      bottomLeft.y = bottomRight.y;
+    }
+    else
+    {
+      topLeft.x = bottomLeft.x;
+      topLeft.y = topRight.y;
+      bottomRight.x = topRight.x;
+      bottomRight.y = bottomLeft.y;
+    }
+  }
+
+  std::vector<std::pair<cv::Point, cv::Point>> walls = {
+          {topLeft, topRight},
+          {topRight, bottomRight},
+          {bottomRight, bottomLeft},
+          {bottomLeft, topLeft}
+  };
+
+  for (const auto& [start, end] : walls)
+  {
+    Vector vec(end.x - start.x, end.y - start.y);
+    auto wall = std::make_unique<VectorWithStartPos>(start.x, start.y, vec);
+
+    MainController::addBlockedObject(std::move(wall));
+    cv::line(overlay, start, end, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("WallWidth"), cv::LINE_AA);
+  }
+  cv::circle(overlay, topLeft, 5, cv::Scalar(0, 255, 0), -1);
+  cv::circle(overlay, topRight, 5, cv::Scalar(0, 255, 0), -1);
+  cv::circle(overlay, bottomRight, 5, cv::Scalar(0, 255, 0), -1);
+  cv::circle(overlay, bottomLeft, 5, cv::Scalar(0, 255, 0), -1);
 }
 
 
