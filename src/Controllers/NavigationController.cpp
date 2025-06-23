@@ -665,8 +665,8 @@ Vector NavigationController::handleObjectNearCross(const CourseObject *courseObj
   {
     vectorParallelToClosestCrossSegment = vectorParallelToClosestCrossSegment * -1.0;
   }
-  auto normalizedVectorFromBallToCross = vectorParallelToClosestCrossSegment * (
-                                           1.0 / vectorParallelToClosestCrossSegment.getLength());
+  auto normalizedVectorFromBallToCross = vectorFromBallToClosestCrossSegment * (
+                                           1.0 / vectorFromBallToClosestCrossSegment.getLength());
   auto normalizedVectorParallelToClosest = vectorParallelToClosestCrossSegment * (
                                              1.0 / vectorParallelToClosestCrossSegment.getLength());
 
@@ -685,7 +685,7 @@ Vector NavigationController::handleObjectNearCross(const CourseObject *courseObj
   if (vectorToShifted.getLength() < targetReached)
   {
     CourseObject shiftedCourseObject = CourseObject(shiftedObjectPoint.x, shiftedObjectPoint.y, shiftedObjectPoint.x,
-                                              shiftedObjectPoint.y, "ball");
+                                                    shiftedObjectPoint.y, "ball");
     return MathUtil::calculateVectorToObject(&robotMiddle, &shiftedCourseObject);
   }
 
