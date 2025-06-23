@@ -167,94 +167,82 @@ void ImageProcessor::crossHelperFunction(const cv::Mat& frame, cv::Mat& mask, co
   for (const auto& contour : contours)
   {
     double area = cv::contourArea(contour);
-    if (area > ConfigController::getConfigInt("MaxCrossSize"))
-    {
+    if (area > ConfigController::getConfigInt("MaxCrossSize") || area < 700)
       continue;
-    }
-    if (area < 700)
-    {
-      continue;
-    }
-    // Approximate contour to get corners
+
     std::vector<cv::Point> approx;
     cv::approxPolyDP(contour, approx, 10, true); // epsilon=10 can be tuned
 
-    cv::Point top = cv::Point(INT_MIN, INT_MIN);
-    cv::Point bottom = cv::Point(INT_MAX, INT_MAX);
-    cv::Point right = cv::Point(INT_MIN, INT_MIN);
-    cv::Point left = cv::Point(INT_MAX, INT_MAX);
+    if (approx.size() < 4)
+      continue;
 
+    // Step 1: Find the longest line (first axis)
+    double maxDist = 0.0;
+    cv::Point p1_best, p2_best;
     for (size_t i = 0; i < approx.size(); ++i)
     {
-      cv::Point p = approx[i];
-      if (p.y > top.y) top = p;
-      if (p.y < bottom.y) bottom = p;
-      if (p.x > right.x) right = p;
-      if (p.x < left.x) left = p;
-    }
-
-    cv::Point closestToTop;
-    double minDistanceToTop = 50000;
-    cv::Point closestToBottom;
-    double minDistanceToBottom = 50000;
-    cv::Point closestToRight;
-    double minDistanceToRight = 50000;
-    cv::Point closestToLeft;
-    double minDistanceToLeft = 50000;
-
-    for (size_t i = 0; i < approx.size(); ++i)
-    {
-      cv::Point p = approx[i];
-      if (p == top || p == bottom || p == right || p == left) continue;
-
-      double distanceToTop = std::abs(Vector(p.x - top.x, p.y - top.y).getLength());
-      double distanceToBottom = std::abs(Vector(p.x - bottom.x, p.y - bottom.y).getLength());
-      double distanceToLeft = std::abs(Vector(p.x - left.x, p.y - left.y).getLength());
-      double distanceToRight = std::abs(Vector(p.x - right.x, p.y - right.y).getLength());
-
-      if (distanceToTop < minDistanceToTop)
+      for (size_t j = i + 1; j < approx.size(); ++j)
       {
-        minDistanceToTop = distanceToTop;
-        closestToTop = p;
-      }
-
-      if (distanceToBottom < minDistanceToBottom)
-      {
-        minDistanceToBottom = distanceToBottom;
-        closestToBottom = p;
-      }
-
-      if (distanceToLeft < minDistanceToLeft)
-      {
-        minDistanceToLeft = distanceToLeft;
-        closestToLeft = p;
-      }
-
-      if (distanceToRight < minDistanceToRight)
-      {
-        minDistanceToRight = distanceToRight;
-        closestToRight = p;
+        double dist = cv::norm(approx[i] - approx[j]);
+        if (dist > maxDist)
+        {
+          maxDist = dist;
+          p1_best = approx[i];
+          p2_best = approx[j];
+        }
       }
     }
 
-    auto topCenter = cv::Point((top.x + closestToTop.x) / 2, (top.y + closestToTop.y) / 2);
-    auto bottomCenter = cv::Point((bottom.x + closestToBottom.x) / 2, (bottom.y + closestToBottom.y) / 2);
-    auto rightCenter = cv::Point((right.x + closestToRight.x) / 2, (right.y + closestToRight.y) / 2);
-    auto leftCenter = cv::Point((left.x + closestToLeft.x) / 2, (left.y + closestToLeft.y) / 2);
+    // Step 2: Find a roughly orthogonal line (second axis)
+    cv::Point2f axis1 = p2_best - p1_best;
+    cv::Point2f axis1_unit = axis1 * (1.0 / cv::norm(axis1));
+    cv::Point p3_best, p4_best;
+    double bestScore = 0.0;
 
-    auto horizontal = Vector(leftCenter.x - rightCenter.x , leftCenter.y - rightCenter.y);
-    auto vertical = Vector( bottomCenter.x - topCenter.x,  bottomCenter.y - topCenter.y);
+    for (size_t i = 0; i < approx.size(); ++i)
+    {
+      for (size_t j = i + 1; j < approx.size(); ++j)
+      {
+        if ((approx[i] == p1_best && approx[j] == p2_best) || (approx[j] == p1_best && approx[i] == p2_best))
+          continue;
+
+        cv::Point2f vec = approx[j] - approx[i];
+        double vecLength = cv::norm(vec);
+        if (vecLength < 10) continue;
+
+        cv::Point2f unitVec = vec * (1.0 / vecLength);
+        double dot = std::abs(axis1_unit.dot(unitVec)); // want close to 0
+
+        if (dot < 0.3 && vecLength > bestScore)
+        {
+          bestScore = vecLength;
+          p3_best = approx[i];
+          p4_best = approx[j];
+        }
+      }
+    }
+
+    // If orthogonal axis not found, skip
+    if (bestScore == 0.0)
+      continue;
+
+    // Compute midpoints (used as origin for each arm vector)
+    cv::Point topCenter = (p1_best + p2_best) * 0.5;
+    cv::Point sideCenter = (p3_best + p4_best) * 0.5;
+
+    // Create vectors
+    Vector vertical(p2_best.x - p1_best.x, p2_best.y - p1_best.y);
+    Vector horizontal(p4_best.x - p3_best.x, p4_best.y - p3_best.y);
 
     MainController::addCrossObject(std::make_unique<VectorWithStartPos>(topCenter.x, topCenter.y, vertical));
-    MainController::addCrossObject(std::make_unique<VectorWithStartPos>(rightCenter.x, rightCenter.y, horizontal));
+    MainController::addCrossObject(std::make_unique<VectorWithStartPos>(sideCenter.x, sideCenter.y, horizontal));
 
-    cv::line(overlay, bottomCenter, topCenter, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("CrossWallWidth"),
-               cv::LINE_AA, 0);
-    cv::putText(overlay, std::to_string(label++), bottomCenter, cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
+    // Draw vectors for visualization
+    cv::line(overlay, p1_best, p2_best, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("CrossWallWidth"), cv::LINE_AA);
+    cv::putText(overlay, std::to_string(label++), p1_best, cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
 
-    cv::line(overlay, leftCenter, rightCenter, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("CrossWallWidth"),
-               cv::LINE_AA, 0);
-    cv::putText(overlay, std::to_string(label++), leftCenter, cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
+    cv::line(overlay, p3_best, p4_best, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("CrossWallWidth"), cv::LINE_AA);
+    cv::putText(overlay, std::to_string(label++), p3_best, cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
   }
 }
 
