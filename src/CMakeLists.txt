@@ -41,6 +41,8 @@ add_library(CDIONavigationLib STATIC
         Controllers/ImageProcessing/WallProcessor.h
         Controllers/ObjectCounter.cpp
         Controllers/ObjectCounter.h
+        Models/VectorToBlockingObject.cpp
+        Models/VectorToBlockingObject.h
 )
 
 target_link_libraries(CDIONavigationLib PUBLIC Utility)
