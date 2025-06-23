@@ -163,86 +163,21 @@ void ImageProcessor::crossHelperFunction(const cv::Mat& frame, cv::Mat& mask, co
   std::vector<std::vector<cv::Point>> contours;
   cv::findContours(mask, contours, cv::RETR_CCOMP, cv::CHAIN_APPROX_SIMPLE);
 
-  int label = 0;
-  for (const auto& contour : contours)
-  {
-    double area = cv::contourArea(contour);
-    if (area > ConfigController::getConfigInt("MaxCrossSize") || area < 700)
-      continue;
+  for (auto& contour : contours) {
+    cv::RotatedRect rect = minAreaRect(contour);
+    if (rect.size.area() < 100 || rect.size.area() > ConfigController::getConfigInt("MaxCrossSize")) continue;  // Skip small areas
 
-    std::vector<cv::Point> approx;
-    cv::approxPolyDP(contour, approx, 10, true); // epsilon=10 can be tuned
+    cv::Point2f points[4];
+    rect.points(points);
 
-    if (approx.size() < 4)
-      continue;
-
-    // Step 1: Find the longest line (first axis)
-    double maxDist = 0.0;
-    cv::Point p1_best, p2_best;
-    for (size_t i = 0; i < approx.size(); ++i)
+    for (int i = 0; i < 2; i++)
     {
-      for (size_t j = i + 1; j < approx.size(); ++j)
-      {
-        double dist = cv::norm(approx[i] - approx[j]);
-        if (dist > maxDist)
-        {
-          maxDist = dist;
-          p1_best = approx[i];
-          p2_best = approx[j];
-        }
-      }
+      auto vector = Vector(static_cast<int>(points[i + 2].x) - static_cast<int>(points[i].x), static_cast<int>(points[i + 2].y) - static_cast<int>(points[i].x));
+      MainController::addCrossObject(std::make_unique<VectorWithStartPos>(static_cast<int>(points[i].x), static_cast<int>(points[i].x), vector));
+
+      cv::line(overlay, points[i], points[i+2], cv::Scalar(255, 0, 0), ConfigController::getConfigInt("CrossWallWidth"), cv::LINE_AA);
+      cv::putText(overlay, std::to_string(i), points[i], cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
     }
-
-    // Step 2: Find a roughly orthogonal line (second axis)
-    cv::Point2f axis1 = p2_best - p1_best;
-    cv::Point2f axis1_unit = axis1 * (1.0 / cv::norm(axis1));
-    cv::Point p3_best, p4_best;
-    double bestScore = 0.0;
-
-    for (size_t i = 0; i < approx.size(); ++i)
-    {
-      for (size_t j = i + 1; j < approx.size(); ++j)
-      {
-        if ((approx[i] == p1_best && approx[j] == p2_best) || (approx[j] == p1_best && approx[i] == p2_best))
-          continue;
-
-        cv::Point2f vec = approx[j] - approx[i];
-        double vecLength = cv::norm(vec);
-        if (vecLength < 10) continue;
-
-        cv::Point2f unitVec = vec * (1.0 / vecLength);
-        double dot = std::abs(axis1_unit.dot(unitVec)); // want close to 0
-
-        if (dot < 0.3 && vecLength > bestScore)
-        {
-          bestScore = vecLength;
-          p3_best = approx[i];
-          p4_best = approx[j];
-        }
-      }
-    }
-
-    // If orthogonal axis not found, skip
-    if (bestScore == 0.0)
-      continue;
-
-    // Compute midpoints (used as origin for each arm vector)
-    cv::Point topCenter = (p1_best + p2_best) * 0.5;
-    cv::Point sideCenter = (p3_best + p4_best) * 0.5;
-
-    // Create vectors
-    Vector vertical(p2_best.x - p1_best.x, p2_best.y - p1_best.y);
-    Vector horizontal(p4_best.x - p3_best.x, p4_best.y - p3_best.y);
-
-    MainController::addCrossObject(std::make_unique<VectorWithStartPos>(topCenter.x, topCenter.y, vertical));
-    MainController::addCrossObject(std::make_unique<VectorWithStartPos>(sideCenter.x, sideCenter.y, horizontal));
-
-    // Draw vectors for visualization
-    cv::line(overlay, p1_best, p2_best, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("CrossWallWidth"), cv::LINE_AA);
-    cv::putText(overlay, std::to_string(label++), p1_best, cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
-
-    cv::line(overlay, p3_best, p4_best, cv::Scalar(255, 0, 0), ConfigController::getConfigInt("CrossWallWidth"), cv::LINE_AA);
-    cv::putText(overlay, std::to_string(label++), p3_best, cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
   }
 }
 
