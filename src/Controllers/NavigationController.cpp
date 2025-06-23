@@ -17,6 +17,7 @@
 #include "../Models/VectorWithStartPos.h"
 #include "Utility/Utility.h"
 #include "../Models/Egg.h"
+#include "../Models/VectorToBlockingObject.h"
 
 void NavigationController::addCourseObject(std::unique_ptr<CourseObject> &&courseObject)
 {
@@ -276,10 +277,10 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     target_ = std::move(potentialTarget_);
     potentialTarget_ = nullptr;
     auto closestVectors = getVectorsForClosestBlockingObjects(target_.get());
-    double distanceToWall = closestVectors.first.getLength();
+    double distanceToWall = closestVectors.first.vector.getLength();
     if (distanceToWall < ConfigController::getConfigInt("DistanceBeforeToCloseToWall"))
     {
-      if (closestVectors.second.getLength() < ConfigController::getConfigInt("DistanceBeforeToCloseToWall"))
+      if (closestVectors.second.vector.getLength() < ConfigController::getConfigInt("DistanceBeforeToCloseToWall"))
       {
         distanceToBackUp = 30;
       } else
@@ -586,30 +587,36 @@ Vector NavigationController::handleObjectNextToBlocking(const CourseObject *cour
     Vector startPoint = Vector((courseObject->x1() + courseObject->x2()) / 2,
                                (courseObject->y1() + courseObject->y2()) / 2);
     cv::arrowedLine(*MainController::getFrame(), {startPoint.x, startPoint.y},
-                    {startPoint.x + closestVectors.first.x, startPoint.y + closestVectors.first.y},
+                    {startPoint.x + closestVectors.first.vector.x, startPoint.y + closestVectors.first.vector.y},
                     cv::Scalar(0, 0, 255), 1,
                     cv::LINE_AA, 0, 0.01);
     cv::arrowedLine(*MainController::getFrame(), {startPoint.x, startPoint.y},
-                    {startPoint.x + closestVectors.second.x, startPoint.y + closestVectors.second.y},
+                    {startPoint.x + closestVectors.second.vector.x, startPoint.y + closestVectors.second.vector.y},
                     cv::Scalar(0, 0, 255), 1,
                     cv::LINE_AA, 0, 0.01);
   }
 
   double closestVectorsAngleDiff = MathUtil::calculateAngleDifferenceBetweenVectors(
-    closestVectors.first, closestVectors.second);
+    closestVectors.first.vector, closestVectors.second.vector);
   int maxAllowedAngleDiffBetweenClosestVectors = ConfigController::getConfigInt("AngleDiffBeforeCornerBall");
-  if (closestVectors.second.getLength() > ConfigController::getConfigInt("DistanceToWallBeforeHandling")
+  if (closestVectors.second.vector.getLength() > ConfigController::getConfigInt("DistanceToWallBeforeHandling")
       || std::abs(closestVectorsAngleDiff) < maxAllowedAngleDiffBetweenClosestVectors)
   {
     auto vectorToWall = closestVectors.first;
 
-    if (vectorToWall.getLength() > ConfigController::getConfigInt("DistanceToWallBeforeHandling"))
+    if (vectorToWall.vector.getLength() > ConfigController::getConfigInt("DistanceToWallBeforeHandling"))
     {
       return MathUtil::calculateVectorToObject(&robotMiddle, courseObject);
     }
-    return handleObjectNearWall(courseObject, vectorToWall);
+    return handleObjectNearWall(courseObject, vectorToWall.vector);
   }
-  return handleObjectNearCorner(courseObject, closestVectors);
+
+  auto vectorPair = std::make_pair(closestVectors.first.vector, closestVectors.second.vector);
+  if (closestVectors.first.isCross)
+  {
+    return handleObjectNearCross(courseObject, vectorPair);
+  }
+  return handleObjectNearCorner(courseObject, vectorPair);
 }
 
 Vector NavigationController::handleObjectNearWall(const CourseObject *courseObject,
@@ -831,12 +838,34 @@ bool NavigationController::checkCollisionOnRoute(const Vector &targetVector) con
   return false;
 }
 
-std::pair<Vector, Vector> NavigationController::getVectorsForClosestBlockingObjects(
+std::pair<VectorToBlockingObject, VectorToBlockingObject> NavigationController::getVectorsForClosestBlockingObjects(
   const CourseObject *courseObject
 )
 const
 {
-  auto returnPair = std::make_pair(Vector(5000, 5000), Vector(5000, 5000));
+  auto returnPair = std::make_pair(VectorToBlockingObject({5000, 5000},false),VectorToBlockingObject(Vector(5000, 5000),false));
+
+  for (const auto &blockingObject: crossObjects_)
+  {
+    auto fromPointVector = Vector((courseObject->x1() + courseObject->x2()) / 2,
+                                  (courseObject->y1() + courseObject->y2()) / 2);
+    auto vector = blockingObject->closestVectorFromPoint(fromPointVector);
+    /*cv::arrowedLine(*MainController::getFrame(), {fromPointVector.x, fromPointVector.y},
+                    {fromPointVector.x + vector.x, fromPointVector.y + vector.y}, cv::Scalar(0, 0, 255), 1,
+                    cv::LINE_AA, 0, 0.01);
+    */
+    if (returnPair.first.vector.getLength() > vector.getLength())
+    {
+      returnPair.second = returnPair.first;
+      returnPair.first.vector = vector;
+      returnPair.first.isCross = true;
+    } else if (returnPair.second.vector.getLength() > vector.getLength())
+    {
+      returnPair.second.vector = vector;
+      returnPair.first.isCross = true;
+    }
+  }
+
   for (const auto &blockingObject: blockingObjects_)
   {
     auto fromPointVector = Vector((courseObject->x1() + courseObject->x2()) / 2,
@@ -846,32 +875,15 @@ const
                     {fromPointVector.x + vector.x, fromPointVector.y + vector.y}, cv::Scalar(0, 0, 255), 1,
                     cv::LINE_AA, 0, 0.01);
 */
-    if (returnPair.first.getLength() > vector.getLength())
+    if (returnPair.first.vector.getLength() > vector.getLength())
     {
       returnPair.second = returnPair.first;
-      returnPair.first = vector;
-    } else if (returnPair.second.getLength() > vector.getLength())
+      returnPair.first.vector = vector;
+      returnPair.first.isCross = false;
+    } else if (returnPair.second.vector.getLength() > vector.getLength())
     {
-      returnPair.second = vector;
-    }
-  }
-
-  for (const auto &crossObject: crossObjects_)
-  {
-    auto fromPointVector = Vector((courseObject->x1() + courseObject->x2()) / 2,
-                                  (courseObject->y1() + courseObject->y2()) / 2);
-    auto vector = crossObject->closestVectorFromPoint(fromPointVector);
-    /*cv::arrowedLine(*MainController::getFrame(), {fromPointVector.x, fromPointVector.y},
-                    {fromPointVector.x + vector.x, fromPointVector.y + vector.y}, cv::Scalar(0, 0, 255), 1,
-                    cv::LINE_AA, 0, 0.01);
-*/
-    if (returnPair.first.getLength() > vector.getLength())
-    {
-      returnPair.second = returnPair.first;
-      returnPair.first = vector;
-    } else if (returnPair.second.getLength() > vector.getLength())
-    {
-      returnPair.second = vector;
+      returnPair.second.vector = vector;
+      returnPair.first.isCross = false;
     }
   }
   return returnPair;

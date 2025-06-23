@@ -12,6 +12,7 @@
 #include "../Models/CourseObject.h"
 #include "../Models/JourneyModel.h"
 #include "../Models/Vector.h"
+#include "../Models/VectorToBlockingObject.h"
 #include "Utility/ConfigController.h"
 
 class NavigationController {
@@ -62,7 +63,7 @@ private:
 
   Vector handleObjectNearCross(const CourseObject *courseObject, const std::pair<Vector, Vector> &) const;
 
-  std::pair<Vector, Vector> getVectorsForClosestBlockingObjects(const CourseObject *courseObject) const;
+  std::pair<VectorToBlockingObject, VectorToBlockingObject> getVectorsForClosestBlockingObjects(const CourseObject *courseObject) const;
 
   [[nodiscard]] bool checkCollisionOnRoute(const Vector &targetVector) const;
 
