@@ -36,7 +36,7 @@
   "MinimumBallSize": 250,
   "EggBallDiffVal": 1000,
   "EggMaxSize": 5000,
-  "goalIsLeft": false,
+  "goalIsLeft": true,
   "minRedSize": 50,
   "showVectorsToWall": true,
   "MinimumSizeOfBlockingObject": 50,
