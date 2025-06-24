@@ -233,17 +233,12 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
                     {robotMiddle.x1() + vectorToObject.x, robotMiddle.y1() + vectorToObject.y},
                     cv::Scalar(255, 0, 255), 1,
                     cv::LINE_AA, 0, 0.01);
-    if (target_.get() == nullptr)
-    {
-      return makeJourneyModel(vectorToObject, true);
-    }
     auto directVectorToObject = MathUtil::calculateVectorToObject(robotFront_.get(), target_.get());
     if (directVectorToObject.getLength() < ConfigController::getConfigInt("DistanceBeforeTargetReached"))
     {
       Utility::appendToFile("log.txt", "target_ is now null\n");
       auto closestVector = getVectorsForClosestBlockingObjects(target_.get()).first;
       target_ = nullptr;
-      hasTakenCross_ = true;
       sameTargetCount_ = 0;
       if (distanceToBackUp > 0)
       {
@@ -694,7 +689,7 @@ Vector NavigationController::handleObjectNearCross(const CourseObject *courseObj
   auto intermediateCourseObject = CourseObject(intermediatePoint.x,intermediatePoint.y,intermediatePoint.x,intermediatePoint.y,"");
 
   auto vectorToIntermediatePoint = MathUtil::calculateVectorToObject(&robotMiddle,&intermediateCourseObject);
-  if (vectorToIntermediatePoint.getLength() < ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning") || not hasTakenCross_)
+  if (vectorToIntermediatePoint.getLength() < ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning"))
   {
     ballNearCross_ = true;
     auto localCourseObjcet = CourseObject(*courseObject);

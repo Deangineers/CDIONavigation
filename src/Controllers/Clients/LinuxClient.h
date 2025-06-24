@@ -26,6 +26,7 @@ private:
   std::mutex mutex_;
   std::thread sendThread_;
   bool keepRunning_;
+  bool firstRecieved_;
 };
 
 #endif //LINUXCLIENT_H

@@ -70,7 +70,7 @@ void MainController::navigateAndSendCommand(cv::Mat* frame)
   if (journey == nullptr && not navigationController_->isAtGoal() && not commandInProgress_)
   {
     amountOfNullVectors_++;
-    if (amountOfNullVectors_ > 20)
+    if (amountOfNullVectors_ > 500)
     {
       journey = std::make_unique<JourneyModel>(10,0,true);
     }
@@ -116,16 +116,27 @@ Command MainController::journeyToCommand(const JourneyModel* journey)
     {
       command.setAction("r");
     }
-    int maxAngleBeforeSlowingDown = ConfigController::getConfigInt("MaxAngleBeforeSlowingDown");
-    if (journey->angle > -maxAngleBeforeSlowingDown && journey->angle < maxAngleBeforeSlowingDown)
+    double angle = std::abs(journey->angle);
+    if (angle > 45)
     {
-      command.setSpeed(ConfigController::getConfigInt("RotationSlowSpeed"));
+      command.setDistanceOrAngle(angle - 45);
+      command.setSpeed(250);
+    }
+    else if (angle > 20)
+    {
+      command.setDistanceOrAngle(angle - 20);
+      command.setSpeed(100);
+    }
+    else if (angle > 10)
+    {
+      command.setDistanceOrAngle(angle - 10);
+      command.setSpeed(50);
     }
     else
     {
-      command.setSpeed(ConfigController::getConfigInt("RotationFastSpeed"));
+      command.setDistanceOrAngle(angle);
+      command.setSpeed(25);
     }
-    command.setDistanceOrAngle(std::abs(journey->angle));
     return command;
   }
 

@@ -16,10 +16,10 @@
 #include "Utility/DebugController.h"
 #include "Utility/Utility.h"
 
-LinuxClient::LinuxClient() : commandToSend_(""), keepRunning_(true)
+LinuxClient::LinuxClient() : commandToSend_(""), keepRunning_(true), firstRecieved_(false)
 {
   LinuxClient::connectToServer();
-  LinuxClient::sendBallCollectionCommand("in\n");
+  commandToSend_ = ("f 30 17 in\n");
   sendThread_ = std::thread(&LinuxClient::sendCommand, this);
 }
 
@@ -32,6 +32,10 @@ LinuxClient::~LinuxClient()
 void LinuxClient::sendCommandAndAddNewLine(const std::string& command)
 {
   std::lock_guard lock(mutex_);
+  if (not firstRecieved_)
+  {
+    return;
+  }
   commandToSend_ = command + "\n";
 }
 
@@ -105,7 +109,14 @@ void LinuxClient::sendCommand()
     if (bytesReceived > 0)
     {
       lock.lock();
+      if (not firstRecieved_)
+      {
+        commandToSend_ = "f 500 -15 in\n";
+        firstRecieved_ = true;
+        continue;
+      }
       commandToSend_ = "";
+
       if (atGoal)
       {
         MainController::completedGoalDelivery();
