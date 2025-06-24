@@ -650,7 +650,7 @@ Vector NavigationController::handleObjectNearCorner(const CourseObject *courseOb
     {
       localObject.shiftX(shiftDistanceOnCornerBall);
     }
-    return MathUtil::calculateVectorToObject(&robotMiddle, &localObject) * 1.32;
+    return MathUtil::calculateVectorToObject(&robotMiddle, &localObject) * 1.4;
   }
 
   return vectorToIntermediaryPoint;
@@ -805,6 +805,28 @@ const
       returnPair.first.isCross = true;
     }
   }
+
+  for (const auto &blockingObject: wallObjects_)
+  {
+    auto fromPointVector = Vector((courseObject->x1() + courseObject->x2()) / 2,
+                                  (courseObject->y1() + courseObject->y2()) / 2);
+    auto vector = blockingObject->closestVectorFromPoint(fromPointVector);
+    /*cv::arrowedLine(*MainController::getFrame(), {fromPointVector.x, fromPointVector.y},
+                    {fromPointVector.x + vector.x, fromPointVector.y + vector.y}, cv::Scalar(0, 0, 255), 1,
+                    cv::LINE_AA, 0, 0.01);
+    */
+    if (returnPair.first.vector.getLength() > vector.getLength())
+    {
+      returnPair.second = returnPair.first;
+      returnPair.first.vector = vector;
+      returnPair.first.isCross = false;
+    } else if (returnPair.second.vector.getLength() > vector.getLength())
+    {
+      returnPair.second.vector = vector;
+      returnPair.first.isCross = false;
+    }
+  }
+
   return returnPair;
 }
 
