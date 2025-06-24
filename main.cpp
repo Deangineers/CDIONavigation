@@ -57,6 +57,10 @@ int main()
 
     cv::imshow("EngineBase", frame);
 
+    if (totalDuration.count() == 420) {
+      MainController::forceNavigateToGoal();
+    }
+
     if (cv::waitKey(1) == 27) // Wait for 1 ms and break on 'Esc' key
     {
       return 0;

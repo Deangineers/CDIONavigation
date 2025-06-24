@@ -125,7 +125,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   findSafeSpots();
 
 
-  if (ballVector_.empty() || (ballVector_.size() <= 5 && not hasDeliveredBallsOnce_))
+  if (ballVector_.empty() || (ballVector_.size() <= 5 && not hasDeliveredBallsOnce_) || forceNavigateGoal())
   {
     goToGoalCount_++;
   }
@@ -964,6 +964,11 @@ void NavigationController::findSafeSpots()
 
 void NavigationController::forceNavigateToGoal() {
   goToGoalCount_ = stableThreshold + 1;
+  forceNavigateGoal = true;
+}
+
+bool NavigationController::forceNavigateGoal() const {
+  return forceNavigateGoal;
 }
 
 
