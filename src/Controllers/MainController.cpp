@@ -127,10 +127,10 @@ Command MainController::journeyToCommand(const JourneyModel* journey)
       command.setDistanceOrAngle(angle - 20);
       command.setSpeed(100);
     }
-    else if (angle > 10)
+    else if (angle > 7)
     {
-      command.setDistanceOrAngle(angle - 10);
-      command.setSpeed(50);
+      command.setDistanceOrAngle(angle - 7);
+      command.setSpeed(100);
     }
     else
     {
