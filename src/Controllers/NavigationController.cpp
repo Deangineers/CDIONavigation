@@ -962,6 +962,11 @@ void NavigationController::findSafeSpots()
                  cv::MARKER_CROSS, 10, 2);
 }
 
+void NavigationController::forceNavigateToGoal() {
+  goToGoalCount_ = stableThreshold + 1;
+}
+
+
 bool NavigationController::isAtGoal()
 {
   return atGoal_;

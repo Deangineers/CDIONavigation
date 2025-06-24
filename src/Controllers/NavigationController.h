@@ -34,6 +34,8 @@ public:
 
   void newCommandSent();
 
+  void forceNavigateToGoal();
+
   bool isAtGoal();
 
 private:
