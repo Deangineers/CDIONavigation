@@ -27,7 +27,8 @@ void ImageProcessor::processImage(const cv::Mat& frame)
 
   auto f1 = std::async(std::launch::async, [&]
   {
-      detectBalls(frame, ballOverlay);
+    detectEgg(frame, eggOverlay);
+    detectBalls(frame, ballOverlay);
   });
 
   auto f3 = std::async(std::launch::async, [&]
@@ -51,6 +52,7 @@ void ImageProcessor::processImage(const cv::Mat& frame)
   f1.get();
   applyOverlay(frame, ballOverlay);
   f3.get();
+  applyOverlay(frame, eggOverlay);
   applyOverlay(frame, redOverlay);
   f4.get();
   applyOverlay(frame, frontBackOverlay);
@@ -272,7 +274,10 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const std::string&
 
     auto courseObject = std::make_unique<CourseObject>(x1, y1, x2, y2, detectedColor);
     ObjectCounter::objectDetected(detectedColor);
-
+    if (not ballProcessor_->isBallValid(courseObject.get()))
+    {
+      continue;
+    }
     MainController::addCourseObject(std::move(courseObject));
 
     cv::rectangle(overlay, rect, cv::Scalar(0, 255, 0), 2);

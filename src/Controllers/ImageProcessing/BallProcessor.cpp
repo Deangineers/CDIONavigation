@@ -4,9 +4,10 @@
 
 #include "BallProcessor.h"
 
+#include "../../../Simulator/TextureLocations.h"
 #include "Utility/ConfigController.h"
 
-BallProcessor::BallProcessor() : ballsFromImages_(ConfigController::getConfigInt("ImagesToAverage"))
+BallProcessor::BallProcessor() : ballsFromImages_(ConfigController::getConfigInt("ImagesToAverage")), eggFromImage_(ConfigController::getConfigInt("ImagesToAverage"))
 {
 }
 
@@ -15,6 +16,7 @@ void BallProcessor::begin()
   currentIndex_++;
   currentIndex_ %= ConfigController::getConfigInt("ImagesToAverage");
   ballsFromImages_[currentIndex_].clear();
+  eggFromImage_[currentIndex_].clear();
 }
 
 bool BallProcessor::isBallValid(CourseObject* courseObject)
@@ -26,32 +28,23 @@ bool BallProcessor::isBallValid(CourseObject* courseObject)
 
 bool BallProcessor::isEggValid(const CourseObject* courseObject)
 {
+  eggFromImage_[currentIndex_].emplace_back(*courseObject);
   return toAddEgg(courseObject);
 }
 
 bool BallProcessor::toAddBall(const CourseObject* courseObject) const
 {
-  int timesSeen = 0;
-  for (const auto& outerVector : ballsFromImages_)
+  for (const auto& egg : eggFromImage_[currentIndex_])
   {
-    for (const auto& ball : outerVector)
-    {
-      if (courseObject->courseObjectWithinValidRange(&ball))
-      {
-        timesSeen++;
-      }
-    }
-  }
+    int centerX = (courseObject->x1() + courseObject->x2()) / 2;
+    int centerY = (courseObject->y1() + courseObject->y2()) / 2;
 
-  for (const auto& ball : ballsFromImages_[currentIndex_])
-  {
-    if (ball.courseObjectWithinValidRange(courseObject))
+    if (centerX > egg.x1() && centerX < egg.x2() && centerY > egg.y1() && centerY < egg.y2())
     {
       return false;
     }
   }
-
-  return timesSeen >= ConfigController::getConfigInt("AmountOfSeenBeforeCreate");
+  return true;
 }
 
 bool BallProcessor::toAddEgg(const CourseObject* courseObject) const

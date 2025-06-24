@@ -66,23 +66,22 @@ void MainController::navigateAndSendCommand(cv::Mat* frame)
   auto journey = navigationController_->calculateDegreesAndDistanceToObject();
   navigationController_->clearObjects();
   cv::putText(*frame_,std::to_string(amountOfNullVectors_),{50,50},1,1,cv::Scalar(0,0,255));
-  if (amountOfNullVectors_ > 20 && journey == nullptr)
+
+  if (journey == nullptr && not navigationController_->isAtGoal() && not commandInProgress_)
   {
-    amountOfNullVectors_ = 0;
-    journey = std::make_unique<JourneyModel>(10,0,true);
-  }
-  if (journey != nullptr || navigationController_->isAtGoal())
-  {
-    amountOfNullVectors_ = 0;
+    amountOfNullVectors_++;
+    if (amountOfNullVectors_ > 20)
+    {
+      journey = std::make_unique<JourneyModel>(10,0,true);
+    }
   }
 
-  if (journey == nullptr)
+  if (journey != nullptr)
   {
-    Utility::appendToFile("log.txt", "Journey was nullptr\n");
-    if (not commandInProgress_)
-    {
-      amountOfNullVectors_++;
-    }
+    amountOfNullVectors_ = 0;
+  }
+  else
+  {
     return;
   }
   Utility::appendToFile(

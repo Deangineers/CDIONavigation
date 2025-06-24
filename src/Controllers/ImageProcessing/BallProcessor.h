@@ -21,6 +21,7 @@ private:
   bool toAddEgg(const CourseObject* courseObject) const;
   int currentIndex_ = 0;
   std::vector<std::vector<CourseObject>> ballsFromImages_;
+  std::vector<std::vector<CourseObject>> eggFromImage_;
 };
 
 
