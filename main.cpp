@@ -35,6 +35,7 @@ int main()
   double lastFPS = 0;
 
   std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
+  std::chrono::high_resolution_clock::time_point timer = std::chrono::high_resolution_clock::now();
   while (cap.read(frame))
   {
     //cv::imwrite("../../TestImages/newTestImages0.jpeg", frame);
@@ -44,10 +45,16 @@ int main()
     processor->processImage(frame);
 
     MainController::navigateAndSendCommand(&frame);
+      std::chrono::high_resolution_clock::time_point timerEnd = std::chrono::high_resolution_clock::now();
+    auto totalDuration = std::chrono::duration_cast<std::chrono::seconds>(timerEnd - timer);
+    cv::putText(frame, "Total time: " + std::to_string(totalDuration.count()),
+                    {1600, 1050}, cv::FONT_HERSHEY_SIMPLEX,
+                    1, cv::Scalar(255, 255, 0), 2);
 
     cv::putText(frame, "FPS: " + std::to_string(lastFPS),
-                {1700, 1000}, cv::FONT_HERSHEY_SIMPLEX,
+                {1600, 1000}, cv::FONT_HERSHEY_SIMPLEX,
                 1, cv::Scalar(255, 255, 0), 2);
+
     cv::imshow("EngineBase", frame);
 
     if (cv::waitKey(1) == 27) // Wait for 1 ms and break on 'Esc' key
