@@ -696,7 +696,6 @@ Vector NavigationController::handleObjectNearCross(const CourseObject *courseObj
     auto localCourseObjcet = CourseObject(*courseObject);
     localCourseObjcet.shiftX(shiftedVector.x);
     localCourseObjcet.shiftY(shiftedVector.y);
-    target_ = nullptr;
     return MathUtil::calculateVectorToObject(&robotMiddle, &localCourseObjcet);
   }
   return vectorToIntermediatePoint;
@@ -956,4 +955,9 @@ void NavigationController::findSafeSpots()
 
   cv::drawMarker(*MainController::getFrame(), {minX + xOffset, maxY - yOffset}, cv::Scalar(0, 0, 255),
                  cv::MARKER_CROSS, 10, 2);
+}
+
+bool NavigationController::isAtGoal()
+{
+  return atGoal_;
 }

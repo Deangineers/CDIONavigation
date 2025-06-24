@@ -34,6 +34,8 @@ public:
 
   void newCommandSent();
 
+  bool isAtGoal();
+
 private:
   void removeBallsOutsideCourse();
 
@@ -59,6 +61,7 @@ private:
   [[nodiscard]] bool checkCollisionOnRoute(const Vector& targetVector) const;
   Vector navigateToSafeSpot(bool toGoal);
   void findSafeSpots();
+
 
 
   std::vector<std::unique_ptr<CourseObject> > ballVector_;

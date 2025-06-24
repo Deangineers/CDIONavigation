@@ -71,6 +71,10 @@ void MainController::navigateAndSendCommand(cv::Mat* frame)
     amountOfNullVectors_ = 0;
     journey = std::make_unique<JourneyModel>(10,0,true);
   }
+  if (journey != nullptr || navigationController_->isAtGoal())
+  {
+    amountOfNullVectors_ = 0;
+  }
 
   if (journey == nullptr)
   {
@@ -148,7 +152,7 @@ Command MainController::journeyToCommand(const JourneyModel* journey)
     }
     if (journey->isCross)
     {
-      command.setSpeed(1000);
+      command.setSpeed(30);
     }
     return command;
   }
