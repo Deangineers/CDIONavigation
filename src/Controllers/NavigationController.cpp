@@ -674,8 +674,8 @@ Vector NavigationController::handleObjectNearCross(const CourseObject *courseObj
   const int ballY = (courseObject->y1() + courseObject->y2()) / 2 + shiftedVector.y;
   Vector ballCentre(ballX, ballY);
   auto closestCrossVector = VectorWithStartPos(ballX, ballY, vectors.first);
-
-  auto intermediatePoint = Vector(ballX + -vectors.first.x * 5, ballY + -vectors.first.y * 5);
+  Vector offsetVector = vectors.first * (1.0/vectors.first.getLength()) * 200;
+  auto intermediatePoint = Vector(ballX + -offsetVector.x, ballY + -offsetVector.y);
   auto intermediateCourseObject = CourseObject(intermediatePoint.x,intermediatePoint.y,intermediatePoint.x,intermediatePoint.y,"");
 
   auto vectorToIntermediatePoint = MathUtil::calculateVectorToObject(&robotMiddle,&intermediateCourseObject);
@@ -884,7 +884,7 @@ Vector NavigationController::navigateToSafeSpot(bool toGoal)
     currentSafeSpotIndex_ %= 4;
     if (startIndex == currentSafeSpotIndex_)
     {
-      return {0, 0};
+      return {-100, -100};
     }
   }
 
