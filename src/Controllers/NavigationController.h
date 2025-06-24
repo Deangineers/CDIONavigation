@@ -101,6 +101,8 @@ private:
   bool ballNearCross_ = false;
 
   bool goingToIntermediate_ = false;
+
+  bool hasTakenCross_ = false;
 };
 
 
