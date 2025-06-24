@@ -266,8 +266,6 @@ void ImageProcessor::ballHelperFunction(const cv::Mat& frame, const std::string&
     {
       detectedColor = "orange";
     }
-    std::string label = "ball";
-    // at some point we might want to add the colorLabel here to separate white and orange balls
 
     int x1 = rect.x, y1 = rect.y;
     int x2 = x1 + rect.width, y2 = y1 + rect.height;
