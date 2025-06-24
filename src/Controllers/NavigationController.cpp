@@ -279,6 +279,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   {
     target_ = std::move(potentialTarget_);
     potentialTarget_ = nullptr;
+    navigatedToGoalIntermediate_ = false;
     auto closestVectors = getVectorsForClosestBlockingObjects(target_.get());
     double distanceToWall = closestVectors.first.vector.getLength();
     if (distanceToWall < ConfigController::getConfigInt("DistanceBeforeToCloseToWall"))
@@ -661,7 +662,7 @@ Vector NavigationController::handleObjectNearCross(const CourseObject *courseObj
 {
   CourseObject robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
 
-  if (vectors.second.getLength() < ConfigController::getConfigInt("DistanceToWallBeforeHandling")*2)
+  if (vectors.second.getLength() > ConfigController::getConfigInt("DistanceToWallBeforeHandling")*2)
   {
     return MathUtil::calculateVectorToObject(&robotMiddle, courseObject);
   }
@@ -674,18 +675,19 @@ Vector NavigationController::handleObjectNearCross(const CourseObject *courseObj
   const int ballY = (courseObject->y1() + courseObject->y2()) / 2 + shiftedVector.y;
   Vector ballCentre(ballX, ballY);
   auto closestCrossVector = VectorWithStartPos(ballX, ballY, vectors.first);
-  Vector offsetVector = vectors.first * (1.0/vectors.first.getLength()) * 200;
+  Vector offsetVector = vectors.first * ((1.0/vectors.first.getLength()) * 200);
   auto intermediatePoint = Vector(ballX + -offsetVector.x, ballY + -offsetVector.y);
   auto intermediateCourseObject = CourseObject(intermediatePoint.x,intermediatePoint.y,intermediatePoint.x,intermediatePoint.y,"");
 
   auto vectorToIntermediatePoint = MathUtil::calculateVectorToObject(&robotMiddle,&intermediateCourseObject);
+  cv::circle(*MainController::getFrame(),{intermediatePoint.x,intermediatePoint.y},25,cv::Scalar(0,0,255));
   if (vectorToIntermediatePoint.getLength() < ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning"))
   {
     auto localCourseObjcet = CourseObject(*courseObject);
     localCourseObjcet.shiftX(shiftedVector.x);
     localCourseObjcet.shiftY(shiftedVector.y);
     ballNearCross_ = true;
-    return MathUtil::calculateVectorToObject(&robotMiddle, &localCourseObjcet) * 0.7;
+    return MathUtil::calculateVectorToObject(&robotMiddle, &localCourseObjcet);
   }
   return vectorToIntermediatePoint;
 }
@@ -884,7 +886,7 @@ Vector NavigationController::navigateToSafeSpot(bool toGoal)
     currentSafeSpotIndex_ %= 4;
     if (startIndex == currentSafeSpotIndex_)
     {
-      return {-100, -100};
+      return {-30, -30};
     }
   }
 
