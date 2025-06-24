@@ -233,6 +233,10 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
                     {robotMiddle.x1() + vectorToObject.x, robotMiddle.y1() + vectorToObject.y},
                     cv::Scalar(255, 0, 255), 1,
                     cv::LINE_AA, 0, 0.01);
+    if (target_.get() == nullptr)
+    {
+      return makeJourneyModel(vectorToObject, true);
+    }
     auto directVectorToObject = MathUtil::calculateVectorToObject(robotFront_.get(), target_.get());
     if (directVectorToObject.getLength() < ConfigController::getConfigInt("DistanceBeforeTargetReached"))
     {
@@ -564,8 +568,7 @@ Vector NavigationController::handleObjectNextToBlocking(const CourseObject *cour
     closestVectors.first.vector, closestVectors.second.vector);
   int maxAllowedAngleDiffBetweenClosestVectors = ConfigController::getConfigInt("AngleDiffBeforeCornerBall");
   if ((closestVectors.second.vector.getLength() > ConfigController::getConfigInt("DistanceToWallBeforeHandling")
-       || std::abs(closestVectorsAngleDiff) < maxAllowedAngleDiffBetweenClosestVectors) && not closestVectors.first.
-      isCross)
+       || std::abs(closestVectorsAngleDiff) < maxAllowedAngleDiffBetweenClosestVectors))
   {
     auto vectorToWall = closestVectors.first;
 
@@ -668,8 +671,8 @@ Vector NavigationController::handleObjectNearCross(const CourseObject *courseObj
   }
   Vector shiftedVector = Vector(vectors.second);
   shiftedVector = Vector(-shiftedVector.x,-shiftedVector.y);
-  shiftedVector.x = 1.0 / shiftedVector.getLength() * shiftedVector.x * (robotWidth_/2);
-  shiftedVector.y = 1.0/ shiftedVector.getLength() * shiftedVector.y * (robotWidth_/2);
+  shiftedVector.x = 1.0 / shiftedVector.getLength() * shiftedVector.x * (robotWidth_/4);
+  shiftedVector.y = 1.0/ shiftedVector.getLength() * shiftedVector.y * (robotWidth_/4);
 
   const int ballX = (courseObject->x1() + courseObject->x2()) / 2 + shiftedVector.x;
   const int ballY = (courseObject->y1() + courseObject->y2()) / 2 + shiftedVector.y;
@@ -683,13 +686,11 @@ Vector NavigationController::handleObjectNearCross(const CourseObject *courseObj
   cv::circle(*MainController::getFrame(),{intermediatePoint.x,intermediatePoint.y},25,cv::Scalar(0,0,255));
   if (vectorToIntermediatePoint.getLength() < ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning"))
   {
-    if (vectors.second.getLength() < ConfigController::getConfigInt("DistanceToWallBeforeHandling"))
-    {
-      ballNearCross_ = true;
-    }
+    ballNearCross_ = true;
     auto localCourseObjcet = CourseObject(*courseObject);
     localCourseObjcet.shiftX(shiftedVector.x);
     localCourseObjcet.shiftY(shiftedVector.y);
+    target_ = nullptr;
     return MathUtil::calculateVectorToObject(&robotMiddle, &localCourseObjcet);
   }
   return vectorToIntermediatePoint;
@@ -721,6 +722,7 @@ bool NavigationController::checkCollisionOnRoute(const Vector &targetVector) con
   robotMiddles.push_back(robotRightSide);
 
   int behindCount = 0;
+  bool collisionDetected = false;
   for (const auto &robotMiddle: robotMiddles)
   {
     auto backToFrontVector = MathUtil::calculateVectorToObject(robotBack_.get(), robotFront_.get());
@@ -787,10 +789,10 @@ bool NavigationController::checkCollisionOnRoute(const Vector &targetVector) con
       cv::arrowedLine(*MainController::getFrame(), {robotMiddle.x1(), robotMiddle.y1()},
                       {robotMiddle.x1() + targetVector.x, robotMiddle.y1() + targetVector.y}, cv::Scalar(255, 0, 255),
                       1);
-      return true;
+      collisionDetected = true;
     }
   }
-  return false;
+  return collisionDetected;
 }
 
 std::pair<VectorToBlockingObject, VectorToBlockingObject> NavigationController::getVectorsForClosestBlockingObjects(

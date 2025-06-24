@@ -37,6 +37,8 @@ private:
   static inline std::unique_ptr<NavigationController> navigationController_ = nullptr;
   static inline std::unique_ptr<ClientController> clientController_ = nullptr;
   static inline cv::Mat* frame_;
+  static inline int amountOfNullVectors_ = 0;
+  static inline std::atomic_bool commandInProgress_;
 };
 
 

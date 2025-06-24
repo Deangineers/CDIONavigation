@@ -6,6 +6,7 @@
 
 #include <sstream>
 #include <thread>
+#include <opencv2/imgproc.hpp>
 #include <opencv2/core/mat.hpp>
 
 #include "../Models/Command.h"
@@ -64,10 +65,20 @@ void MainController::navigateAndSendCommand(cv::Mat* frame)
   frame_ = frame;
   auto journey = navigationController_->calculateDegreesAndDistanceToObject();
   navigationController_->clearObjects();
+  cv::putText(*frame_,std::to_string(amountOfNullVectors_),{50,50},1,1,cv::Scalar(0,0,255));
+  if (amountOfNullVectors_ > 20 && journey == nullptr)
+  {
+    amountOfNullVectors_ = 0;
+    journey = std::make_unique<JourneyModel>(10,0,true);
+  }
 
   if (journey == nullptr)
   {
     Utility::appendToFile("log.txt", "Journey was nullptr\n");
+    if (not commandInProgress_)
+    {
+      amountOfNullVectors_++;
+    }
     return;
   }
   Utility::appendToFile(
@@ -76,6 +87,7 @@ void MainController::navigateAndSendCommand(cv::Mat* frame)
 
   clientController_->sendCommand(journeyToCommand(journey.get()));
   navigationController_->newCommandSent();
+  commandInProgress_ = false;
 }
 
 Command MainController::journeyToCommand(const JourneyModel* journey)
@@ -136,7 +148,7 @@ Command MainController::journeyToCommand(const JourneyModel* journey)
     }
     if (journey->isCross)
     {
-      command.setSpeed(30);
+      command.setSpeed(1000);
     }
     return command;
   }
@@ -158,6 +170,7 @@ void MainController::completedGoalDelivery()
 void MainController::completedCommand()
 {
   navigationController_->lastSentCommandWasCompleted();
+  commandInProgress_ = false;
 }
 
 int MainController::findMaxValue(const int* cords, const int size, int maxValueAllowed)
