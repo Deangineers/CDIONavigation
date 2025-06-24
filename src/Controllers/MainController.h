@@ -28,6 +28,7 @@ public:
   static cv::Mat* getFrame();
   static void completedGoalDelivery();
   static void completedCommand();
+  static void forceNavigateToGoal();
 
 private:
   static int findMaxValue(const int* cords, int size, int maxValueAllowed);
