@@ -720,6 +720,7 @@ bool NavigationController::checkCollisionOnRoute(const Vector &targetVector) con
   robotRightSide.shiftY(-acrossRobotVector.y);
   robotMiddles.push_back(robotRightSide);
 
+  int behindCount = 0;
   for (const auto &robotMiddle: robotMiddles)
   {
     auto backToFrontVector = MathUtil::calculateVectorToObject(robotBack_.get(), robotFront_.get());
@@ -767,6 +768,17 @@ bool NavigationController::checkCollisionOnRoute(const Vector &targetVector) con
 
     double minAngle = std::min(std::min(point1Angle, point2Angle), std::min(point3Angle, point4Angle));
     double maxAngle = std::max(std::max(point1Angle, point2Angle), std::max(point3Angle, point4Angle));
+
+    auto direction = MathUtil::calculateAngleDifferenceBetweenVectors(targetVector, middleVector);
+
+    if (direction > 90 || direction < -90)
+    {
+      behindCount++;
+      if (behindCount == robotMiddles.size())
+      {
+        return false;
+      }
+    }
 
     double angleToTargetVector = MathUtil::calculateAngleDifferenceBetweenVectors(backToFrontVector, targetVector);
     if (not(angleToTargetVector < minAngle || angleToTargetVector > maxAngle) && middleVector.getLength() < targetVector
