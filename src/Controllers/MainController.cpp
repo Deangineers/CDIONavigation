@@ -70,7 +70,7 @@ void MainController::navigateAndSendCommand(cv::Mat* frame)
   if (journey == nullptr && not navigationController_->isAtGoal() && not commandInProgress_)
   {
     amountOfNullVectors_++;
-    if (amountOfNullVectors_ > 500)
+    if (amountOfNullVectors_ > 50)
     {
       journey = std::make_unique<JourneyModel>(10,0,true);
     }

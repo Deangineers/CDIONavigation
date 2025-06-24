@@ -202,6 +202,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
                   {robotMiddle.x1() + shootingVector.x, robotMiddle.y1() + shootingVector.y + 30},
                   cv::FONT_HERSHEY_SIMPLEX,
                   0.5, cv::Scalar(0, 255, 0), 2);
+      goingToIntermediate_ = true;
       return makeJourneyModel(shootingVector, true);
     }
 
@@ -223,6 +224,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     cv::putText(*MainController::getFrame(), "VA FANGOOL",
                 {robotMiddle.x1() + objectVector.x, robotMiddle.y1() + objectVector.y + 30}, cv::FONT_HERSHEY_SIMPLEX,
                 0.5, cv::Scalar(0, 255, 0), 2);
+    goingToIntermediate_ = true;
     return makeJourneyModel(objectVector, true);
   }
 

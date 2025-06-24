@@ -39,7 +39,8 @@ bool BallProcessor::toAddBall(const CourseObject* courseObject) const
     int centerX = (courseObject->x1() + courseObject->x2()) / 2;
     int centerY = (courseObject->y1() + courseObject->y2()) / 2;
 
-    if (centerX > egg.x1() && centerX < egg.x2() && centerY > egg.y1() && centerY < egg.y2())
+    if ((std::abs(egg.x1() - courseObject->x1()) < 20 || std::abs(egg.x2() - courseObject->x2()) < 20) &&
+      std::abs(egg.y1() - courseObject->y2()) < 20 || std::abs(egg.y2() - courseObject->y2()) < 20)
     {
       return false;
     }
