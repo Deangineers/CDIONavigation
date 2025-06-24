@@ -224,3 +224,8 @@ int MainController::findMinValue(const int* cords, int size, int minValueAllowed
   }
   return min;
 }
+
+void MainController::forceNavigateToGoal() {
+  navigationController_->forceNavigateToGoal();
+}
+
