@@ -668,8 +668,8 @@ Vector NavigationController::handleObjectNearCross(const CourseObject *courseObj
   }
   Vector shiftedVector = Vector(vectors.second);
   shiftedVector = Vector(-shiftedVector.x,-shiftedVector.y);
-  shiftedVector.x = 1.0 / shiftedVector.getLength() * shiftedVector.x * (robotWidth_/3);
-  shiftedVector.y = 1.0/ shiftedVector.getLength() * shiftedVector.y * (robotWidth_/3);
+  shiftedVector.x = 1.0 / shiftedVector.getLength() * shiftedVector.x * (robotWidth_/2);
+  shiftedVector.y = 1.0/ shiftedVector.getLength() * shiftedVector.y * (robotWidth_/2);
 
   const int ballX = (courseObject->x1() + courseObject->x2()) / 2 + shiftedVector.x;
   const int ballY = (courseObject->y1() + courseObject->y2()) / 2 + shiftedVector.y;
@@ -683,10 +683,13 @@ Vector NavigationController::handleObjectNearCross(const CourseObject *courseObj
   cv::circle(*MainController::getFrame(),{intermediatePoint.x,intermediatePoint.y},25,cv::Scalar(0,0,255));
   if (vectorToIntermediatePoint.getLength() < ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning"))
   {
+    if (vectors.second.getLength() < ConfigController::getConfigInt("DistanceToWallBeforeHandling"))
+    {
+      ballNearCross_ = true;
+    }
     auto localCourseObjcet = CourseObject(*courseObject);
     localCourseObjcet.shiftX(shiftedVector.x);
     localCourseObjcet.shiftY(shiftedVector.y);
-    ballNearCross_ = true;
     return MathUtil::calculateVectorToObject(&robotMiddle, &localCourseObjcet);
   }
   return vectorToIntermediatePoint;
