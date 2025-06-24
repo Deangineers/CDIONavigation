@@ -261,6 +261,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
         std::cout << "could not find a safe, safe spot" << std::endl;
         return nullptr;
       }
+      goingToIntermediate_ = true;
 
       std::cout << "Navigating to safe spot: " << vectorToObject.x << " " << vectorToObject.y << std::endl;
     }
@@ -341,8 +342,10 @@ std::unique_ptr<JourneyModel> NavigationController::makeJourneyModel(const Vecto
                                                      10) / vectorToRobotBack.getLength());
 
   bool localCross = ballNearCross_;
+  bool localIntermediate = goingToIntermediate_;
   ballNearCross_ = false;
-  return std::make_unique<JourneyModel>(distanceInCm, angle, toCollectBalls, localCross);
+  goingToIntermediate_ = false;
+  return std::make_unique<JourneyModel>(distanceInCm, angle, toCollectBalls, localCross,localIntermediate);
 }
 
 void NavigationController::removeBallsOutsideCourse()
@@ -599,7 +602,7 @@ Vector NavigationController::handleObjectNextToBlocking(const CourseObject *cour
 }
 
 Vector NavigationController::handleObjectNearWall(const CourseObject *courseObject,
-                                                  const Vector &vectorToWall) const
+                                                  const Vector &vectorToWall)
 {
   auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
   // 1 wall
@@ -620,11 +623,12 @@ Vector NavigationController::handleObjectNearWall(const CourseObject *courseObje
   {
     return MathUtil::calculateVectorToObject(&robotMiddle, courseObject);
   }
+  goingToIntermediate_ = true;
   return MathUtil::calculateVectorToObject(&robotMiddle, &localCourseObject);
 }
 
 Vector NavigationController::handleObjectNearCorner(const CourseObject *courseObject,
-                                                    const std::pair<Vector, Vector> &) const
+                                                    const std::pair<Vector, Vector> &)
 {
   auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
 
@@ -662,7 +666,7 @@ Vector NavigationController::handleObjectNearCorner(const CourseObject *courseOb
     }
     return MathUtil::calculateVectorToObject(&robotMiddle, &localObject) * 1.4;
   }
-
+  goingToIntermediate_ = true;
   return vectorToIntermediaryPoint;
 }
 
@@ -698,6 +702,7 @@ Vector NavigationController::handleObjectNearCross(const CourseObject *courseObj
     localCourseObjcet.shiftY(shiftedVector.y);
     return MathUtil::calculateVectorToObject(&robotMiddle, &localCourseObjcet);
   }
+  goingToIntermediate_ = true;
   return vectorToIntermediatePoint;
 }
 
@@ -911,7 +916,7 @@ Vector NavigationController::navigateToSafeSpot(bool toGoal)
       return {-30, -30};
     }
   }
-
+  goingToIntermediate_ = true;
   return vectorToObject;
 }
 

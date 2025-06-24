@@ -9,10 +9,13 @@ struct JourneyModel {
   JourneyModel(double dist, double angl, bool collectB) : distance(dist), angle(angl), collectBalls(collectB){}
   JourneyModel(double dist, double angl, bool collectB, bool isCross) : distance(dist), angle(angl), collectBalls(collectB), isCross(isCross)
   {}
+  JourneyModel(double dist, double angl, bool collectB, bool isCross, bool intermediate) : distance(dist), angle(angl), collectBalls(collectB), isCross(isCross),isIntermediate(intermediate)
+  {}
   double distance;
   double angle;
   bool collectBalls;
   bool isCross = false;
+  bool isIntermediate = false;
 };
 
 #endif //TRAVELMODEL_H

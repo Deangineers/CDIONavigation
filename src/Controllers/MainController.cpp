@@ -151,7 +151,11 @@ Command MainController::journeyToCommand(const JourneyModel* journey)
     }
     if (journey->isCross)
     {
-      command.setSpeed(30);
+      command.setSpeed(50);
+    }
+    else if (journey->isIntermediate)
+    {
+      command.setSpeed(350);
     }
     return command;
   }

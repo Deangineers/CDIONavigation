@@ -49,10 +49,10 @@ private:
 
   Vector handleObjectNextToBlocking(const CourseObject *courseObject);
 
-  Vector handleObjectNearWall(const CourseObject *courseObject, const Vector &vectorToWall) const;
+  Vector handleObjectNearWall(const CourseObject *courseObject, const Vector &vectorToWall);
 
   Vector handleObjectNearCorner(const CourseObject *courseObject,
-                                const std::pair<Vector, Vector> &closestVectors) const;
+                                const std::pair<Vector, Vector> &closestVectors);
 
   Vector handleObjectNearCross(const CourseObject *courseObject, const std::pair<Vector,Vector>& vectors);
 
@@ -99,6 +99,8 @@ private:
 
   int amountOfWalls_ = 0;
   bool ballNearCross_ = false;
+
+  bool goingToIntermediate_ = false;
 };
 
 
