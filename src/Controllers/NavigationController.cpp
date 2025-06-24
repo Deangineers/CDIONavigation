@@ -125,7 +125,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   findSafeSpots();
 
 
-  if (ballVector_.empty() || (ballVector_.size() <= 5 && not hasDeliveredBallsOnce_) || forceNavigateGoal())
+  if (ballVector_.empty() || (ballVector_.size() <= 5 && not hasDeliveredBallsOnce_))
   {
     goToGoalCount_++;
   }
@@ -149,7 +149,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     hasDeliveredBallsOnce_ = false;
   }
 
-  if (goToGoalCount_ >= stableThreshold)
+  if (goToGoalCount_ >= stableThreshold || forceGoToGoal_)
   {
     if (distanceToBackUp > 0)
     {
@@ -958,13 +958,9 @@ void NavigationController::findSafeSpots()
                  cv::MARKER_CROSS, 10, 2);
 }
 
-void NavigationController::forceNavigateToGoal() {
-  goToGoalCount_ = stableThreshold + 1;
-  forceNavigateGoal = true;
-}
-
-bool NavigationController::forceNavigateGoal() const {
-  return forceNavigateGoal;
+void NavigationController::forceNavigateToGoal()
+{
+  forceGoToGoal_ = true;
 }
 
 

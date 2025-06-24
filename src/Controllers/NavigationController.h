@@ -36,8 +36,6 @@ public:
 
   void forceNavigateToGoal();
 
-  bool forceNavigateGoal() const;
-
   bool isAtGoal();
 
 private:
@@ -105,8 +103,7 @@ private:
   bool ballNearCross_ = false;
 
   bool goingToIntermediate_ = false;
-
-  bool forceNavigateGoal() const;
+  bool forceGoToGoal_ = false;
 };
 
 

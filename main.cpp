@@ -57,7 +57,8 @@ int main()
 
     cv::imshow("EngineBase", frame);
 
-    if (totalDuration.count() == 420) {
+    if (totalDuration.count() > 420)
+    {
       MainController::forceNavigateToGoal();
     }
 
