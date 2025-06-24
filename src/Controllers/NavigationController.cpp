@@ -279,6 +279,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   {
     target_ = std::move(potentialTarget_);
     potentialTarget_ = nullptr;
+    navigatedToGoalIntermediate_ = false;
     auto closestVectors = getVectorsForClosestBlockingObjects(target_.get());
     double distanceToWall = closestVectors.first.vector.getLength();
     if (distanceToWall < ConfigController::getConfigInt("DistanceBeforeToCloseToWall"))
@@ -667,31 +668,35 @@ Vector NavigationController::handleObjectNearCross(const CourseObject *courseObj
 {
   CourseObject robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
 
-  if (vectors.second.getLength() < ConfigController::getConfigInt("DistanceToWallBeforeHandling")*2)
+  if (vectors.second.getLength() > ConfigController::getConfigInt("DistanceToWallBeforeHandling")*2)
   {
     return MathUtil::calculateVectorToObject(&robotMiddle, courseObject);
   }
   Vector shiftedVector = Vector(vectors.second);
   shiftedVector = Vector(-shiftedVector.x,-shiftedVector.y);
-  shiftedVector.x = 1.0 / shiftedVector.getLength() * shiftedVector.x * (robotWidth_/3);
-  shiftedVector.y = 1.0/ shiftedVector.getLength() * shiftedVector.y * (robotWidth_/3);
+  shiftedVector.x = 1.0 / shiftedVector.getLength() * shiftedVector.x * (robotWidth_/2);
+  shiftedVector.y = 1.0/ shiftedVector.getLength() * shiftedVector.y * (robotWidth_/2);
 
   const int ballX = (courseObject->x1() + courseObject->x2()) / 2 + shiftedVector.x;
   const int ballY = (courseObject->y1() + courseObject->y2()) / 2 + shiftedVector.y;
   Vector ballCentre(ballX, ballY);
   auto closestCrossVector = VectorWithStartPos(ballX, ballY, vectors.first);
-
-  auto intermediatePoint = Vector(ballX + -vectors.first.x * 5, ballY + -vectors.first.y * 5);
+  Vector offsetVector = vectors.first * ((1.0/vectors.first.getLength()) * 200);
+  auto intermediatePoint = Vector(ballX + -offsetVector.x, ballY + -offsetVector.y);
   auto intermediateCourseObject = CourseObject(intermediatePoint.x,intermediatePoint.y,intermediatePoint.x,intermediatePoint.y,"");
 
   auto vectorToIntermediatePoint = MathUtil::calculateVectorToObject(&robotMiddle,&intermediateCourseObject);
+  cv::circle(*MainController::getFrame(),{intermediatePoint.x,intermediatePoint.y},25,cv::Scalar(0,0,255));
   if (vectorToIntermediatePoint.getLength() < ConfigController::getConfigInt("DistanceToShiftedPointBeforeTurning"))
   {
+    if (vectors.second.getLength() < ConfigController::getConfigInt("DistanceToWallBeforeHandling"))
+    {
+      ballNearCross_ = true;
+    }
     auto localCourseObjcet = CourseObject(*courseObject);
     localCourseObjcet.shiftX(shiftedVector.x);
     localCourseObjcet.shiftY(shiftedVector.y);
-    ballNearCross_ = true;
-    return MathUtil::calculateVectorToObject(&robotMiddle, &localCourseObjcet) * 0.7;
+    return MathUtil::calculateVectorToObject(&robotMiddle, &localCourseObjcet);
   }
   return vectorToIntermediatePoint;
 }
@@ -721,6 +726,7 @@ bool NavigationController::checkCollisionOnRoute(const Vector &targetVector) con
   robotRightSide.shiftY(-acrossRobotVector.y);
   robotMiddles.push_back(robotRightSide);
 
+  int behindCount = 0;
   for (const auto &robotMiddle: robotMiddles)
   {
     auto backToFrontVector = MathUtil::calculateVectorToObject(robotBack_.get(), robotFront_.get());
@@ -768,6 +774,17 @@ bool NavigationController::checkCollisionOnRoute(const Vector &targetVector) con
 
     double minAngle = std::min(std::min(point1Angle, point2Angle), std::min(point3Angle, point4Angle));
     double maxAngle = std::max(std::max(point1Angle, point2Angle), std::max(point3Angle, point4Angle));
+
+    auto direction = MathUtil::calculateAngleDifferenceBetweenVectors(targetVector, middleVector);
+
+    if (direction > 90 || direction < -90)
+    {
+      behindCount++;
+      if (behindCount == robotMiddles.size())
+      {
+        return false;
+      }
+    }
 
     double angleToTargetVector = MathUtil::calculateAngleDifferenceBetweenVectors(backToFrontVector, targetVector);
     if (not(angleToTargetVector < minAngle || angleToTargetVector > maxAngle) && middleVector.getLength() < targetVector
@@ -890,7 +907,7 @@ Vector NavigationController::navigateToSafeSpot(bool toGoal)
     currentSafeSpotIndex_ %= 4;
     if (startIndex == currentSafeSpotIndex_)
     {
-      return {0, 0};
+      return {-30, -30};
     }
   }
 
