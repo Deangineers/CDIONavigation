@@ -661,6 +661,10 @@ Vector NavigationController::handleObjectNearCross(const CourseObject *courseObj
 {
   CourseObject robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
 
+  if (vectors.second.getLength() < ConfigController::getConfigInt("DistanceToWallBeforeHandling")*2)
+  {
+    return MathUtil::calculateVectorToObject(&robotMiddle, courseObject);
+  }
   Vector shiftedVector = Vector(vectors.second);
   shiftedVector = Vector(-shiftedVector.x,-shiftedVector.y);
   shiftedVector.x = 1.0 / shiftedVector.getLength() * shiftedVector.x * (robotWidth_/3);
@@ -836,49 +840,33 @@ bool segmentsIntersect(int x1, int y1, int x2, int y2,
 Vector NavigationController::navigateToSafeSpot(bool toGoal)
 {
   auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
+  auto safeSpot = safeSpots_[currentSafeSpotIndex_];
+  int startIndex = currentSafeSpotIndex_;
   int allowedDistance = ConfigController::getConfigInt("DistanceBeforeTargetReached");
-  std::vector<std::tuple<int, std::pair<int, int>, double> > safeSpotsWithDistance;
-
-  for (int i = 0; i < safeSpots_.size(); i++)
+  CourseObject courseObject(safeSpot.first, safeSpot.second, safeSpot.first, safeSpot.second, "safeSpot");
+  Vector vectorToObject = MathUtil::calculateVectorToObject(&robotMiddle, &courseObject);
+  if (vectorToObject.getLength() < allowedDistance)
   {
-    const auto &spot = safeSpots_[i];
-    CourseObject courseObject(spot.first, spot.second,
-                              spot.first, spot.second, "safeSpot");
-    double distToBall = findClosestBall(&courseObject).getLength();
-    if (toGoal)
+    safeSpot = safeSpots_[currentSafeSpotIndex_];
+    courseObject = CourseObject(safeSpot.first, safeSpot.second, safeSpot.first, safeSpot.second, "safeSpot");
+    vectorToObject = MathUtil::calculateVectorToObject(&robotMiddle, &courseObject);
+    currentSafeSpotIndex_++;
+    currentSafeSpotIndex_ %= 4;
+  }
+  while (checkCollisionOnRoute(vectorToObject))
+  {
+    safeSpot = safeSpots_[currentSafeSpotIndex_];
+    courseObject = CourseObject(safeSpot.first, safeSpot.second, safeSpot.first, safeSpot.second, "safeSpot");
+    vectorToObject = MathUtil::calculateVectorToObject(&robotMiddle, &courseObject);
+    currentSafeSpotIndex_++;
+    currentSafeSpotIndex_ %= 4;
+    if (startIndex == currentSafeSpotIndex_)
     {
-      distToBall = navigateToGoal(&courseObject).getLength();
+      return {0, 0};
     }
-    safeSpotsWithDistance.emplace_back(i, spot, distToBall);
   }
 
-  std::sort(safeSpotsWithDistance.begin(), safeSpotsWithDistance.end(), [](const auto &a, const auto &b) {
-    return std::get<2>(a) < std::get<2>(b);
-  });
-
-  for (const auto &[index, spot, _]: safeSpotsWithDistance)
-  {
-    CourseObject courseObject(spot.first, spot.second,
-                              spot.first, spot.second, "safeSpot");
-
-    Vector vectorToSpot = MathUtil::calculateVectorToObject(&robotMiddle, &courseObject);
-
-    if (vectorToSpot.getLength() < allowedDistance)
-    {
-      continue;
-    }
-    if (checkCollisionOnRoute(vectorToSpot))
-    {
-      continue;
-    }
-
-    currentSafeSpotIndex_ = index;
-    target_ = std::make_unique<CourseObject>(courseObject);
-    distanceToBackUp = 0;
-
-    return vectorToSpot;
-  }
-  return {0, 0};
+  return vectorToObject;
 }
 
 void NavigationController::findSafeSpots()
