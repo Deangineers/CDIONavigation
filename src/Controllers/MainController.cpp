@@ -135,7 +135,7 @@ Command MainController::journeyToCommand(const JourneyModel* journey)
     else
     {
       command.setDistanceOrAngle(angle);
-      command.setSpeed(25);
+      command.setSpeed(30);
     }
     return command;
   }
@@ -160,11 +160,7 @@ Command MainController::journeyToCommand(const JourneyModel* journey)
     {
       command.setDistanceOrAngle(journey->distance);
     }
-    if (journey->isCross)
-    {
-      command.setSpeed(50);
-    }
-    else if (journey->isSafeSpot)
+    if (journey->isSafeSpot)
     {
       command.setSpeed(1000);
       command.setDistanceOrAngle(journey->distance);
@@ -173,6 +169,11 @@ Command MainController::journeyToCommand(const JourneyModel* journey)
     {
       command.setSpeed(350);
     }
+    else if (journey->isCross)
+    {
+      command.setSpeed(50);
+    }
+
     return command;
   }
 

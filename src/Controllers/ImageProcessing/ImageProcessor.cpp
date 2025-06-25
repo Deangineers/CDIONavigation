@@ -27,7 +27,7 @@ void ImageProcessor::processImage(const cv::Mat& frame)
 
   auto f1 = std::async(std::launch::async, [&]
   {
-    detectEgg(frame, eggOverlay);
+    //detectEgg(frame, eggOverlay);
     detectBalls(frame, ballOverlay);
   });
 
@@ -52,7 +52,7 @@ void ImageProcessor::processImage(const cv::Mat& frame)
   f1.get();
   applyOverlay(frame, ballOverlay);
   f3.get();
-  applyOverlay(frame, eggOverlay);
+  //applyOverlay(frame, eggOverlay);
   applyOverlay(frame, redOverlay);
   f4.get();
   applyOverlay(frame, frontBackOverlay);

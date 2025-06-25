@@ -29,6 +29,11 @@ int main()
   cap.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M','J','P','G'));
   cap.set(cv::CAP_PROP_FPS, 30);
 
+  cv::VideoWriter video("output.avi",
+                          cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
+                          30,
+                          cv::Size(1920,1080));
+
   cv::Mat frame;
   const auto processor = std::make_unique<CloudyImageProcessor>();
 
@@ -69,6 +74,7 @@ int main()
     {
       return 0;
     }
+    video.write(frame);
     std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     lastFPS = 1000.0 / duration.count();
@@ -77,6 +83,7 @@ int main()
   }
 
   cap.release();
+  video.release();
   cv::destroyAllWindows();
   return 0;
 }
