@@ -168,6 +168,11 @@ Command MainController::journeyToCommand(const JourneyModel* journey)
     {
       command.setSpeed(350);
     }
+    else if (journey->isSafeSpot)
+    {
+      command.setSpeed(1000);
+      command.setDistanceOrAngle(journey->distance);
+    }
     return command;
   }
 

@@ -113,6 +113,15 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     Utility::appendToFile("log.txt", "No Robot\n");
     return nullptr;
   }
+  if (target_ != nullptr)
+  {
+    auto now = std::chrono::high_resolution_clock::now();
+    auto totalDuration = std::chrono::duration_cast<std::chrono::seconds>(now - targetTimeStamp_);
+    if (totalDuration.count() > 30)
+    {
+      target_ = nullptr;
+    }
+  }
   auto robotMiddle = MathUtil::getRobotMiddle(robotBack_.get(), robotFront_.get());
   if (not lastSentCommandWasCompleted_)
   {
@@ -144,7 +153,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
     }
     return nullptr;
   }
-  if (ballVector_.size() > 5 && hasDeliveredBallsOnce_)
+  if (ballVector_.size() > 6 && hasDeliveredBallsOnce_)
   {
     hasDeliveredBallsOnce_ = false;
   }
@@ -259,7 +268,6 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
         std::cout << "could not find a safe, safe spot" << std::endl;
         return nullptr;
       }
-      goingToIntermediate_ = true;
 
       std::cout << "Navigating to safe spot: " << vectorToObject.x << " " << vectorToObject.y << std::endl;
     }
@@ -281,6 +289,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   if (sameTargetCount_ == ConfigController::getConfigInt("TargetSameBeforeTargetSet"))
   {
     target_ = std::move(potentialTarget_);
+    targetTimeStamp_ = std::chrono::high_resolution_clock::now();
     potentialTarget_ = nullptr;
     navigatedToGoalIntermediate_ = false;
     auto closestVectors = getVectorsForClosestBlockingObjects(target_.get());
@@ -341,9 +350,11 @@ std::unique_ptr<JourneyModel> NavigationController::makeJourneyModel(const Vecto
 
   bool localCross = ballNearCross_;
   bool localIntermediate = goingToIntermediate_;
+  bool localSafeSpot = goingToSafeSpot_;
   ballNearCross_ = false;
   goingToIntermediate_ = false;
-  return std::make_unique<JourneyModel>(distanceInCm, angle, toCollectBalls, localCross,localIntermediate);
+  goingToSafeSpot_ = false;
+  return std::make_unique<JourneyModel>(distanceInCm, angle, toCollectBalls, localCross,localIntermediate, localSafeSpot);
 }
 
 void NavigationController::removeBallsOutsideCourse()
@@ -914,7 +925,7 @@ Vector NavigationController::navigateToSafeSpot(bool toGoal)
       return {-30, -30};
     }
   }
-  goingToIntermediate_ = true;
+  goingToSafeSpot_ = true;
   return vectorToObject;
 }
 

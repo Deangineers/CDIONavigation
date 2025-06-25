@@ -104,6 +104,10 @@ private:
 
   bool goingToIntermediate_ = false;
   bool forceGoToGoal_ = false;
+  bool goingToSafeSpot_ = false;
+
+  std::chrono::high_resolution_clock::time_point targetTimeStamp_;
+
 };
 
 

@@ -47,7 +47,10 @@ int main()
     MainController::navigateAndSendCommand(&frame);
       std::chrono::high_resolution_clock::time_point timerEnd = std::chrono::high_resolution_clock::now();
     auto totalDuration = std::chrono::duration_cast<std::chrono::seconds>(timerEnd - timer);
-    cv::putText(frame, "Total time: " + std::to_string(totalDuration.count()),
+    std::string timeString = std::to_string(static_cast<int>(totalDuration.count() / 60));
+    timeString += ":";
+    timeString += totalDuration.count() % 60 < 10 ? "0" + std::to_string(totalDuration.count() % 60) : std::to_string(totalDuration.count() % 60);
+    cv::putText(frame, "Total time: " + timeString,
                     {1600, 1050}, cv::FONT_HERSHEY_SIMPLEX,
                     1, cv::Scalar(255, 255, 0), 2);
 

@@ -11,11 +11,14 @@ struct JourneyModel {
   {}
   JourneyModel(double dist, double angl, bool collectB, bool isCross, bool intermediate) : distance(dist), angle(angl), collectBalls(collectB), isCross(isCross),isIntermediate(intermediate)
   {}
+  JourneyModel(double dist, double angl, bool collectB, bool isCross, bool intermediate, bool isSafeSpot) : distance(dist), angle(angl), collectBalls(collectB), isCross(isCross),isIntermediate(intermediate), isSafeSpot(isSafeSpot)
+  {}
   double distance;
   double angle;
   bool collectBalls;
   bool isCross = false;
   bool isIntermediate = false;
+  bool isSafeSpot = false;
 };
 
 #endif //TRAVELMODEL_H
