@@ -922,7 +922,7 @@ Vector NavigationController::navigateToSafeSpot(bool toGoal)
     currentSafeSpotIndex_ %= 4;
     if (startIndex == currentSafeSpotIndex_)
     {
-      return {-30, -30};
+      return {0,0};
     }
   }
   goingToSafeSpot_ = true;
