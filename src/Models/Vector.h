@@ -23,8 +23,6 @@ public:
 
   Vector closestVectorFromPoint(const Vector& vectorStart, const Vector& fromPoint) const;
 
-  Vector normalize() const;
-
   [[nodiscard]] bool isNullVector() const;
   [[nodiscard]] double getLength() const;
   [[nodiscard]] std::string toString() const;

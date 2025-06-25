@@ -45,15 +45,6 @@ Vector Vector::closestVectorFromPoint(const Vector& vectorStart, const Vector& f
   return Q - fromPoint;
 }
 
-Vector Vector::normalize() const
-{
-  if (x == 0 && y == 0)
-    return {0, 0};
-
-  int divisor = std::gcd(std::abs(x), std::abs(y));
-  return Vector(x / divisor, y / divisor);
-}
-
 bool Vector::isNullVector() const
 {
   return x == 0 && y == 0;
