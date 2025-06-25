@@ -117,7 +117,7 @@ std::unique_ptr<JourneyModel> NavigationController::calculateDegreesAndDistanceT
   {
     auto now = std::chrono::high_resolution_clock::now();
     auto totalDuration = std::chrono::duration_cast<std::chrono::seconds>(now - targetTimeStamp_);
-    if (totalDuration.count() > 30)
+    if (totalDuration.count() > 15)
     {
       target_ = nullptr;
     }
