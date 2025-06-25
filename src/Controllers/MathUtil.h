@@ -13,7 +13,7 @@ class MathUtil
 public:
   static double calculateAngleDifferenceBetweenVectors(const Vector& firstVector,
                                                        const Vector& secondVector);
-  static Vector calculateVectorToObject(const CourseObject* robotFront, const CourseObject* courseObject);
+  static Vector calculateVectorToObject(const CourseObject* from, const CourseObject* courseObject);
   static CourseObject getRobotMiddle(const CourseObject* robotBack, const CourseObject* robotFront);
   static void correctCourseObjectForPerspective(CourseObject* robotBack, CourseObject* robotFront);
 

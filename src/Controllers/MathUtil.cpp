@@ -37,13 +37,13 @@ double MathUtil::calculateAngleDifferenceBetweenVectors(const Vector& firstVecto
   return angleDegrees;
 }
 
-Vector MathUtil::calculateVectorToObject(const CourseObject* robotFront, const CourseObject* courseObject)
+Vector MathUtil::calculateVectorToObject(const CourseObject* from, const CourseObject* courseObject)
 {
   const int middleX = (courseObject->x1() + courseObject->x2()) / 2;
   const int middleY = (courseObject->y1() + courseObject->y2()) / 2;
 
-  const int robotMiddleX = (robotFront->x1() + robotFront->x2()) / 2;
-  const int robotMiddleY = (robotFront->y1() + robotFront->y2()) / 2;
+  const int robotMiddleX = (from->x1() + from->x2()) / 2;
+  const int robotMiddleY = (from->y1() + from->y2()) / 2;
 
   return Vector(middleX - robotMiddleX, middleY - robotMiddleY);
 }
